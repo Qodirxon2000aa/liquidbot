@@ -13,8 +13,8 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
   };
 
   return (
-    <header className="fixed left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top [top:var(--app-top-offset)]">
-      <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
+    <header className="relative z-50 w-full shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top">
+      <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             type="button"

@@ -60,6 +60,11 @@ export default function App() {
 
   return (
     <div className="app">
+      <div
+        className="shrink-0 h-[3px] w-full bg-zinc-50 dark:bg-black"
+        aria-hidden
+      />
+
       <Header
         title={getPageTitle()}
         profileAvatarSrc={profileAvatarSrc}
@@ -75,7 +80,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-md mx-auto px-4 pt-[calc(5rem+var(--app-top-offset))] pb-24"
+            className="w-full max-w-md mx-auto px-4 pb-24 pt-4"
           >
             {renderPage()}
           </motion.div>
