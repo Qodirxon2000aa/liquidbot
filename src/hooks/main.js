@@ -4,59 +4,64 @@ export const useTelegram = () => {
   const [webApp, setWebApp] = useState(null);
 
   useEffect(() => {
-    // ✅ LOCAL MODE (Chrome)
+    // LOCAL MODE (Chrome)
     if (!window.Telegram?.WebApp) {
       const setHeight = () => {
-        const height = window.innerHeight;
-        document.documentElement.style.setProperty('--tg-height', `${height}px`);
+        document.documentElement.style
+          .setProperty('--tg-height', `${window.innerHeight}px`);
+        document.documentElement.style
+          .setProperty('--tg-safe-top', '0px');
+        document.documentElement.style
+          .setProperty('--tg-safe-bottom', '0px');
       };
-
       setHeight();
       window.addEventListener('resize', setHeight);
-
-      return () => {
-        window.removeEventListener('resize', setHeight);
-      };
+      return () => window.removeEventListener('resize', setHeight);
     }
 
-    // ✅ TELEGRAM MODE
+    // TELEGRAM MODE
     const tg = window.Telegram.WebApp;
 
     tg.ready();
     tg.expand();
+    tg.disableVerticalSwipes?.();
+    tg.MainButton.hide();
 
+    // ✅ Fullscreen so'rash
     if (typeof tg.requestFullscreen === 'function') {
       tg.requestFullscreen();
     }
 
-    tg.disableVerticalSwipes?.();
-    tg.MainButton.hide();
+    const updateSizes = () => {
+      // ✅ safeAreaInset — status bar va bottom nav uchun
+      const safeTop    = tg.safeAreaInset?.top    ?? 0;
+      const safeBottom = tg.safeAreaInset?.bottom ?? 0;
+      const contentTop = tg.contentSafeAreaInset?.top ?? 0;
 
-    const setHeight = () => {
-      const height = tg.viewportHeight || window.innerHeight;
-      document.documentElement.style.setProperty('--tg-height', `${height}px`);
+      document.documentElement.style
+        .setProperty('--tg-height',
+          `${tg.viewportStableHeight || tg.viewportHeight || window.innerHeight}px`);
+      document.documentElement.style
+        .setProperty('--tg-safe-top', `${Math.max(safeTop, contentTop)}px`);
+      document.documentElement.style
+        .setProperty('--tg-safe-bottom', `${safeBottom}px`);
     };
 
-    setHeight();
-
-    const ensureExpanded = () => {
-      tg.expand();
-      setHeight();
-    };
-
-    tg.onEvent('viewportChanged', ensureExpanded);
+    updateSizes();
+    tg.onEvent('viewportChanged', updateSizes);
+    tg.onEvent('fullscreenChanged', updateSizes); // ✅ yangi event
 
     setWebApp(tg);
 
     return () => {
-      tg.offEvent('viewportChanged', ensureExpanded);
+      tg.offEvent('viewportChanged', updateSizes);
+      tg.offEvent('fullscreenChanged', updateSizes);
     };
   }, []);
 
   const user = webApp?.initDataUnsafe?.user || {
     id: 12345678,
-    first_name: 'John',
-    last_name: 'Doe',
+    first_name: 'John', last_name: 'Doe',
     username: 'johndoe',
     photo_url: 'https://picsum.photos/seed/john/200'
   };
@@ -64,6 +69,7 @@ export const useTelegram = () => {
   return {
     webApp,
     user,
-    isDark: webApp?.colorScheme === 'dark'
+    isDark: webApp?.colorScheme === 'dark',
+    isFullscreen: webApp?.isFullscreen ?? false, // ✅
   };
 };

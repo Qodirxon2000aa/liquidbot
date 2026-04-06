@@ -1,6 +1,6 @@
 import { useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, CheckCircle2, ChevronDown } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles } from 'lucide-react';
 import { Button, Input, Tabs } from '../components/UI';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -141,7 +141,7 @@ export const HomePage = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="space-y-6"
+            className="flex flex-col gap-4"
           >
             <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700">
               <div className="absolute inset-0 overflow-hidden">
@@ -176,7 +176,45 @@ export const HomePage = () => {
 
             <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
 
-            <div className="space-y-2">
+            <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/95 via-white to-orange-50/60 p-4 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/15 dark:border-amber-500/25 dark:from-amber-950/35 dark:via-zinc-900 dark:to-orange-950/25 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] dark:ring-amber-500/10">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-400/15 blur-2xl dark:bg-amber-500/10" aria-hidden />
+              <div className="pointer-events-none absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-orange-300/10 blur-xl dark:bg-orange-500/5" aria-hidden />
+
+              <div className="relative flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
+                  <Sparkles className="h-5 w-5 text-white" strokeWidth={2.2} />
+                </div>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-white">{t('home.customAmount')}</p>
+                    <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">{t('home.customHint')}</p>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-xl border border-amber-200/80 bg-white/90 px-3 py-2 shadow-inner shadow-amber-500/5 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/25 dark:border-zinc-600 dark:bg-zinc-950/80 dark:focus-within:border-amber-500/50 dark:focus-within:ring-amber-500/20">
+                    <TelegramStar className="h-5 w-5 shrink-0 opacity-90" />
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      placeholder="750"
+                      value={starsCustomInput}
+                      onChange={(e) => onStarsCustomChange(e.target.value)}
+                      onFocus={() => {
+                        const n = parseInt(starsCustomInput, 10);
+                        if (!Number.isNaN(n) && n > 0) {
+                          setStarsSelected({ type: 'custom', amount: n });
+                        }
+                      }}
+                      className="min-w-0 flex-1 border-0 bg-transparent py-1 text-[15px] font-semibold tabular-nums text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+                    />
+                    <span className="shrink-0 text-xs font-bold uppercase tracking-wide text-amber-700/80 dark:text-amber-400/90">
+                      Stars
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-5">
               <p className="ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 {t('home.stars')}
               </p>
@@ -196,26 +234,16 @@ export const HomePage = () => {
                   </div>
                 </button>
               ))}
-            </div>
-
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => setStarsMoreOpen((o) => !o)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 py-2.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-zinc-50 dark:border-zinc-600 dark:text-blue-400 dark:hover:bg-zinc-900/50"
-              >
-                {t('home.more')}
-                <ChevronDown className={`h-4 w-4 transition-transform ${starsMoreOpen ? 'rotate-180' : ''}`} />
-              </button>
 
               <AnimatePresence initial={false}>
                 {starsMoreOpen && (
                   <motion.div
+                    key="star-extra"
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-2 overflow-hidden"
+                    className="flex flex-col gap-5 overflow-hidden"
                   >
                     {STAR_EXTRA.map((pkg) => (
                       <button
@@ -235,33 +263,18 @@ export const HomePage = () => {
                         </div>
                       </button>
                     ))}
-
-                    <div className="rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900/60">
-                      <label className="mb-1.5 block text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-                        {t('home.customAmount')}
-                      </label>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={1}
-                        placeholder="e.g. 750"
-                        value={starsCustomInput}
-                        onChange={(e) => onStarsCustomChange(e.target.value)}
-                        onFocus={() => {
-                          const n = parseInt(starsCustomInput, 10);
-                          if (!Number.isNaN(n) && n > 0) {
-                            setStarsSelected({ type: 'custom', amount: n });
-                          }
-                        }}
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium tabular-nums outline-none ring-0 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
-                      />
-                      <p className="mt-2 text-[11px] leading-snug text-zinc-500 dark:text-zinc-400">
-                        {t('home.customHint')}
-                      </p>
-                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              <button
+                type="button"
+                onClick={() => setStarsMoreOpen((o) => !o)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 py-2.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-zinc-50 dark:border-zinc-600 dark:text-blue-400 dark:hover:bg-zinc-900/50"
+              >
+                {t('home.more')}
+                <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${starsMoreOpen ? 'rotate-180' : ''}`} />
+              </button>
             </div>
 
             <Button onClick={handleBuy} disabled={starsCustomInvalid} className="text-sm">
