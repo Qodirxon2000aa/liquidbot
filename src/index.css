@@ -77,7 +77,7 @@
 
   /* Safe areas */
   .safe-top {
-    padding-top: calc(env(safe-area-inset-top) + 18px);
+    padding-top: calc(env(safe-area-inset-top) + 27px);
   }
 
   .safe-bottom {
