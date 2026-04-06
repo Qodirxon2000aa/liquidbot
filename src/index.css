@@ -90,3 +90,34 @@
   width: 0;
   background: transparent;
 }
+
+
+:root {
+  --tg-height: 100dvh;           /* dynamic viewport height */
+  --app-top-inset: 0px;          /* header yo‘q bo‘lsa 0 qil */
+}
+
+html, body, #root, .app {
+  height: var(--tg-height) !important;
+  min-height: var(--tg-height) !important;
+  max-height: var(--tg-height) !important;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  padding-top: 0;                /* agar bot header ko‘rinmasligi kerak bo‘lsa */
+  box-sizing: border-box;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Chat input va header ni majburan yashirish uchun (ba’zida yordam beradi) */
+body {
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
