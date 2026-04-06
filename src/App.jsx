@@ -19,7 +19,8 @@ import { AnimatePresence, motion } from 'motion/react';
 
 export default function App() {
   const { t } = useTranslation();
-  const { webApp } = useTelegram();
+  const { webApp, user } = useTelegram();
+  const profileAvatarSrc = user.photo_url || `https://picsum.photos/seed/${user.id}/200`;
   const [activeTab, setActiveTab] = useState('home');
 
   useEffect(() => {
@@ -49,10 +50,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black transition-colors duration-300 flex flex-col">
+    <div className="min-h-[var(--tg-viewport-stable-height,100dvh)] flex-1 flex flex-col bg-zinc-50 dark:bg-black transition-colors duration-300">
       <Header 
         title={getPageTitle()} 
+        profileAvatarSrc={profileAvatarSrc}
         onSettingsClick={() => setActiveTab('settings')}
+        onProfileClick={() => setActiveTab('profile')}
       />
       
       <main className="flex-1 max-w-md mx-auto w-full pt-20 pb-24 px-4 overflow-x-hidden">

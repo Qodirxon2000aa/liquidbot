@@ -4,12 +4,27 @@ export const useTelegram = () => {
   const [webApp, setWebApp] = useState(null);
 
   useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
+    if (!window.Telegram?.WebApp) return;
+
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Full-height Mini App: avoid the webview shrinking when the keyboard or chrome changes.
+    const ensureExpanded = () => {
       tg.expand();
-      setWebApp(tg);
+    };
+    tg.onEvent('viewportChanged', ensureExpanded);
+
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      tg.disableVerticalSwipes();
     }
+
+    setWebApp(tg);
+
+    return () => {
+      tg.offEvent('viewportChanged', ensureExpanded);
+    };
   }, []);
 
   const user = webApp?.initDataUnsafe?.user || {

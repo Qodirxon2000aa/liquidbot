@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Globe, Settings as SettingsIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export const Header = ({ title, onSettingsClick }) => {
-  const { i18n } = useTranslation();
+export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClick }) => {
+  const { i18n, t } = useTranslation();
 
   const toggleLanguage = () => {
     const langs = ['en', 'ru', 'uz'];
@@ -16,10 +16,19 @@ export const Header = ({ title, onSettingsClick }) => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top">
       <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xs">TWA</span>
-          </div>
-          <span className="font-bold text-zinc-900 dark:text-white hidden sm:block">App</span>
+          <button
+            type="button"
+            onClick={onProfileClick}
+            className="shrink-0 rounded-full ring-2 ring-zinc-200 dark:ring-zinc-700 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
+            aria-label={t('nav.profile')}
+          >
+            <img
+              src={profileAvatarSrc}
+              alt=""
+              className="w-9 h-9 object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </button>
         </div>
         
         <motion.h1 
