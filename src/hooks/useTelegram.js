@@ -1,44 +1,69 @@
-useEffect(() => {
-  if (!window.Telegram?.WebApp) return;
+import { useEffect, useState } from 'react';
 
-  const tg = window.Telegram.WebApp;
+export const useTelegram = () => {
+  const [webApp, setWebApp] = useState(null);
 
-  tg.ready();
+  useEffect(() => {
+    // ✅ LOCAL MODE (Chrome)
+    if (!window.Telegram?.WebApp) {
+      const setHeight = () => {
+        const height = window.innerHeight;
+        document.documentElement.style.setProperty('--tg-height', `${height}px`);
+      };
 
-  // 🔥 doim expand
-  const applyFullscreen = () => {
+      setHeight();
+      window.addEventListener('resize', setHeight);
+
+      return () => {
+        window.removeEventListener('resize', setHeight);
+      };
+    }
+
+    // ✅ TELEGRAM MODE
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
     tg.expand();
 
-    // requestFullscreen bo‘lsa ishlatamiz
     if (typeof tg.requestFullscreen === 'function') {
       tg.requestFullscreen();
     }
 
-    // viewport height fix
-    const vh = tg.viewportHeight || window.innerHeight;
-    document.documentElement.style.setProperty('--tg-height', `${vh}px`);
+    tg.disableVerticalSwipes?.();
+    tg.MainButton.hide();
+
+    const setHeight = () => {
+      const height = tg.viewportHeight || window.innerHeight;
+      document.documentElement.style.setProperty('--tg-height', `${height}px`);
+    };
+
+    setHeight();
+
+    const ensureExpanded = () => {
+      tg.expand();
+      setHeight();
+    };
+
+    tg.onEvent('viewportChanged', ensureExpanded);
+
+    setWebApp(tg);
+
+    return () => {
+      tg.offEvent('viewportChanged', ensureExpanded);
+    };
+  }, []);
+
+  const user = webApp?.initDataUnsafe?.user || {
+    id: 12345678,
+    first_name: 'John',
+    last_name: 'Doe',
+    username: 'johndoe',
+    photo_url: 'https://picsum.photos/seed/john/200'
   };
 
-  applyFullscreen();
-
-  tg.onEvent('viewportChanged', applyFullscreen);
-
-  if (typeof tg.disableVerticalSwipes === 'function') {
-    tg.disableVerticalSwipes();
-  }
-
-  tg.MainButton.hide();
-
-  const userData = userId
-    ? { id: userId }
-    : tg?.initDataUnsafe?.user;
-
-  setParams({
-    chatId: userData?.id,
-    mode: mode || mode1,
-  });
-
-  return () => {
-    tg.offEvent('viewportChanged', applyFullscreen);
+  return {
+    webApp,
+    user,
+    isDark: webApp?.colorScheme === 'dark'
   };
-}, [mode, mode1]);
+};
