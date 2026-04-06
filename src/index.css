@@ -8,7 +8,7 @@
   :root {
     --app-text-size: 16px;
     --tg-height: 100dvh; /* fallback */
-    --app-top-inset: 24px;
+    --app-top-inset: 27px;
   }
 
   html,
