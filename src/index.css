@@ -8,6 +8,7 @@
   :root {
     --app-text-size: 16px;
     --tg-height: 100dvh; /* fallback */
+    --app-top-inset: 5px;
   }
 
   html,
@@ -39,6 +40,8 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    padding-top: var(--app-top-inset);
+    box-sizing: border-box;
   }
 
   .content {

@@ -60,11 +60,6 @@ export default function App() {
 
   return (
     <div className="app">
-      <div
-        className="shrink-0 h-[3px] w-full bg-zinc-50 dark:bg-black"
-        aria-hidden
-      />
-
       <Header
         title={getPageTitle()}
         profileAvatarSrc={profileAvatarSrc}
