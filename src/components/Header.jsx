@@ -16,7 +16,7 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
     <header
       className="relative z-50 w-full shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top"
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)'
+        transform: 'translateY(10px)'
       }}
     >
       <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between">
