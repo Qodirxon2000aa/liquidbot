@@ -214,8 +214,8 @@ export const HomePage = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-5">
-              <p className="ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <div className="flex flex-col gap-[4.7px]">
+              <p className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                 {t('home.stars')}
               </p>
               {STAR_PRIMARY.map((pkg) => (
@@ -243,7 +243,7 @@ export const HomePage = () => {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="flex flex-col gap-5 overflow-hidden"
+                    className="flex flex-col gap-[4.7px] overflow-hidden"
                   >
                     {STAR_EXTRA.map((pkg) => (
                       <button
