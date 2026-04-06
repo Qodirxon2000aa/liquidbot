@@ -1,43 +1,44 @@
-import { useEffect, useState } from 'react';
+useEffect(() => {
+  if (!window.Telegram?.WebApp) return;
 
-export const useTelegram = () => {
-  const [webApp, setWebApp] = useState(null);
+  const tg = window.Telegram.WebApp;
 
-  useEffect(() => {
-    if (!window.Telegram?.WebApp) return;
+  tg.ready();
 
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+  // 🔥 doim expand
+  const applyFullscreen = () => {
     tg.expand();
 
-    // Full-height Mini App: avoid the webview shrinking when the keyboard or chrome changes.
-    const ensureExpanded = () => {
-      tg.expand();
-    };
-    tg.onEvent('viewportChanged', ensureExpanded);
-
-    if (typeof tg.disableVerticalSwipes === 'function') {
-      tg.disableVerticalSwipes();
+    // requestFullscreen bo‘lsa ishlatamiz
+    if (typeof tg.requestFullscreen === 'function') {
+      tg.requestFullscreen();
     }
 
-    setWebApp(tg);
-
-    return () => {
-      tg.offEvent('viewportChanged', ensureExpanded);
-    };
-  }, []);
-
-  const user = webApp?.initDataUnsafe?.user || {
-    id: 12345678,
-    first_name: 'John',
-    last_name: 'Doe',
-    username: 'johndoe',
-    photo_url: 'https://picsum.photos/seed/john/200'
+    // viewport height fix
+    const vh = tg.viewportHeight || window.innerHeight;
+    document.documentElement.style.setProperty('--tg-height', `${vh}px`);
   };
 
-  return {
-    webApp,
-    user,
-    isDark: webApp?.colorScheme === 'dark'
+  applyFullscreen();
+
+  tg.onEvent('viewportChanged', applyFullscreen);
+
+  if (typeof tg.disableVerticalSwipes === 'function') {
+    tg.disableVerticalSwipes();
+  }
+
+  tg.MainButton.hide();
+
+  const userData = userId
+    ? { id: userId }
+    : tg?.initDataUnsafe?.user;
+
+  setParams({
+    chatId: userData?.id,
+    mode: mode || mode1,
+  });
+
+  return () => {
+    tg.offEvent('viewportChanged', applyFullscreen);
   };
-};
+}, [mode, mode1]);
