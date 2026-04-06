@@ -1,37 +1,39 @@
 import { useEffect, useState } from 'react';
 
 export const useTelegram = () => {
-  const [webApp, setWebApp] = useState<any>(null);
+  const [webApp, setWebApp] = useState(null);
 
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-
-    if (!tg) {
-      // Local Chrome test uchun (fallback)
+    // ✅ LOCAL MODE (Chrome)
+    if (!window.Telegram?.WebApp) {
       const setHeight = () => {
-        document.documentElement.style.setProperty('--tg-height', `${window.innerHeight}px`);
+        const height = window.innerHeight;
+        document.documentElement.style.setProperty('--tg-height', `${height}px`);
       };
+
       setHeight();
       window.addEventListener('resize', setHeight);
-      return () => window.removeEventListener('resize', setHeight);
+
+      return () => {
+        window.removeEventListener('resize', setHeight);
+      };
     }
 
-    // ==================== TELEGRAM MODE ====================
-    tg.ready();
-    tg.expand();                    // oddiy expand
-    tg.disableVerticalSwipes?.();   // vertikal surishni o‘chirish
+    // ✅ TELEGRAM MODE
+    const tg = window.Telegram.WebApp;
 
-    // Yangi Fullscreen rejimi (Mini Apps 2.0+)
+    tg.ready();
+    tg.expand();
+
     if (typeof tg.requestFullscreen === 'function') {
       tg.requestFullscreen();
     }
 
-    // Main Button ni yashirish (ko‘pincha chat input ni ham yashiradi)
+    tg.disableVerticalSwipes?.();
     tg.MainButton.hide();
 
-    // Viewport height ni to‘g‘ri boshqarish
     const setHeight = () => {
-      const height = tg.viewportStableHeight || tg.viewportHeight || window.innerHeight;
+      const height = tg.viewportHeight || window.innerHeight;
       document.documentElement.style.setProperty('--tg-height', `${height}px`);
     };
 
@@ -39,32 +41,29 @@ export const useTelegram = () => {
 
     const ensureExpanded = () => {
       tg.expand();
-      if (typeof tg.requestFullscreen === 'function') {
-        tg.requestFullscreen();
-      }
       setHeight();
     };
 
     tg.onEvent('viewportChanged', ensureExpanded);
-    tg.onEvent('fullscreenChanged', setHeight);   // yangi event
 
     setWebApp(tg);
 
     return () => {
       tg.offEvent('viewportChanged', ensureExpanded);
-      tg.offEvent('fullscreenChanged', setHeight);
     };
   }, []);
 
   const user = webApp?.initDataUnsafe?.user || {
     id: 12345678,
-    first_name: 'Test',
-    username: 'testuser',
+    first_name: 'John',
+    last_name: 'Doe',
+    username: 'johndoe',
+    photo_url: 'https://picsum.photos/seed/john/200'
   };
 
   return {
     webApp,
     user,
-    isDark: webApp?.colorScheme === 'dark',
+    isDark: webApp?.colorScheme === 'dark'
   };
 };
