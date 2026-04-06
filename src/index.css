@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   :root {
-    --app-text-size: 16px;
     --tg-height: 100dvh; /* fallback */
     --app-top-inset: 27px;
   }
@@ -21,13 +22,23 @@
   body {
     @apply antialiased text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-black;
 
-    /* 🔥 ENG MUHIM */
     height: var(--tg-height);
 
     overflow: hidden;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    font-size: var(--app-text-size);
+    font-size: 1rem;
+  }
+
+  /* Matn o‘lchami: html ildiz rem — Tailwind text-* klasslari masshtablanadi */
+  html.app-text-small {
+    font-size: 14px;
+  }
+  html.app-text-medium {
+    font-size: 16px;
+  }
+  html.app-text-large {
+    font-size: 18px;
   }
 
   #root {
@@ -62,17 +73,6 @@
   .night-mode .dark\:bg-zinc-900,
   .night-mode .dark\:bg-zinc-800 {
     background-color: #121212 !important;
-  }
-
-  /* Text Sizes */
-  .text-small {
-    --app-text-size: 14px;
-  }
-  .text-medium {
-    --app-text-size: 16px;
-  }
-  .text-large {
-    --app-text-size: 18px;
   }
 
   /* Safe areas */

@@ -36,6 +36,20 @@ export default function App() {
     webApp.expand();
   }, [webApp]);
 
+  useEffect(() => {
+    if (!webApp) return;
+    try {
+      if (localStorage.getItem('app-dark') !== null) return;
+    } catch {
+      return;
+    }
+    if (webApp.colorScheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [webApp]);
+
   const renderPage = () => {
     switch (activeTab) {
       case 'referral':
