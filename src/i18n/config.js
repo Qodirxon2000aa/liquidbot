@@ -37,7 +37,17 @@ const resources = {
         premium: 'Premium',
         username: 'Telegram Username',
         buy: 'Buy',
-        success: 'Purchase successful!'
+        success: 'Purchase successful!',
+        starsSubtitle: 'Send balance & reactions to anyone',
+        premiumSubtitle: 'HD media, faster downloads, unique badges',
+        popular: 'Best value',
+        perMonth: 'per month avg',
+        months: 'months',
+        more: 'More',
+        customAmount: 'Custom amount',
+        customHint: 'Type any number of Stars (price at checkout)',
+        premiumCustomMonths: 'Custom period (months)',
+        premiumCustomHint: 'Enter months — price shown at checkout'
       },
       market: {
         title: 'Market',
@@ -100,7 +110,17 @@ const resources = {
         premium: 'Премиум',
         username: 'Имя пользователя Telegram',
         buy: 'Купить',
-        success: 'Покупка прошла успешно!'
+        success: 'Покупка прошла успешно!',
+        starsSubtitle: 'Баланс и реакции любому пользователю',
+        premiumSubtitle: 'HD, быстрая загрузка и уникальные значки',
+        popular: 'Выгодно',
+        perMonth: 'в среднем в месяц',
+        months: 'мес.',
+        more: 'Ещё',
+        customAmount: 'Своя сумма',
+        customHint: 'Любое количество Stars (цена при оплате)',
+        premiumCustomMonths: 'Свой срок (месяцев)',
+        premiumCustomHint: 'Укажите месяцы — цена при оплате'
       },
       market: {
         title: 'Маркет',
@@ -163,7 +183,17 @@ const resources = {
         premium: 'Premium',
         username: 'Telegram foydalanuvchi nomi',
         buy: 'Sotib olish',
-        success: 'Xarid muvaffaqiyatli yakunlandi!'
+        success: 'Xarid muvaffaqiyatli yakunlandi!',
+        starsSubtitle: 'Balans va reaksiyalarni istalgan odamga',
+        premiumSubtitle: 'HD media, tez yuklash, noyob nishonlar',
+        popular: 'Eng foydali',
+        perMonth: 'oyiga o‘rtacha',
+        months: 'oy',
+        more: 'Ko‘proq',
+        customAmount: 'O‘zingiz yozing',
+        customHint: 'Istalgan miqdor (narx to‘lovda)',
+        premiumCustomMonths: 'Oylar (o‘zingiz yozing)',
+        premiumCustomHint: 'Oy sonini kiriting — narx to‘lovda'
       },
       market: {
         title: 'Market',
