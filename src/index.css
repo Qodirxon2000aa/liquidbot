@@ -92,3 +92,34 @@
 }
 
 
+:root {
+  --tg-height: 100vh;
+  --tg-safe-top: 0px;
+  --tg-safe-bottom: 0px;
+}
+
+/* ✅ Root wrapper — butun ekranni egallaydi */
+.app-root {
+  width: 100%;
+  height: var(--tg-height);
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* ✅ Content area — safe zone ichida */
+.app-content {
+  padding-top: var(--tg-safe-top);
+  padding-bottom: var(--tg-safe-bottom);
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ Header status bar tepasiga chiqmasin */
+.app-header {
+  padding-top: var(--tg-safe-top);
+  position: sticky;
+  top: 0;
+}
