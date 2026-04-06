@@ -123,3 +123,58 @@
   position: sticky;
   top: 0;
 }
+
+
+/* ── Default qiymatlar ── */
+:root {
+  --tg-height:      100vh;
+  --tg-safe-top:    0px;
+  --tg-safe-bottom: 0px;
+  --tg-bg:          #ffffff;
+}
+
+/* ── html va body — STATUS BAR RANGINI OLADI ── */
+html,
+body {
+  background-color: var(--tg-bg); /* ← tepadagi qora joy shu bilan ketadi */
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+/* ── Root wrapper ── */
+#root {
+  width: 100%;
+  height: var(--tg-height);
+  background-color: var(--tg-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Scrollable content area ── */
+.app-content {
+  height: 100%;
+  padding-top: var(--tg-safe-top);
+  padding-bottom: var(--tg-safe-bottom);
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Header ── */
+.app-header {
+  padding-top: var(--tg-safe-top);
+  background-color: var(--tg-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* ── Bottom nav ── */
+.app-bottom-nav {
+  padding-bottom: var(--tg-safe-bottom);
+  background-color: var(--tg-bg);
+  position: sticky;
+  bottom: 0;
+}
