@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    --tg-viewport-height: 100vh;
+    --tg-viewport-stable-height: 100vh;
+    --app-text-size: 16px;
+  }
+
+  body {
+    @apply antialiased text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-black;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-size: var(--app-text-size);
+  }
+
+  /* Night Mode (Extra Dark) */
+  .night-mode {
+    --tw-bg-opacity: 1;
+    background-color: rgb(0 0 0 / var(--tw-bg-opacity)) !important;
+  }
+
+  .night-mode .bg-white,
+  .night-mode .bg-zinc-50 {
+    background-color: rgb(12 12 12 / var(--tw-bg-opacity)) !important;
+  }
+
+  .night-mode .dark\:bg-zinc-900,
+  .night-mode .dark\:bg-zinc-800 {
+    background-color: rgb(18 18 18 / var(--tw-bg-opacity)) !important;
+  }
+
+  /* Text Sizes */
+  .text-small { --app-text-size: 14px; }
+  .text-medium { --app-text-size: 16px; }
+  .text-large { --app-text-size: 18px; }
+
+  /* Telegram Safe Areas */
+  .safe-top {
+    padding-top: calc(env(safe-area-inset-top) + 8px);
+  }
+
+  .safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  }
+}
+
+/* Custom scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
