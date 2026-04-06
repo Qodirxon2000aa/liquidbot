@@ -80,9 +80,9 @@
     padding-top: calc(env(safe-area-inset-top) + 40px);
   }
 
-  .safe-bottom {
+  /* .safe-bottom {
     padding-bottom: calc(env(safe-area-inset-bottom) + 3px);
-  }
+  } */
 }
 
 /* Scrollbar hide */

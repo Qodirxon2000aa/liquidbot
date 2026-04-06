@@ -15,7 +15,10 @@ export const BottomNav = ({ activeTab, onTabChange }) => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 safe-bottom">
-      <div className="max-w-md mx-auto px-2 h-16 flex items-center justify-around">
+      <div
+        className="max-w-md mx-auto px-2 h-16 flex items-center justify-around"
+        style={{ transform: 'translateY(-5px)' }}
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
