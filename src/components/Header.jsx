@@ -13,14 +13,8 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
   };
 
   return (
-    <header
-      className="relative z-50 w-full shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top"
-      style={{
-        transform: 'translateY(10px)'
-      }}
-    >
+    <header className="relative z-50 w-full shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top">
       <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -36,7 +30,7 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
             />
           </button>
         </div>
-
+        
         <motion.h1 
           key={title}
           initial={{ opacity: 0, y: -5 }}
@@ -52,11 +46,8 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
             className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-600 dark:text-zinc-400 flex items-center gap-1"
           >
             <Globe className="w-4 h-4" />
-            <span className="text-[10px] font-bold uppercase">
-              {i18n.language.split('-')[0]}
-            </span>
+            <span className="text-[10px] font-bold uppercase">{i18n.language.split('-')[0]}</span>
           </button>
-
           <button 
             onClick={onSettingsClick}
             className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-600 dark:text-zinc-400"
@@ -64,7 +55,6 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
             <SettingsIcon className="w-5 h-5" />
           </button>
         </div>
-
       </div>
     </header>
   );
