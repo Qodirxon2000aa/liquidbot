@@ -8,6 +8,7 @@
   :root {
     --app-text-size: 16px;
     --tg-height: 100dvh; /* fallback */
+    --app-top-offset: 3px;
   }
 
   html,
@@ -35,7 +36,6 @@
     flex-direction: column;
   }
 
-  /* Layout */
   .app {
     height: 100%;
     display: flex;
