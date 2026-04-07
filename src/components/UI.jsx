@@ -12,6 +12,10 @@ export const Card = ({ children, className = '' }) => {
   );
 };
 
+export const CardContent = ({ children, className = '' }) => (
+  <div className={className}>{children}</div>
+);
+
 export const Button = ({ children, onClick, variant = 'primary', className = '', disabled }) => {
   const variants = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600',

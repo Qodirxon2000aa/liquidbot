@@ -1,0 +1,1276 @@
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import Lottie from 'lottie-react';
+import {
+  Copy,
+  Eye,
+  ShoppingCart,
+  Sparkles,
+  CheckCircle2,
+  Gift,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Wallet,
+  X,
+  User,
+  Send,
+  CheckCheck,
+  EyeOff,
+  Wand2,
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Card, CardContent, Button } from '../components/UI';
+import { useTelegram } from '../hooks/useTelegram';
+
+import heart from '../assets/heart.json';
+import teddy_bear from '../assets/teddy_bear.json';
+import gift_box from '../assets/gift_box.json';
+import rose from '../assets/rose.json';
+import cake from '../assets/cake.json';
+import bouquet from '../assets/bouquet.json';
+import rocket from '../assets/rocket.json';
+import trophy from '../assets/trophy.json';
+import ring from '../assets/ring.json';
+import diamond from '../assets/diamond.json';
+import champagne from '../assets/champagne.json';
+import love_teddy from '../assets/love_teddy.json';
+import love_heart from '../assets/love_heart.json';
+import tree from '../assets/tree.json';
+import new_bear from '../assets/new_bear.json';
+import bear from '../assets/bear.json';
+
+const GIFT_ANIMATIONS = {
+  heart,
+  teddy_bear,
+  gift_box,
+  rose,
+  cake,
+  bouquet,
+  rocket,
+  trophy,
+  ring,
+  diamond,
+  champagne,
+  love_teddy,
+  love_heart,
+  tree,
+  new_bear,
+  bear,
+};
+
+const GIFT_EMOJIS = {
+  heart: '❤️',
+  teddy_bear: '🐻',
+  gift_box: '🎁',
+  rose: '🌹',
+  cake: '🎂',
+  bouquet: '💐',
+  rocket: '🚀',
+  trophy: '🏆',
+  ring: '💍',
+  diamond: '💎',
+  champagne: '🍾',
+  love_teddy: '🧸',
+  love_heart: '💝',
+  tree: '🌳',
+  new_bear: '🐻',
+  march_bear: '🐻',
+  bear: '🐻',
+};
+
+const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY ?? '';
+const NFT_API_BASE = import.meta.env.VITE_NFT_API_BASE ?? 'https://tezpremium.uz/uzbstar/giftlar.php';
+const ODDIY_API_BASE = import.meta.env.VITE_ODDIY_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/info.php';
+const ORDER_API_BASE = import.meta.env.VITE_ORDER_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/order.php';
+const NFT_ORDER_API_BASE = import.meta.env.VITE_NFT_ORDER_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/nft.php';
+const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
+
+const NFT_FILTERS = [
+  { key: 'all', label: 'Barcha' },
+  { key: 'cheap', label: 'Arzon ↑' },
+  { key: 'expensive', label: 'Qimmat ↓' },
+  { key: 'new', label: 'Yangi' },
+  { key: 'old', label: 'Eski' },
+];
+
+const MOCK_BALANCE_UZS = Number(import.meta.env.VITE_MOCK_BALANCE_UZS ?? 5_000_000);
+
+const ODDIY_FALLBACK = Object.keys(GIFT_ANIMATIONS).map((name, i) => ({
+  id: 200 + i,
+  name,
+  price: 45_000 + i * 18_000,
+}));
+
+const NFT_FALLBACK = [
+  {
+    id: 'nft-demo-1',
+    nft_id: 'CyberCat-NFT',
+    model: 'Demo',
+    backdrop: 'Night',
+    price: 120_000,
+    photo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop',
+    link: 'https://t.me',
+    created_at: '—',
+  },
+  {
+    id: 'nft-demo-2',
+    nft_id: 'GoldenGift-NFT',
+    model: 'Demo',
+    backdrop: 'Sun',
+    price: 350_000,
+    photo: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop',
+    link: 'https://t.me',
+    created_at: '—',
+  },
+];
+
+function GiftAnimation({ name }) {
+  const animData = useMemo(() => GIFT_ANIMATIONS[name] ?? null, [name]);
+  const wrapRef = useRef(null);
+  const lottieRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const [played, setPlayed] = useState(false);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (visible && !played && lottieRef.current) {
+      lottieRef.current.goToAndPlay(0, true);
+      setPlayed(true);
+    }
+  }, [visible, played]);
+
+  return (
+    <div ref={wrapRef} className="flex h-full w-full items-center justify-center">
+      {animData ? (
+        <Lottie
+          lottieRef={lottieRef}
+          animationData={animData}
+          loop={false}
+          autoplay={false}
+          style={{ width: '82%', height: '82%', display: 'block' }}
+        />
+      ) : (
+        <span className="select-none text-5xl leading-none">{GIFT_EMOJIS[name] || '🎁'}</span>
+      )}
+    </div>
+  );
+}
+
+function useUserSearch() {
+  const [username, setUsername] = useState('');
+  const [anonim, setAnonim] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [checkLoading, setCheckLoad] = useState(false);
+  const [checkError, setCheckError] = useState(null);
+  const debounceRef = useRef(null);
+
+  const cleanUsername = username.replace(/^@/, '').trim();
+
+  useEffect(() => {
+    if (!cleanUsername) {
+      setUserInfo(null);
+      setCheckError(null);
+      return;
+    }
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setCheckLoad(true);
+      setCheckError(null);
+      setUserInfo(null);
+      try {
+        const res = await fetch(`${USER_CHECK_API}?username=${encodeURIComponent(cleanUsername)}`);
+        const data = await res.json();
+        if (data.username) setUserInfo(data);
+        else setCheckError(data.message || data.error || "Foydalanuvchi topilmadi");
+      } catch {
+        setCheckError("Tekshirib bo'lmadi");
+      } finally {
+        setCheckLoad(false);
+      }
+    }, 600);
+    return () => clearTimeout(debounceRef.current);
+  }, [cleanUsername]);
+
+  return { username, setUsername, cleanUsername, anonim, setAnonim, userInfo, checkLoading, checkError };
+}
+
+function useAIComment() {
+  const [commentOn, setCommentOn] = useState(false);
+  const [comment, setComment] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [showAiInput, setShowAiInput] = useState(false);
+
+  const generateAIGreeting = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+
+    const FREE_MODELS = [
+      'mistralai/mistral-7b-instruct:free',
+      'huggingfaceh4/zephyr-7b-beta:free',
+      'openchat/openchat-7b:free',
+      'gryphe/mythomist-7b:free',
+    ];
+
+    if (OPENROUTER_KEY) {
+      for (const model of FREE_MODELS) {
+        try {
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${OPENROUTER_KEY}`,
+              'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : '',
+              'X-Title': 'Gift App',
+            },
+            body: JSON.stringify({
+              model,
+              max_tokens: 150,
+              messages: [
+                {
+                  role: 'user',
+                  content: `Write a short sincere greeting in Uzbek language for: "${aiPrompt}". Only return the greeting text, nothing else.`,
+                },
+              ],
+            }),
+          });
+          const data = await response.json();
+          if (data.error) continue;
+          const text = data?.choices?.[0]?.message?.content?.trim() || '';
+          if (text) {
+            setComment(text);
+            setShowAiInput(false);
+            setAiLoading(false);
+            return;
+          }
+        } catch {
+          /* next model */
+        }
+      }
+    }
+
+    const fallbacks = [
+      `💝 ${aiPrompt} munosabati bilan sizni qalbdan tabriklayman! Baxt, sog'lik va omad tilayman! 🎉`,
+      `🌸 Aziz do'stim, ${aiPrompt} bilan tabriklayman! Hayotingiz doim baxtli bo'lsin! ✨`,
+      `🎊 ${aiPrompt}! Sizga eng yaxshi tilaklar! Sog'lik, baxt va farovonlik tilayman! 💫`,
+    ];
+    setComment(fallbacks[Math.floor(Math.random() * fallbacks.length)]);
+    setShowAiInput(false);
+    setAiLoading(false);
+  };
+
+  return {
+    commentOn,
+    setCommentOn,
+    comment,
+    setComment,
+    aiLoading,
+    aiPrompt,
+    setAiPrompt,
+    showAiInput,
+    setShowAiInput,
+    generateAIGreeting,
+  };
+}
+
+function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center">
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        className="relative z-10 max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white pb-12 shadow-2xl dark:bg-zinc-950"
+        style={{ maxHeight: '92vh' }}
+      >
+        <div className="p-5 pb-8">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{title}</h2>
+              <p className="mt-0.5 text-xs capitalize text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition-colors hover:text-zinc-900 dark:bg-zinc-800 dark:hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="mx-auto mb-5 h-20 w-20 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">{thumbContent}</div>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserInputSection({ username, setUsername, cleanUsername, userInfo, checkLoading, checkError }) {
+  return (
+    <div className="mb-3 space-y-2">
+      <label className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        Kimga yuborish?
+      </label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-sm font-medium text-zinc-400">
+          @
+        </span>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="username"
+          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-3 pl-7 pr-10 text-sm font-medium text-zinc-900 transition-all focus:border-blue-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:bg-zinc-900"
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          {checkLoading && <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />}
+          {!checkLoading && userInfo && <CheckCheck className="h-4 w-4 text-green-500" />}
+          {!checkLoading && checkError && cleanUsername && <AlertCircle className="h-4 w-4 text-red-500" />}
+        </div>
+      </div>
+
+      {userInfo && !checkLoading && (
+        <div className="flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/10 px-3 py-2.5">
+          {userInfo.photo ? (
+            <img src={userInfo.photo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500/20">
+              <User className="h-4 w-4 text-green-500" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+              {userInfo.name || userInfo.first_name || cleanUsername}
+            </p>
+            <p className="text-xs text-zinc-500">@{userInfo.username || cleanUsername}</p>
+          </div>
+          <CheckCheck className="ml-auto h-4 w-4 shrink-0 text-green-500" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CommentSection({
+  commentOn,
+  setCommentOn,
+  comment,
+  setComment,
+  aiLoading,
+  aiPrompt,
+  setAiPrompt,
+  showAiInput,
+  setShowAiInput,
+  generateAIGreeting,
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setCommentOn((v) => !v)}
+        className={`mb-2 flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+          commentOn
+            ? 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400'
+            : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
+        }`}
+      >
+        <span className="shrink-0 text-base">💬</span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Izoh qo&apos;shish</p>
+          <p className="text-[11px] opacity-70">Giftga xabar biriktirish</p>
+        </div>
+        <div
+          className={`relative ml-auto h-5 w-9 shrink-0 rounded-full transition-all ${commentOn ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600'}`}
+        >
+          <div
+            className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${commentOn ? 'left-4' : 'left-0.5'}`}
+          />
+        </div>
+      </button>
+
+      <AnimatePresence>
+        {commentOn && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-3 overflow-hidden"
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-zinc-500">Xabar matni</span>
+              <button
+                type="button"
+                onClick={() => setShowAiInput(!showAiInput)}
+                className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-500/20 dark:text-blue-400"
+              >
+                <Wand2 className="h-3 w-3" />
+                AI BILAN YOZISH
+              </button>
+            </div>
+
+            {showAiInput && (
+              <div className="mb-3 space-y-2 rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
+                <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400">Kimga va nima uchunligini ayting:</p>
+                <div className="flex gap-2">
+                  <input
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="Masalan: Onamga tug'ilgan kun tabrigi"
+                    className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={generateAIGreeting}
+                    disabled={aiLoading || !aiPrompt}
+                    className="rounded-lg bg-blue-500 p-2 text-white disabled:opacity-50"
+                  >
+                    {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Tabrik yoki xabar yozing..."
+              maxLength={200}
+              rows={3}
+              className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-400/50 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+            />
+            <p className="mt-1 text-right text-[10px] text-zinc-400">{comment.length}/200</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function AnonimToggle({ anonim, setAnonim }) {
+  return (
+    <button
+      type="button"
+      onClick={() => setAnonim((v) => !v)}
+      className={`mb-4 flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+        anonim
+          ? 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400'
+          : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400'
+      }`}
+    >
+      <EyeOff className="h-4 w-4 shrink-0" />
+      <div className="min-w-0">
+        <p className="text-sm font-semibold">Anonim yuborish</p>
+        <p className="text-[11px] opacity-70">Kim yuborganini ko&apos;rsatmaydi</p>
+      </div>
+      <div className={`relative ml-auto h-5 w-9 shrink-0 rounded-full ${anonim ? 'bg-blue-500' : 'bg-zinc-300 dark:bg-zinc-600'}`}>
+        <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${anonim ? 'left-4' : 'left-0.5'}`} />
+      </div>
+    </button>
+  );
+}
+
+function SuccessOverlay({ text = "Gift muvaffaqiyatli jo'natildi" }) {
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex items-center justify-center"
+      style={{
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        backgroundColor: 'rgba(0,0,0,0.55)',
+      }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center gap-6"
+      >
+        <div className="flex h-28 w-28 items-center justify-center rounded-full border border-green-500/30 bg-green-500/20 shadow-2xl shadow-green-500/20">
+          <CheckCircle2 className="h-14 w-14 text-green-400" />
+        </div>
+        <div className="text-center">
+          <p className="text-2xl font-bold text-white">🎉 Yuborildi!</p>
+          <p className="mt-1 text-sm text-white/60">{text}</p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function BuyOddiyModal({ gift, onClose, onSuccess }) {
+  const { user } = useTelegram();
+  const userSearch = useUserSearch();
+  const aiComment = useAIComment();
+  const [orderLoading, setOrderLoad] = useState(false);
+  const [orderError, setOrderError] = useState(null);
+  const [ordered, setOrdered] = useState(false);
+
+  const { cleanUsername, anonim, userInfo } = userSearch;
+  const { commentOn, comment } = aiComment;
+
+  const getSenderId = () => user?.id ?? '';
+
+  const handleOrder = async () => {
+    if (!cleanUsername) return;
+    const senderId = getSenderId();
+    if (!senderId) {
+      setOrderError("Foydalanuvchi ID topilmadi. Iltimos qayta kiring.");
+      return;
+    }
+
+    setOrderLoad(true);
+    setOrderError(null);
+    try {
+      const params = new URLSearchParams({
+        user_id: String(senderId),
+        gift_id: String(gift.id),
+        username: `@${cleanUsername}`,
+        anonim: anonim ? 'true' : 'false',
+      });
+      if (commentOn && comment.trim()) params.append('comment', comment.trim());
+
+      const res = await fetch(`${ORDER_API_BASE}?${params.toString()}`);
+      const rawText = await res.text();
+      const jsonStart = rawText.indexOf('{');
+      const data = JSON.parse(jsonStart >= 0 ? rawText.slice(jsonStart) : rawText);
+
+      if (data.ok === true) {
+        setOrdered(true);
+        onSuccess?.();
+        setTimeout(() => onClose(), 3000);
+      } else {
+        setOrderError(data.message || data.error || 'Xatolik yuz berdi');
+      }
+    } catch (err) {
+      setOrderError("Serverga ulanib bo'lmadi: " + err.message);
+    } finally {
+      setOrderLoad(false);
+    }
+  };
+
+  const canOrder = !orderLoading && cleanUsername && (userInfo || anonim) && !ordered;
+
+  return (
+    <>
+      <ModalShell
+        title="Gift yuborish"
+        subtitle={`${String(gift.name).replace(/_/g, ' ')} · ${gift.price.toLocaleString('uz-UZ')} UZS`}
+        thumbContent={<GiftAnimation name={gift.name} />}
+        onClose={onClose}
+      >
+        <UserInputSection {...userSearch} />
+        <CommentSection {...aiComment} />
+        <AnonimToggle anonim={anonim} setAnonim={userSearch.setAnonim} />
+
+        {orderError && (
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+            <p className="text-xs text-red-500">{orderError}</p>
+          </div>
+        )}
+
+        {!ordered && (
+          <button
+            type="button"
+            onClick={handleOrder}
+            disabled={!canOrder}
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all ${
+              canOrder
+                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 active:scale-95'
+                : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500'
+            }`}
+          >
+            {orderLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Yuborilmoqda...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Gift yuborish
+              </>
+            )}
+          </button>
+        )}
+      </ModalShell>
+
+      {ordered && <SuccessOverlay text="Gift muvaffaqiyatli jo'natildi" />}
+    </>
+  );
+}
+
+function BuyNftModal({ gift, onClose, onSuccess }) {
+  const { user } = useTelegram();
+  const userSearch = useUserSearch();
+  const [orderLoading, setOrderLoad] = useState(false);
+  const [orderError, setOrderError] = useState(null);
+  const [ordered, setOrdered] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
+
+  const { cleanUsername } = userSearch;
+
+  const formatName = (nftId) => {
+    if (!nftId) return 'Gift';
+    return nftId.split('-')[0].replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  const getSenderId = () => user?.id ?? '';
+
+  const handleOrder = async () => {
+    if (!cleanUsername) return;
+    const senderId = getSenderId();
+    if (!senderId) {
+      setOrderError("Foydalanuvchi ID topilmadi. Iltimos qayta kiring.");
+      return;
+    }
+
+    setOrderLoad(true);
+    setOrderError(null);
+    try {
+      const params = new URLSearchParams({
+        user_id: String(senderId),
+        gift_id: String(gift.id),
+        sent: `@${cleanUsername}`,
+      });
+
+      const res = await fetch(`${NFT_ORDER_API_BASE}?${params.toString()}`);
+      const rawText = await res.text();
+      const jsonStart = rawText.indexOf('{');
+      const data = JSON.parse(jsonStart >= 0 ? rawText.slice(jsonStart) : rawText);
+
+      if (data.ok === true) {
+        setOrdered(true);
+        onSuccess?.();
+        setTimeout(() => onClose(), 3000);
+      } else {
+        setOrderError(data.message || data.error || 'Xatolik yuz berdi');
+      }
+    } catch (err) {
+      setOrderError("Serverga ulanib bo'lmadi: " + err.message);
+    } finally {
+      setOrderLoad(false);
+    }
+  };
+
+  const canOrder = !orderLoading && cleanUsername.length > 2 && !ordered;
+
+  return (
+    <>
+      <ModalShell
+        title="NFT Gift yuborish"
+        subtitle={`${formatName(gift.nft_id)} · ${gift.price.toLocaleString('uz-UZ')} UZS`}
+        thumbContent={
+          !imgErr && gift.photo ? (
+            <img
+              src={gift.photo}
+              alt={formatName(gift.nft_id)}
+              className="h-full w-full object-cover"
+              onError={() => setImgErr(true)}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-zinc-200 dark:bg-zinc-800">
+              <Gift className="h-10 w-10 text-zinc-400" />
+            </div>
+          )
+        }
+        onClose={onClose}
+      >
+        <UserInputSection {...userSearch} />
+
+        {orderError && (
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+            <p className="text-xs text-red-500">{orderError}</p>
+          </div>
+        )}
+
+        {!ordered && (
+          <button
+            type="button"
+            onClick={handleOrder}
+            disabled={!canOrder}
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all ${
+              canOrder
+                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 active:scale-95'
+                : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
+            }`}
+          >
+            {orderLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Yuborilmoqda...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                NFT Gift yuborish
+              </>
+            )}
+          </button>
+        )}
+      </ModalShell>
+
+      {ordered && <SuccessOverlay text="NFT Gift muvaffaqiyatli jo'natildi" />}
+    </>
+  );
+}
+
+function formatNftName(nftId) {
+  if (!nftId) return 'Gift';
+  return nftId.split('-')[0].replace(/([A-Z])/g, ' $1').trim();
+}
+
+export function GiftsMarketView({ onNavigateHome }) {
+  const [mainTab, setMainTab] = useState('nft');
+  const [oddiyFilter, setOddiyFilter] = useState('cheap');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [copiedId, setCopiedId] = useState(null);
+  const [gifts, setGifts] = useState([]);
+  const [nftLoading, setNftLoading] = useState(true);
+  const [nftError, setNftError] = useState(null);
+  const [oddiyGifts, setOddiyGifts] = useState([]);
+  const [oddiyLoading, setOddiyLoading] = useState(false);
+  const [oddiyError, setOddiyError] = useState(null);
+  const [buyGift, setBuyGift] = useState(null);
+  const [buyNftGift, setBuyNftGift] = useState(null);
+
+  const userBalance = MOCK_BALANCE_UZS;
+
+  const fetchNftGifts = useCallback(async (type = 'all') => {
+    setNftLoading(true);
+    setNftError(null);
+    try {
+      const url = type === 'all' ? NFT_API_BASE : `${NFT_API_BASE}?type=${type}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.ok) setGifts(data.gifts || []);
+      else setNftError("Ma'lumot olishda xatolik");
+    } catch {
+      setGifts(NFT_FALLBACK);
+      setNftError(null);
+    } finally {
+      setNftLoading(false);
+    }
+  }, []);
+
+  const fetchOddiyGifts = useCallback(async () => {
+    setOddiyLoading(true);
+    setOddiyError(null);
+    try {
+      const res = await fetch(ODDIY_API_BASE);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.ok) setOddiyGifts(data.gifts || []);
+      else setOddiyError("Ma'lumot olishda xatolik");
+    } catch {
+      setOddiyGifts(ODDIY_FALLBACK);
+      setOddiyError(null);
+    } finally {
+      setOddiyLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mainTab === 'nft') fetchNftGifts(activeFilter);
+    else if (mainTab === 'oddiy' && oddiyGifts.length === 0) fetchOddiyGifts();
+  }, [activeFilter, mainTab, fetchNftGifts, fetchOddiyGifts, oddiyGifts.length]);
+
+  const handleFilterChange = (key) => {
+    if (key === activeFilter) return;
+    setActiveFilter(key);
+    setGifts([]);
+  };
+
+  const handleMainTab = (tab) => {
+    if (tab === mainTab) return;
+    setMainTab(tab);
+    if (tab === 'nft') {
+      setGifts([]);
+      setNftError(null);
+      setNftLoading(true);
+    }
+  };
+
+  const handleCopy = (gift) => {
+    if (gift.link) navigator.clipboard.writeText(gift.link).catch(() => {});
+    setCopiedId(gift.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const canBuy = (price) => userBalance >= price;
+
+  const oddiyList = useMemo(
+    () =>
+      [...oddiyGifts].sort((a, b) => (oddiyFilter === 'cheap' ? a.price - b.price : b.price - a.price)),
+    [oddiyGifts, oddiyFilter]
+  );
+
+  const minOddiyPrice = useMemo(
+    () => (oddiyGifts.length > 0 ? Math.min(...oddiyGifts.map((g) => g.price)) : 0),
+    [oddiyGifts]
+  );
+
+  const minNftPrice = useMemo(
+    () => (gifts.length > 0 ? Math.min(...gifts.map((g) => g.price)) : 0),
+    [gifts]
+  );
+
+  const canAffordAny = gifts.length > 0 && userBalance >= minNftPrice;
+
+  return (
+    <div className="min-h-0 space-y-4 pb-2">
+      <Card className="overflow-hidden border-none bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 p-0 text-white shadow-lg">
+        <CardContent className="px-4 pb-5 pt-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="mb-1 text-xs text-white/70">Sizning balansingiz</p>
+              <h2 className="text-2xl font-bold leading-none">
+                {userBalance.toLocaleString('uz-UZ')}
+                <span className="ml-1 text-base font-normal">UZS</span>
+              </h2>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+              <Wallet className="h-6 w-6" />
+            </div>
+          </div>
+          {mainTab === 'nft' && !nftLoading && gifts.length > 0 && !canAffordAny && (
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-white/80" />
+              <p className="text-xs text-white/80">Giftlar sotib olish uchun balansingizni to&apos;ldiring</p>
+              <button
+                type="button"
+                onClick={() => onNavigateHome?.()}
+                className="ml-auto shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold transition-all hover:bg-white/30"
+              >
+                To&apos;ldirish
+              </button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          { key: 'nft', icon: <Sparkles className="h-4 w-4" />, label: 'NFT Giftlar' },
+          { key: 'oddiy', icon: <span className="text-base leading-none">🎁</span>, label: 'Oddiy Giftlar' },
+        ].map(({ key, icon, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handleMainTab(key)}
+            className={`flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-semibold transition-all ${
+              mainTab === key
+                ? 'border-blue-500 bg-blue-500 text-white shadow-md'
+                : 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+            }`}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {mainTab === 'nft' && (
+        <>
+          <div className="scrollbar-hide flex gap-1.5 overflow-x-auto pb-0.5">
+            {NFT_FILTERS.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => handleFilterChange(f.key)}
+                className={`shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                  activeFilter === f.key
+                    ? 'border-blue-500 bg-blue-500 text-white'
+                    : 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-0">
+              <CardContent className="px-4 pb-4 pt-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pink-500/10">
+                    <Gift className="h-4 w-4 text-pink-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">Jami giftlar</p>
+                    <p className="mt-0.5 text-xl font-bold leading-none text-zinc-900 dark:text-white">
+                      {nftLoading ? '—' : gifts.length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="p-0">
+              <CardContent className="px-4 pb-4 pt-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">Eng arzon</p>
+                    <p className="mt-0.5 text-xl font-bold leading-none text-zinc-900 dark:text-white">
+                      {nftLoading || gifts.length === 0 ? '—' : minNftPrice.toLocaleString('uz-UZ')}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="p-0">
+            <CardContent className="px-3 pb-4 pt-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-base font-semibold text-zinc-900 dark:text-white">
+                  {NFT_FILTERS.find((f) => f.key === activeFilter)?.label ?? 'Giftlar'}
+                </h3>
+                <div className="flex items-center gap-2">
+                  {!nftLoading && <span className="text-xs text-zinc-500">{gifts.length} ta</span>}
+                  <button
+                    type="button"
+                    onClick={() => fetchNftGifts(activeFilter)}
+                    className="flex h-6 w-6 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${nftLoading ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {nftLoading && (
+                <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+                  <Loader2 className="mb-3 h-8 w-8 animate-spin" />
+                  <p className="text-sm">Yuklanmoqda...</p>
+                </div>
+              )}
+              {!nftLoading && nftError && gifts.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 text-zinc-500">
+                  <AlertCircle className="mb-3 h-8 w-8 text-red-500/60" />
+                  <p className="mb-3 text-sm">{nftError}</p>
+                  <button
+                    type="button"
+                    onClick={() => fetchNftGifts(activeFilter)}
+                    className="flex items-center gap-1.5 rounded-xl bg-blue-500 px-4 py-2 text-xs font-medium text-white"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Qayta urinish
+                  </button>
+                </div>
+              )}
+              {!nftLoading && !nftError && gifts.length === 0 && (
+                <div className="py-10 text-center text-zinc-500">
+                  <Gift className="mx-auto mb-3 h-10 w-10 opacity-40" />
+                  <p className="text-sm">Bu kategoriyada giftlar yo&apos;q</p>
+                </div>
+              )}
+              {!nftLoading && gifts.length > 0 && (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {gifts.map((gift) => {
+                    const affordable = canBuy(gift.price);
+                    return (
+                      <NftGiftCard
+                        key={gift.id}
+                        gift={gift}
+                        affordable={affordable}
+                        copiedId={copiedId}
+                        onCopy={handleCopy}
+                        onBuy={() => affordable && setBuyNftGift(gift)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {mainTab === 'oddiy' && (
+        <>
+          <div className="flex gap-1.5">
+            {[
+              { key: 'cheap', label: 'Arzon ↑' },
+              { key: 'expensive', label: 'Qimmat ↓' },
+            ].map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setOddiyFilter(f.key)}
+                className={`shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                  oddiyFilter === f.key
+                    ? 'border-blue-500 bg-blue-500 text-white'
+                    : 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-0">
+              <CardContent className="px-4 pb-4 pt-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pink-500/10">
+                    <span className="text-lg">🎁</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs text-zinc-500">Jami giftlar</p>
+                    <p className="mt-0.5 text-xl font-bold leading-none">{oddiyLoading ? '—' : oddiyList.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="p-0">
+              <CardContent className="px-4 pb-4 pt-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs text-zinc-500">Eng arzon</p>
+                    <p className="mt-0.5 text-xl font-bold leading-none">
+                      {oddiyLoading || oddiyGifts.length === 0 ? '—' : minOddiyPrice.toLocaleString('uz-UZ')}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="p-0">
+            <CardContent className="px-3 pb-4 pt-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-base font-semibold">Oddiy Giftlar</h3>
+                <div className="flex items-center gap-2">
+                  {!oddiyLoading && <span className="text-xs text-zinc-500">{oddiyList.length} ta</span>}
+                  <button
+                    type="button"
+                    onClick={fetchOddiyGifts}
+                    className="flex h-6 w-6 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${oddiyLoading ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {oddiyLoading && (
+                <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
+                  <Loader2 className="mb-3 h-8 w-8 animate-spin" />
+                  <p className="text-sm">Yuklanmoqda...</p>
+                </div>
+              )}
+              {!oddiyLoading && oddiyError && oddiyList.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 text-zinc-500">
+                  <AlertCircle className="mb-3 h-8 w-8 text-red-500/60" />
+                  <p className="mb-3 text-sm">{oddiyError}</p>
+                  <button
+                    type="button"
+                    onClick={fetchOddiyGifts}
+                    className="flex items-center gap-1.5 rounded-xl bg-blue-500 px-4 py-2 text-xs font-medium text-white"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Qayta urinish
+                  </button>
+                </div>
+              )}
+              {!oddiyLoading && !oddiyError && oddiyList.length === 0 && (
+                <div className="py-10 text-center text-zinc-500">
+                  <Gift className="mx-auto mb-3 h-10 w-10 opacity-40" />
+                  <p className="text-sm">Giftlar topilmadi</p>
+                </div>
+              )}
+              {!oddiyLoading && oddiyList.length > 0 && (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {oddiyList.map((gift) => {
+                    const affordable = canBuy(gift.price);
+                    return (
+                      <div
+                        key={gift.id}
+                        className={`overflow-hidden rounded-xl border transition-all ${
+                          affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200/50 opacity-70 dark:border-zinc-800'
+                        }`}
+                      >
+                        <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-50 dark:from-zinc-800 dark:to-zinc-900">
+                          <GiftAnimation name={gift.name} />
+                          {!affordable && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                              <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
+                                <Wallet className="h-3 w-3 text-zinc-500" />
+                                <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-400">Balans yetmaydi</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="h-px bg-zinc-200/80 dark:bg-zinc-800" />
+                        <div className="space-y-1.5 p-2.5">
+                          <p className="truncate text-xs font-semibold capitalize leading-tight text-zinc-900 dark:text-white">
+                            {String(gift.name).replace(/_/g, ' ')}
+                          </p>
+                          <p className={`text-sm font-bold ${affordable ? 'text-zinc-900 dark:text-white' : 'text-red-500/80'}`}>
+                            {gift.price.toLocaleString('uz-UZ')}
+                            <span className="ml-0.5 text-xs font-normal text-zinc-500">UZS</span>
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => affordable && setBuyGift(gift)}
+                            disabled={!affordable}
+                            className={`mt-1 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-all ${
+                              affordable
+                                ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
+                                : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
+                            }`}
+                          >
+                            {affordable ? (
+                              <>
+                                <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+                                Sotib olish
+                              </>
+                            ) : (
+                              <>
+                                <Wallet className="h-3.5 w-3.5 shrink-0" />
+                                Balans yetmaydi
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {buyGift && (
+        <BuyOddiyModal gift={buyGift} onClose={() => setBuyGift(null)} onSuccess={() => {}} />
+      )}
+      {buyNftGift && (
+        <BuyNftModal gift={buyNftGift} onClose={() => setBuyNftGift(null)} onSuccess={() => {}} />
+      )}
+    </div>
+  );
+}
+
+function NftGiftCard({ gift, affordable, copiedId, onCopy, onBuy }) {
+  const [imgErr, setImgErr] = useState(false);
+
+  return (
+    <div
+      className={`overflow-hidden rounded-xl border transition-all ${
+        affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200/50 opacity-70 dark:border-zinc-800'
+      }`}
+    >
+      <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
+        {!imgErr && gift.photo ? (
+          <img
+            src={gift.photo}
+            alt={formatNftName(gift.nft_id)}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            onError={() => setImgErr(true)}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Gift className="h-10 w-10 text-zinc-400/40" />
+          </div>
+        )}
+        {!affordable && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
+              <Wallet className="h-3 w-3 text-zinc-500" />
+              <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-400">Balans yetmaydi</span>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="h-px bg-zinc-200/80 dark:bg-zinc-800" />
+      <div className="space-y-1.5 p-2.5">
+        <p className="truncate text-xs font-semibold leading-tight text-zinc-900 dark:text-white">{formatNftName(gift.nft_id)}</p>
+        <p className="truncate text-[10px] text-zinc-500">
+          {gift.model} · {gift.backdrop}
+        </p>
+        <p className={`text-sm font-bold ${affordable ? 'text-zinc-900 dark:text-white' : 'text-red-500/70'}`}>
+          {gift.price.toLocaleString('uz-UZ')}
+          <span className="ml-0.5 text-xs font-normal text-zinc-500">UZS</span>
+        </p>
+        <p className="text-[10px] text-zinc-400">{gift.created_at}</p>
+        <div className="flex gap-1.5 pt-0.5">
+          <button
+            type="button"
+            onClick={() => onCopy(gift)}
+            className={`flex h-7 flex-1 items-center justify-center gap-1 rounded-lg border text-[11px] font-medium transition-all ${
+              copiedId === gift.id
+                ? 'border-green-500/30 bg-green-500/10 text-green-600'
+                : 'border-zinc-200 text-zinc-600 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400'
+            }`}
+          >
+            {copiedId === gift.id ? (
+              <>
+                <CheckCircle2 className="h-3 w-3 shrink-0" />
+                <span>OK</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3 shrink-0" />
+                <span>Copy</span>
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => gift.link && window.open(gift.link, '_blank')}
+            className="flex h-7 flex-1 items-center justify-center gap-1 rounded-lg border border-zinc-200 text-[11px] font-medium text-zinc-600 transition-all hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400"
+          >
+            <Eye className="h-3 w-3 shrink-0" />
+            <span>View</span>
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={onBuy}
+          disabled={!affordable}
+          className={`flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-all ${
+            affordable
+              ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
+              : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
+          }`}
+        >
+          {affordable ? (
+            <>
+              <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+              Yuborish
+            </>
+          ) : (
+            <>
+              <Wallet className="h-3.5 w-3.5 shrink-0" />
+              Balans yetmaydi
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}

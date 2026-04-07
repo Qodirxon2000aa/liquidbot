@@ -57,7 +57,7 @@ export default function App() {
       case 'events':
         return <EventsPage />;
       case 'market':
-        return <MarketPage />;
+        return <MarketPage onNavigateHome={() => setActiveTab('home')} />;
       case 'profile':
         return <ProfilePage />;
       case 'settings':
