@@ -43,9 +43,9 @@ const STAR_EXTRA = [
 ];
 
 const PREMIUM_PLANS = [
-  { id: 'p3', months: 3, price: '$11.99', discount: '15%' },
-  { id: 'p6', months: 6, price: '$19.99', discount: '25%' },
-  { id: 'p12', months: 12, price: '$35.99', discount: '40%' },
+  { id: 'p3', months: 3, price: '$11.99', discount: '15%', note: 'HADYA ORQALI' },
+  { id: 'p6', months: 6, price: '$19.99', discount: '25%', note: 'HADYA ORQALI' },
+  { id: 'p12', months: 12, price: '$35.99', discount: '40%', note: 'HADYA ORQALI' },
   { id: 'p12-login', months: 12, price: '$29.99', discount: '50%', note: 'AKKOUNTGA KIRIB' },
 ];
 
@@ -318,11 +318,6 @@ export const HomePage = () => {
                   </div>
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                     <div className="min-w-0">
-                  {pkg.note && (
-                    <span className="pointer-events-none absolute right-4 top-0 -translate-y-[58%] rounded-full border border-violet-300/50 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_6px_14px_-6px_rgba(168,85,247,0.9)] ring-1 ring-white/20 dark:border-violet-400/40 dark:from-violet-600 dark:to-fuchsia-600 dark:ring-white/10">
-                      {pkg.note}
-                    </span>
-                  )}
                       <span className="text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
                         {pkg.months} {t('home.months')}
                       </span>
@@ -330,7 +325,20 @@ export const HomePage = () => {
                         −{pkg.discount}
                       </span>
                     </div>
-                    <span className="shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">{pkg.price}</span>
+                    <div className="shrink-0 flex flex-col items-end justify-end gap-1 pt-1">
+                      {pkg.note && (
+                        <span
+                          className={`inline-block rounded-full px-2 py-[1px] text-[9px] font-bold uppercase tracking-wide text-white shadow-[0_5px_12px_-7px_rgba(0,0,0,0.55)] ring-1 ${
+                            pkg.note === 'AKKOUNTGA KIRIB'
+                              ? 'border-violet-300/50 bg-gradient-to-r from-violet-500 to-fuchsia-500 ring-white/20 dark:border-violet-400/40 dark:from-violet-600 dark:to-fuchsia-600'
+                              : 'border-emerald-300/50 bg-gradient-to-r from-emerald-500 to-teal-500 ring-white/20 dark:border-emerald-400/40 dark:from-emerald-600 dark:to-teal-600'
+                          }`}
+                        >
+                          {pkg.note}
+                        </span>
+                      )}
+                      <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{pkg.price}</span>
+                    </div>
                   </div>
                 </button>
               ))}
