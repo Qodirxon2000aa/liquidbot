@@ -43,9 +43,10 @@ const STAR_EXTRA = [
 ];
 
 const PREMIUM_PLANS = [
-  { months: 3, price: '$11.99', discount: '15%' },
-  { months: 6, price: '$19.99', discount: '25%' },
-  { months: 12, price: '$35.99', discount: '40%' },
+  { id: 'p3', months: 3, price: '$11.99', discount: '15%' },
+  { id: 'p6', months: 6, price: '$19.99', discount: '25%' },
+  { id: 'p12', months: 12, price: '$35.99', discount: '40%' },
+  { id: 'p12-login', months: 12, price: '$29.99', discount: '50%', note: 'AKKOUNTGA KIRIB' },
 ];
 
 export const HomePage = () => {
@@ -93,7 +94,7 @@ export const HomePage = () => {
 
   const selectPremPreset = (pkg) => setPremSelected(pkg);
 
-  const isPremPresetActive = (pkg) => premSelected.months === pkg.months;
+  const isPremPresetActive = (pkg) => premSelected.id === pkg.id;
 
   const handleBuy = () => {
     setShowSuccess(true);
@@ -307,16 +308,21 @@ export const HomePage = () => {
               </p>
               {PREMIUM_PLANS.map((pkg) => (
                 <button
-                  key={pkg.months}
+                  key={pkg.id}
                   type="button"
                   onClick={() => selectPremPreset(pkg)}
-                  className={`flex w-full min-h-[44px] items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowPrem(isPremPresetActive(pkg))}`}
+                  className={`relative flex w-full min-h-[44px] items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowPrem(isPremPresetActive(pkg))}`}
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/40">
                     <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                     <div className="min-w-0">
+                  {pkg.note && (
+                    <span className="pointer-events-none absolute right-4 top-0 -translate-y-[58%] rounded-full border border-violet-300/50 bg-gradient-to-r from-violet-500 to-fuchsia-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-[0_6px_14px_-6px_rgba(168,85,247,0.9)] ring-1 ring-white/20 dark:border-violet-400/40 dark:from-violet-600 dark:to-fuchsia-600 dark:ring-white/10">
+                      {pkg.note}
+                    </span>
+                  )}
                       <span className="text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
                         {pkg.months} {t('home.months')}
                       </span>
