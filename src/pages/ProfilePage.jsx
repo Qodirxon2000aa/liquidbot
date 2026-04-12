@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet, History, CreditCard, ChevronRight, ShieldCheck } from 'lucide-react';
 import { Card, Button } from '../components/UI';
+import { MoneyModal } from '../components/MoneyModal';
 import { useTelegram } from '../hooks/useTelegram';
+import { useTezpremium } from '../context/TezpremiumContext';
 
 const TelegramStar = ({ className = "w-6 h-6" }) => (
   <svg 
@@ -28,6 +31,11 @@ const TelegramStar = ({ className = "w-6 h-6" }) => (
 export const ProfilePage = () => {
   const { t } = useTranslation();
   const { user } = useTelegram();
+  const { apiUser, loading: apiLoading } = useTezpremium();
+  const [moneyOpen, setMoneyOpen] = useState(false);
+
+  const balanceDisplay =
+    apiLoading && !apiUser ? '…' : String(apiUser?.balance ?? '0');
 
   const transactions = [
     { id: 1, type: 'Stars Purchase', amount: '+100 Stars', date: 'Today, 14:20', icon: TelegramStar, color: 'text-yellow-500' },
@@ -57,14 +65,21 @@ export const ProfilePage = () => {
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1">
             <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">{t('profile.balance')}</p>
-            <p className="text-3xl font-bold">1,250 Stars</p>
+            <p className="text-3xl font-bold">{balanceDisplay} Stars</p>
           </div>
           <Wallet className="w-8 h-8 text-blue-200 opacity-50" />
         </div>
-        <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => setMoneyOpen(true)}
+          className="bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"
+        >
           {t('profile.topup')}
         </Button>
       </Card>
+
+      <MoneyModal open={moneyOpen} onClose={() => setMoneyOpen(false)} />
 
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
