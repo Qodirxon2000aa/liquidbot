@@ -68,6 +68,7 @@ export function ProfileHistoryModal({ open, onClose }) {
     payments,
     historyLoading,
     refreshHistory,
+    refreshHistorySilent,
   } = useTezpremium();
 
   const [expandedRow, setExpandedRow] = useState(null);
@@ -128,9 +129,15 @@ export function ProfileHistoryModal({ open, onClose }) {
   useEffect(() => {
     if (!open) return;
     refreshHistory();
-    const id = setInterval(refreshHistory, 15000);
-    return () => clearInterval(id);
   }, [open, refreshHistory]);
+
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => {
+      refreshHistorySilent();
+    }, 10000);
+    return () => clearInterval(id);
+  }, [open, refreshHistorySilent]);
 
   useEffect(() => {
     if (!open) return;
@@ -146,8 +153,6 @@ export function ProfileHistoryModal({ open, onClose }) {
       }
     };
     loadCard();
-    const iv = setInterval(loadCard, 30000);
-    return () => clearInterval(iv);
   }, [open]);
 
   useEffect(() => {

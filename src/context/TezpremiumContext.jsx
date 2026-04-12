@@ -86,6 +86,11 @@ export function TezpremiumProvider({ children }) {
     }
   }, [fetchOrders, fetchPayments]);
 
+  /** Orqa fonda — historyLoading yo‘q, UI “refresh” bo‘lmaydi */
+  const refreshHistorySilent = useCallback(async () => {
+    await Promise.all([fetchOrders(), fetchPayments()]);
+  }, [fetchOrders, fetchPayments]);
+
   const refreshUser = useCallback(async () => {
     await fetchUserFromApi();
     await refreshHistory();
@@ -107,6 +112,7 @@ export function TezpremiumProvider({ children }) {
     apiFetch,
     refreshUser,
     refreshHistory,
+    refreshHistorySilent,
   };
 
   return (
