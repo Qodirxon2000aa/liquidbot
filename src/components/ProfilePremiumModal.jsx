@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 import { BodyPortal } from './BodyPortal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
-import { isStarsOrder } from '../utils/orderType';
+import { isPremiumOrder } from '../utils/orderType';
 
 function formatUzNumber(n) {
   if (n == null || n === '') return '0';
@@ -14,38 +14,7 @@ function formatUzNumber(n) {
   return num.toLocaleString('ru-RU');
 }
 
-function StarGlyph({ className = 'w-5 h-5' }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <path
-        d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-        fill="url(#star-grad-modal)"
-        stroke="#FFD700"
-        strokeWidth="0.5"
-      />
-      <defs>
-        <linearGradient
-          id="star-grad-modal"
-          x1="12"
-          y1="2"
-          x2="12"
-          y2="21.02"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="#FFD700" />
-          <stop offset="1" stopColor="#FFA500" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-export function ProfileStarsModal({ open, onClose }) {
+export function ProfilePremiumModal({ open, onClose }) {
   const { t } = useTranslation();
   const { user, webApp } = useTelegram();
   const { apiUser, orders, refreshHistorySilent } = useTezpremium();
@@ -63,16 +32,16 @@ export function ProfileStarsModal({ open, onClose }) {
     return `@${s}`;
   }, [user?.username, t]);
 
-  const starOrders = useMemo(
-    () => (orders || []).filter(isStarsOrder),
+  const premiumOrders = useMemo(
+    () => (orders || []).filter(isPremiumOrder),
     [orders]
   );
 
   const ordersList = useMemo(
     () =>
-      starOrders.map((o, index) => ({
-        id: `order-${o.order_id ?? o.id ?? index}`,
-        stars: o.amount ?? 0,
+      premiumOrders.map((o, index) => ({
+        id: `premium-${o.order_id ?? o.id ?? index}`,
+        months: o.months ?? o.amount ?? '—',
         summa:
           o.summa != null && o.summa !== ''
             ? `${formatUzNumber(o.summa)} UZS`
@@ -80,8 +49,9 @@ export function ProfileStarsModal({ open, onClose }) {
         date: o.date || o.created_at || t('history.unknown'),
         sent: o.sent || o.recipient || '—',
         status: (o.status || 'completed').toLowerCase(),
+        typeLabel: String(o.type || 'Premium').trim() || 'Premium',
       })),
-    [starOrders, t]
+    [premiumOrders, t]
   );
 
   useEffect(() => {
@@ -180,15 +150,15 @@ export function ProfileStarsModal({ open, onClose }) {
           </div>
 
           <div className="px-4 pt-4 pb-2 shrink-0 flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
-              <StarGlyph className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                {t('history.starsModalTitle')}
+                {t('history.premiumModalTitle')}
               </h2>
               <p className="text-[10px] text-zinc-400 mt-0.5">
-                {t('history.starsModalCount', { count: ordersList.length })}
+                {t('history.premiumModalCount', { count: ordersList.length })}
               </p>
             </div>
           </div>
@@ -196,12 +166,12 @@ export function ProfileStarsModal({ open, onClose }) {
           <div className="flex-1 overflow-y-auto px-4 pb-6 min-h-0">
             {listLoading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+                <div className="w-10 h-10 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
                 <p className="text-sm text-zinc-500">{t('history.loading')}</p>
               </div>
             ) : ordersList.length === 0 ? (
               <p className="text-center text-sm text-zinc-500 py-12">
-                {t('history.emptyOrders')}
+                {t('history.emptyPremiumOrders')}
               </p>
             ) : (
               <ul className="space-y-2">
@@ -217,13 +187,13 @@ export function ProfileStarsModal({ open, onClose }) {
                         onClick={() => toggleRow(item.id)}
                         className="w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-colors"
                       >
-                        <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300 shrink-0 max-w-[32%] truncate">
-                          {t('profile.starsPurchase')}
+                        <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300 shrink-0 max-w-[30%] truncate">
+                          {t('home.premium')}
                         </span>
-                        <span className="text-xs font-bold text-green-500 flex-1 min-w-0 truncate">
-                          {item.stars} ⭐
+                        <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex-1 min-w-0 truncate">
+                          {item.months} {t('home.months')}
                         </span>
-                        <span className="text-[10px] text-zinc-500 truncate max-w-[28%]">
+                        <span className="text-[10px] text-zinc-500 truncate max-w-[26%]">
                           {item.date}
                         </span>
                         {expanded ? (
@@ -250,6 +220,12 @@ export function ProfileStarsModal({ open, onClose }) {
                                 {item.summa}
                               </p>
                             )}
+                            <p>
+                              <span className="font-bold text-zinc-800 dark:text-zinc-200">
+                                {t('history.orderType')}:
+                              </span>{' '}
+                              {item.typeLabel}
+                            </p>
                           </div>
                           <span
                             className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${statusClass(item.status)}`}

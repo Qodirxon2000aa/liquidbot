@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wallet, History, ChevronRight, CreditCard, ShieldCheck } from 'lucide-react';
+import { Wallet, History, ChevronRight, CreditCard, ShieldCheck, Gift } from 'lucide-react';
 import { Card, Button } from '../components/UI';
 import { MoneyModal } from '../components/MoneyModal';
 import { ProfileHistoryModal } from '../components/ProfileHistoryModal';
 import { ProfileStarsModal } from '../components/ProfileStarsModal';
+import { ProfilePremiumModal } from '../components/ProfilePremiumModal';
+import { ProfileGiftModal } from '../components/ProfileGiftModal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
+import { isStarsOrder, isPremiumOrder, isGiftOrder } from '../utils/orderType';
 
 const TelegramStar = ({ className = 'w-6 h-6' }) => (
   <svg
@@ -44,31 +47,24 @@ export const ProfilePage = () => {
   const [moneyOpen, setMoneyOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [starsModalOpen, setStarsModalOpen] = useState(false);
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+  const [giftModalOpen, setGiftModalOpen] = useState(false);
+
+  const starOrders = useMemo(
+    () => (orders || []).filter(isStarsOrder),
+    [orders]
+  );
+  const premiumOrders = useMemo(
+    () => (orders || []).filter(isPremiumOrder),
+    [orders]
+  );
+  const giftOrders = useMemo(
+    () => (orders || []).filter(isGiftOrder),
+    [orders]
+  );
 
   const balanceDisplay =
     apiLoading && !apiUser ? '…' : String(apiUser?.balance ?? '0');
-
-  const otherActivity = useMemo(
-    () => [
-      {
-        id: 'demo-premium',
-        type: 'Premium Subscription',
-        amount: '-$11.99',
-        date: 'Yesterday, 09:15',
-        icon: ShieldCheck,
-        color: 'text-purple-500',
-      },
-      {
-        id: 'demo-gift',
-        type: 'Gift Sent',
-        amount: '-50 Stars',
-        date: '2 days ago',
-        icon: CreditCard,
-        color: 'text-blue-500',
-      },
-    ],
-    []
-  );
 
   return (
     <div className="space-y-6">
@@ -115,6 +111,14 @@ export const ProfilePage = () => {
         open={starsModalOpen}
         onClose={() => setStarsModalOpen(false)}
       />
+      <ProfilePremiumModal
+        open={premiumModalOpen}
+        onClose={() => setPremiumModalOpen(false)}
+      />
+      <ProfileGiftModal
+        open={giftModalOpen}
+        onClose={() => setGiftModalOpen(false)}
+      />
 
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
@@ -124,29 +128,6 @@ export const ProfilePage = () => {
           <History className="w-4 h-4 text-zinc-400" />
         </div>
         <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => setStarsModalOpen(true)}
-            className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
-          >
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-yellow-500 shrink-0">
-                <TelegramStar className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                  {t('profile.starsOrdersHeader')}
-                </p>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-                  {(orders || []).length > 0
-                    ? t('profile.starsRowSubtitle', { count: (orders || []).length })
-                    : t('profile.noStarOrders')}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
-          </button>
-
           <button
             type="button"
             onClick={() => setHistoryOpen(true)}
@@ -168,35 +149,74 @@ export const ProfilePage = () => {
             <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
           </button>
 
-          {otherActivity.map((tx) => {
-            const Icon = tx.icon;
-            return (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800"
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center ${tx.color}`}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold dark:text-white">{tx.type}</p>
-                    <p className="text-[10px] text-zinc-500">{tx.date}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-sm font-bold ${tx.amount.startsWith('+') ? 'text-green-500' : 'dark:text-white'}`}
-                  >
-                    {tx.amount}
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-zinc-300" />
-                </div>
+          <button
+            type="button"
+            onClick={() => setStarsModalOpen(true)}
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
+          >
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-yellow-500 shrink-0">
+                <TelegramStar className="w-5 h-5" />
               </div>
-            );
-          })}
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  {t('profile.starsOrdersHeader')}
+                </p>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                  {starOrders.length > 0
+                    ? t('profile.starsRowSubtitle', { count: starOrders.length })
+                    : t('profile.noStarOrders')}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPremiumModalOpen(true)}
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
+          >
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-purple-500 shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  {t('profile.premiumOrdersHeader')}
+                </p>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                  {premiumOrders.length > 0
+                    ? t('profile.premiumRowSubtitle', { count: premiumOrders.length })
+                    : t('profile.noPremiumOrders')}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setGiftModalOpen(true)}
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
+          >
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-rose-500 shrink-0">
+                <Gift className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  {t('profile.giftOrdersHeader')}
+                </p>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                  {giftOrders.length > 0
+                    ? t('profile.giftRowSubtitle', { count: giftOrders.length })
+                    : t('profile.noGiftOrders')}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
+          </button>
         </div>
       </div>
     </div>
