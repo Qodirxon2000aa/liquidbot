@@ -1,9 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { Wallet, Sparkles } from 'lucide-react';
 import { Card, Button } from '../components/UI';
+import { useTezpremium } from '../context/TezpremiumContext';
+import { formatBalanceUzs } from '../utils/balanceUzs';
 
 export const PaymentPage = ({ onOpenStars }) => {
   const { t } = useTranslation();
+  const { apiUser, loading: apiLoading } = useTezpremium();
+  const balanceDisplay =
+    apiLoading && !apiUser
+      ? '…'
+      : formatBalanceUzs(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
 
   return (
     <div className="space-y-6">
@@ -17,7 +24,9 @@ export const PaymentPage = ({ onOpenStars }) => {
             <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider">
               {t('profile.balance')}
             </p>
-            <p className="text-3xl font-bold">1,250 Stars</p>
+            <p className="text-3xl font-bold">
+              {balanceDisplay} {t('profile.balanceCurrency')}
+            </p>
           </div>
           <Wallet className="w-8 h-8 text-emerald-200 opacity-50" />
         </div>

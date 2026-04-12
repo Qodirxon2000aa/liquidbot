@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { parseBalanceUzs } from '../utils/balanceUzs';
 
 const TezpremiumContext = createContext(null);
 
@@ -45,13 +46,22 @@ export function TezpremiumProvider({ children }) {
     try {
       setLoading(true);
       const data = await apiFetch('get_user.php');
+      const rawBal =
+        data.data?.balance_uzs ??
+        data.data?.balance ??
+        data.balance ??
+        '0';
       const userData = data.ok
-        ? { balance: data.data?.balance ?? data.balance ?? '0', ...data.data }
-        : { balance: '0' };
+        ? {
+            ...data.data,
+            balance: String(rawBal),
+            balanceUzs: parseBalanceUzs(rawBal),
+          }
+        : { balance: '0', balanceUzs: 0 };
       setApiUser(userData);
       return userData;
     } catch {
-      const fallback = { balance: '0' };
+      const fallback = { balance: '0', balanceUzs: 0 };
       setApiUser(fallback);
       return fallback;
     } finally {

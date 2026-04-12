@@ -10,6 +10,7 @@ import { ProfileGiftModal } from '../components/ProfileGiftModal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
 import { isStarsOrder, isPremiumOrder, isGiftOrder } from '../utils/orderType';
+import { formatBalanceUzs } from '../utils/balanceUzs';
 
 const TelegramStar = ({ className = 'w-6 h-6' }) => (
   <svg
@@ -64,7 +65,9 @@ export const ProfilePage = () => {
   );
 
   const balanceDisplay =
-    apiLoading && !apiUser ? '…' : String(apiUser?.balance ?? '0');
+    apiLoading && !apiUser
+      ? '…'
+      : formatBalanceUzs(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
 
   return (
     <div className="space-y-6">
@@ -88,7 +91,9 @@ export const ProfilePage = () => {
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1">
             <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">{t('profile.balance')}</p>
-            <p className="text-3xl font-bold">{balanceDisplay} Stars</p>
+            <p className="text-3xl font-bold">
+              {balanceDisplay} {t('profile.balanceCurrency')}
+            </p>
           </div>
           <Wallet className="w-8 h-8 text-blue-200 opacity-50" />
         </div>

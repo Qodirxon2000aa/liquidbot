@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BodyPortal } from '../components/BodyPortal';
 import { Card, CardContent, Button } from '../components/UI';
 import { useTelegram } from '../hooks/useTelegram';
+import { useTezpremium } from '../context/TezpremiumContext';
 
 import heart from '../assets/heart.json';
 import teddy_bear from '../assets/teddy_bear.json';
@@ -93,8 +94,6 @@ const NFT_FILTERS = [
   { key: 'new', label: 'Yangi' },
   { key: 'old', label: 'Eski' },
 ];
-
-const MOCK_BALANCE_UZS = Number(import.meta.env.VITE_MOCK_BALANCE_UZS ?? 5_000_000);
 
 const ODDIY_FALLBACK = Object.keys(GIFT_ANIMATIONS).map((name, i) => ({
   id: 200 + i,
@@ -744,6 +743,7 @@ function formatNftName(nftId) {
 }
 
 export function GiftsMarketView({ onNavigateHome }) {
+  const { apiUser } = useTezpremium();
   const [mainTab, setMainTab] = useState('nft');
   const [oddiyFilter, setOddiyFilter] = useState('cheap');
   const [activeFilter, setActiveFilter] = useState('all');
@@ -757,7 +757,7 @@ export function GiftsMarketView({ onNavigateHome }) {
   const [buyGift, setBuyGift] = useState(null);
   const [buyNftGift, setBuyNftGift] = useState(null);
 
-  const userBalance = MOCK_BALANCE_UZS;
+  const userBalance = apiUser?.balanceUzs ?? 0;
 
   const fetchNftGifts = useCallback(async (type = 'all') => {
     setNftLoading(true);

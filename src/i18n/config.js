@@ -17,7 +17,7 @@ const resources = {
         payment: 'Top up'
       },
       payment: {
-        subtitle: 'Manage your Stars balance and payments.',
+        subtitle: 'Manage your UZS balance and payments.',
         openStars: 'Buy Stars & Premium'
       },
       referral: {
@@ -65,6 +65,7 @@ const resources = {
       profile: {
         title: 'Profile',
         balance: 'Balance',
+        balanceCurrency: 'UZS',
         topup: 'Top up',
         history: 'Transaction History',
         id: 'Telegram ID',
@@ -175,7 +176,7 @@ const resources = {
         payment: 'Пополнение'
       },
       payment: {
-        subtitle: 'Баланс Stars и способы оплаты.',
+        subtitle: 'Баланс в UZS и способы оплаты.',
         openStars: 'Купить Stars и Premium'
       },
       referral: {
@@ -223,6 +224,7 @@ const resources = {
       profile: {
         title: 'Профиль',
         balance: 'Баланс',
+        balanceCurrency: 'UZS',
         topup: 'Пополнить',
         history: 'История транзакций',
         id: 'Telegram ID',
@@ -333,7 +335,7 @@ const resources = {
         payment: 'To\'ldirish'
       },
       payment: {
-        subtitle: 'Stars balansi va to\'lovlar.',
+        subtitle: 'UZS balansi va to\'lovlar.',
         openStars: 'Yulduzlar va Premium'
       },
       referral: {
@@ -381,6 +383,7 @@ const resources = {
       profile: {
         title: 'Profil',
         balance: 'Balans',
+        balanceCurrency: 'UZS',
         topup: 'To\'ldirish',
         history: 'Tranzaksiyalar tarixi',
         id: 'Telegram ID',
