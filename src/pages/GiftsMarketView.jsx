@@ -40,7 +40,14 @@ import love_heart from '../assets/love_heart.json';
 import tree from '../assets/tree.json';
 import new_bear from '../assets/new_bear.json';
 import bear from '../assets/bear.json';
+import bear2 from '../assets/bear2.json';
+import bear3 from '../assets/bear3.json';
+import bear4 from '../assets/bear4.json';
+import egg_bear from '../assets/egg_bear.json';
+import money_pot from '../assets/money_pot.json';
+import march_bear from '../assets/march_bear.json';
 
+/** info.php `name` → assets/*.json (bear3 = serverdagi april_bear bilan bir xil) */
 const GIFT_ANIMATIONS = {
   heart,
   teddy_bear,
@@ -58,6 +65,13 @@ const GIFT_ANIMATIONS = {
   tree,
   new_bear,
   bear,
+  bear2,
+  bear3,
+  bear4,
+  egg_bear,
+  money_pot,
+  march_bear,
+  april_bear: bear3,
 };
 
 const GIFT_EMOJIS = {
@@ -77,8 +91,32 @@ const GIFT_EMOJIS = {
   tree: '🌳',
   new_bear: '🐻',
   march_bear: '🐻',
+  april_bear: '🐻',
+  bear3: '🐻',
+  bear4: '🐻',
+  egg_bear: '🐻',
+  money_pot: '💰',
   bear: '🐻',
+  bear2: '🐻',
 };
+
+function normalizeGiftNameKey(name) {
+  return String(name ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_');
+}
+
+function prepareLottieAnimationData(data) {
+  if (!data || typeof data !== 'object') return data;
+  try {
+    const o = JSON.parse(JSON.stringify(data));
+    delete o.tgs;
+    return o;
+  } catch {
+    return data;
+  }
+}
 
 const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY ?? '';
 const NFT_API_BASE = import.meta.env.VITE_NFT_API_BASE ?? 'https://tezpremium.uz/uzbstar/giftlar.php';
@@ -171,11 +209,27 @@ const NFT_FALLBACK = [
 ];
 
 function GiftAnimation({ name }) {
-  const animData = useMemo(() => GIFT_ANIMATIONS[name] ?? null, [name]);
+  const nameKey = normalizeGiftNameKey(name);
+  const rawAnim = useMemo(
+    () =>
+      GIFT_ANIMATIONS[nameKey] ??
+      GIFT_ANIMATIONS[String(name ?? '').trim()] ??
+      null,
+    [name, nameKey]
+  );
+  const animData = useMemo(
+    () => (rawAnim ? prepareLottieAnimationData(rawAnim) : null),
+    [rawAnim]
+  );
+
   const wrapRef = useRef(null);
   const lottieRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [played, setPlayed] = useState(false);
+
+  useEffect(() => {
+    setPlayed(false);
+  }, [nameKey, animData]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -194,16 +248,17 @@ function GiftAnimation({ name }) {
   }, []);
 
   useEffect(() => {
-    if (visible && !played && lottieRef.current) {
+    if (visible && !played && lottieRef.current && animData) {
       lottieRef.current.goToAndPlay(0, true);
       setPlayed(true);
     }
-  }, [visible, played]);
+  }, [visible, played, animData]);
 
   return (
     <div ref={wrapRef} className="flex h-full w-full items-center justify-center">
       {animData ? (
         <Lottie
+          key={nameKey}
           lottieRef={lottieRef}
           animationData={animData}
           loop={false}
@@ -211,7 +266,9 @@ function GiftAnimation({ name }) {
           style={{ width: '82%', height: '82%', display: 'block' }}
         />
       ) : (
-        <span className="select-none text-5xl leading-none">{GIFT_EMOJIS[name] || '🎁'}</span>
+        <span className="select-none text-5xl leading-none">
+          {GIFT_EMOJIS[nameKey] || GIFT_EMOJIS[name] || '🎁'}
+        </span>
       )}
     </div>
   );
