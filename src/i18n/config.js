@@ -13,7 +13,12 @@ const resources = {
         events: 'Events',
         home: 'Home',
         market: 'Market',
-        profile: 'Profile'
+        profile: 'Profile',
+        payment: 'Top up'
+      },
+      payment: {
+        subtitle: 'Manage your Stars balance and payments.',
+        openStars: 'Buy Stars & Premium'
       },
       referral: {
         title: 'Invite Friends',
@@ -86,7 +91,12 @@ const resources = {
         events: 'События',
         home: 'Главная',
         market: 'Маркет',
-        profile: 'Профиль'
+        profile: 'Профиль',
+        payment: 'Пополнение'
+      },
+      payment: {
+        subtitle: 'Баланс Stars и способы оплаты.',
+        openStars: 'Купить Stars и Premium'
       },
       referral: {
         title: 'Пригласить друзей',
@@ -159,7 +169,12 @@ const resources = {
         events: 'Tadbirlar',
         home: 'Asosiy',
         market: 'Market',
-        profile: 'Profil'
+        profile: 'Profil',
+        payment: 'To\'ldirish'
+      },
+      payment: {
+        subtitle: 'Stars balansi va to\'lovlar.',
+        openStars: 'Yulduzlar va Premium'
       },
       referral: {
         title: 'Do\'stlarni taklif qilish',

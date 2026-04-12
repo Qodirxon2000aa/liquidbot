@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import './i18n/config';
 
@@ -11,16 +11,29 @@ import { HomePage } from './pages/HomePage';
 import { MarketPage } from './pages/MarketPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
+import { PaymentPage } from './pages/PaymentPage';
 
 import { useTelegram } from './hooks/useTelegram';
+
+const START_PARAM_TO_TAB = {
+  payment: 'payment',
+  market: 'market',
+  home: 'home',
+  profile: 'profile',
+  referral: 'referral',
+  events: 'events',
+  gifts: 'market',
+  settings: 'settings',
+};
 
 import { AnimatePresence, motion } from 'motion/react';
 
 export default function App() {
   const { t } = useTranslation();
-  const { webApp, user } = useTelegram();
+  const { webApp, user, startParam } = useTelegram();
 
   const [activeTab, setActiveTab] = useState('home');
+  const startParamAppliedRef = useRef(false);
 
   // ✅ user safe (Chrome + Telegram)
   const profileAvatarSrc =
@@ -50,6 +63,15 @@ export default function App() {
     }
   }, [webApp]);
 
+  useEffect(() => {
+    if (!webApp || !startParam || startParamAppliedRef.current) return;
+    const tab = START_PARAM_TO_TAB[startParam.toLowerCase()];
+    if (tab) {
+      setActiveTab(tab);
+      startParamAppliedRef.current = true;
+    }
+  }, [webApp, startParam]);
+
   const renderPage = () => {
     switch (activeTab) {
       case 'referral':
@@ -62,6 +84,8 @@ export default function App() {
         return <ProfilePage />;
       case 'settings':
         return <SettingsPage />;
+      case 'payment':
+        return <PaymentPage onOpenStars={() => setActiveTab('home')} />;
       default:
         return <HomePage />;
     }
@@ -69,6 +93,7 @@ export default function App() {
 
   const getPageTitle = () => {
     if (activeTab === 'settings') return t('settings.title');
+    if (activeTab === 'payment') return t('nav.payment');
     return t(`nav.${activeTab}`);
   };
 
@@ -97,7 +122,13 @@ export default function App() {
       </main>
 
       <BottomNav
-        activeTab={activeTab === 'settings' ? 'profile' : activeTab}
+        activeTab={
+          activeTab === 'settings'
+            ? 'profile'
+            : activeTab === 'payment'
+              ? 'home'
+              : activeTab
+        }
         onTabChange={setActiveTab}
       />
     </div>
