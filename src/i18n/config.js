@@ -71,7 +71,8 @@ const resources = {
         starsPurchase: 'Stars purchase',
         noStarOrders: 'No orders yet',
         starsOrdersHeader: 'Stars orders',
-        starsOrdersSubtitle: '{{count}} purchase(s) — tap to expand'
+        starsOrdersSubtitle: '{{count}} purchase(s) — tap to expand',
+        starsRowSubtitle: '{{count}} order(s)'
       },
       settings: {
         title: 'Settings',
@@ -122,6 +123,8 @@ const resources = {
         openSubtitle: 'Top-ups & card transfers',
         paymentsTitle: 'Payments',
         paymentsCount: '{{count}} total',
+        starsModalTitle: 'Stars orders',
+        starsModalCount: '{{count}} orders',
         title: 'History',
         tabOrders: 'Orders ({{count}})',
         tabPayments: 'Payments ({{count}})',
@@ -213,7 +216,8 @@ const resources = {
         starsPurchase: 'Покупка Stars',
         noStarOrders: 'Заказов пока нет',
         starsOrdersHeader: 'Заказы Stars',
-        starsOrdersSubtitle: '{{count}} шт. — нажмите, чтобы открыть'
+        starsOrdersSubtitle: '{{count}} шт. — нажмите, чтобы открыть',
+        starsRowSubtitle: '{{count}} заказ(ов)'
       },
       settings: {
         title: 'Настройки',
@@ -264,6 +268,8 @@ const resources = {
         openSubtitle: 'Пополнения и переводы',
         paymentsTitle: 'Платежи',
         paymentsCount: 'Всего: {{count}}',
+        starsModalTitle: 'Заказы Stars',
+        starsModalCount: '{{count}} заказ(ов)',
         title: 'История',
         tabOrders: 'Заказы ({{count}})',
         tabPayments: 'Платежи ({{count}})',
@@ -355,7 +361,8 @@ const resources = {
         starsPurchase: 'Yulduz sotib olish',
         noStarOrders: 'Hozircha buyurtma yo\'q',
         starsOrdersHeader: 'Yulduz buyurtmalari',
-        starsOrdersSubtitle: '{{count}} ta — bosib oching'
+        starsOrdersSubtitle: '{{count}} ta — bosib oching',
+        starsRowSubtitle: '{{count}} ta buyurtma'
       },
       settings: {
         title: 'Sozlamalar',
@@ -406,6 +413,8 @@ const resources = {
         openSubtitle: 'Hisob to\'ldirish va karta',
         paymentsTitle: 'To\'lovlar',
         paymentsCount: 'Jami: {{count}}',
+        starsModalTitle: 'Yulduz buyurtmalari',
+        starsModalCount: '{{count}} ta buyurtma',
         title: 'Tarix',
         tabOrders: 'Buyurtmalar ({{count}})',
         tabPayments: 'To\'lovlar ({{count}})',
