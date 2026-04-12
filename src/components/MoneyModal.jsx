@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet, X, Copy } from 'lucide-react';
+import { BodyPortal } from './BodyPortal';
 import { Button } from './UI';
 import { useTezpremium } from '../context/TezpremiumContext';
 
@@ -230,8 +231,9 @@ export function MoneyModal({ open, onClose }) {
   if (!open) return null;
 
   return (
+    <BodyPortal>
     <div
-      className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 dark:bg-black/70"
+      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 dark:bg-black/70"
       role="dialog"
       aria-modal="true"
       onClick={handleClose}
@@ -430,5 +432,6 @@ export function MoneyModal({ open, onClose }) {
         </div>
       )}
     </div>
+    </BodyPortal>
   );
 }

@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   CreditCard,
 } from 'lucide-react';
+import { BodyPortal } from './BodyPortal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
 
@@ -220,8 +221,9 @@ export function ProfileHistoryModal({ open, onClose }) {
   if (!open) return null;
 
   return (
+    <BodyPortal>
     <div
-      className="fixed inset-0 z-[190] flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/70 p-0 sm:p-4"
+      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/70 p-0 sm:p-4"
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
@@ -454,5 +456,6 @@ export function ProfileHistoryModal({ open, onClose }) {
         </div>
       </div>
     </div>
+    </BodyPortal>
   );
 }

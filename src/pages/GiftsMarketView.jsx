@@ -19,6 +19,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { BodyPortal } from '../components/BodyPortal';
 import { Card, CardContent, Button } from '../components/UI';
 import { useTelegram } from '../hooks/useTelegram';
 
@@ -290,36 +291,38 @@ function useAIComment() {
 
 function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center">
-      <button
-        type="button"
-        aria-label="Close"
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div
-        className="relative z-10 max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white pb-12 shadow-2xl dark:bg-zinc-950"
-        style={{ maxHeight: '92vh' }}
-      >
-        <div className="p-5 pb-8">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{title}</h2>
-              <p className="mt-0.5 text-xs capitalize text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+    <BodyPortal>
+      <div className="fixed inset-0 z-[1000] flex items-end justify-center">
+        <button
+          type="button"
+          aria-label="Close"
+          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
+        />
+        <div
+          className="relative z-10 max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white pb-12 shadow-2xl dark:bg-zinc-950"
+          style={{ maxHeight: '92vh' }}
+        >
+          <div className="p-5 pb-8">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{title}</h2>
+                <p className="mt-0.5 text-xs capitalize text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition-colors hover:text-zinc-900 dark:bg-zinc-800 dark:hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition-colors hover:text-zinc-900 dark:bg-zinc-800 dark:hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="mx-auto mb-5 h-20 w-20 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">{thumbContent}</div>
+            {children}
           </div>
-          <div className="mx-auto mb-5 h-20 w-20 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">{thumbContent}</div>
-          {children}
         </div>
       </div>
-    </div>
+    </BodyPortal>
   );
 }
 
@@ -489,28 +492,30 @@ function AnonimToggle({ anonim, setAnonim }) {
 
 function SuccessOverlay({ text = "Gift muvaffaqiyatli jo'natildi" }) {
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-center justify-center"
-      style={{
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        backgroundColor: 'rgba(0,0,0,0.55)',
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-6"
+    <BodyPortal>
+      <div
+        className="fixed inset-0 z-[1000] flex items-center justify-center"
+        style={{
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          backgroundColor: 'rgba(0,0,0,0.55)',
+        }}
       >
-        <div className="flex h-28 w-28 items-center justify-center rounded-full border border-green-500/30 bg-green-500/20 shadow-2xl shadow-green-500/20">
-          <CheckCircle2 className="h-14 w-14 text-green-400" />
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-bold text-white">🎉 Yuborildi!</p>
-          <p className="mt-1 text-sm text-white/60">{text}</p>
-        </div>
-      </motion.div>
-    </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <div className="flex h-28 w-28 items-center justify-center rounded-full border border-green-500/30 bg-green-500/20 shadow-2xl shadow-green-500/20">
+            <CheckCircle2 className="h-14 w-14 text-green-400" />
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-white">🎉 Yuborildi!</p>
+            <p className="mt-1 text-sm text-white/60">{text}</p>
+          </div>
+        </motion.div>
+      </div>
+    </BodyPortal>
   );
 }
 
