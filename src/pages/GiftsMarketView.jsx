@@ -121,7 +121,8 @@ function prepareLottieAnimationData(data) {
 const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY ?? '';
 const NFT_API_BASE = import.meta.env.VITE_NFT_API_BASE ?? 'https://tezpremium.uz/uzbstar/giftlar.php';
 const ODDIY_API_BASE = import.meta.env.VITE_ODDIY_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/info.php';
-const ORDER_API_BASE = import.meta.env.VITE_ORDER_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/order.php';
+const ORDER_API_BASE =
+  import.meta.env.VITE_ORDER_API_BASE ?? 'https://tezpremium.uz/uzbstar/order_gift.php';
 const NFT_ORDER_API_BASE = import.meta.env.VITE_NFT_ORDER_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/nft.php';
 const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
 
