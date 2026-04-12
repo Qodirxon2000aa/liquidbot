@@ -7,10 +7,12 @@ import {
   useState,
 } from 'react';
 import { parseBalanceUzs } from '../utils/balanceUzs';
+import { parseJsonMaybeLeadingNoise } from '../utils/parseJsonResponse';
 
 const TezpremiumContext = createContext(null);
 
-const API_BASE = 'https://tezpremium.uz/uzbstar';
+const API_BASE =
+  import.meta.env.VITE_UZBSTAR_API_BASE ?? 'https://tezpremium.uz/uzbstar';
 const DEV_USER_ID = '7521806735';
 
 /** Telegram Mini App: `order_gift.php` va boshqa POST API lar uchun */
@@ -37,11 +39,24 @@ export function TezpremiumProvider({ children }) {
 
     const res = await fetch(`${API_BASE}/${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, */*',
+      },
       body: JSON.stringify(body),
     });
 
-    return res.json();
+    const text = await res.text();
+    const parsed = parseJsonMaybeLeadingNoise(text);
+    if (!parsed || typeof parsed !== 'object') {
+      const snippet = text.slice(0, 160).replace(/\s+/g, ' ').trim();
+      throw new Error(
+        res.ok
+          ? `Javob JSON emas${snippet ? `: ${snippet}` : ''}`
+          : `HTTP ${res.status}${snippet ? ` — ${snippet}` : ''}`
+      );
+    }
+    return parsed;
   }, []);
 
   const fetchUserFromApi = useCallback(async () => {

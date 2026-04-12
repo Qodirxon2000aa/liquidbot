@@ -23,6 +23,7 @@ import { BodyPortal } from '../components/BodyPortal';
 import { Card, CardContent, Button } from '../components/UI';
 import { useTelegram } from '../hooks/useTelegram';
 import { getTelegramInitData, useTezpremium } from '../context/TezpremiumContext';
+import { parseJsonMaybeLeadingNoise } from '../utils/parseJsonResponse';
 
 import heart from '../assets/heart.json';
 import teddy_bear from '../assets/teddy_bear.json';
@@ -121,8 +122,6 @@ function prepareLottieAnimationData(data) {
 const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY ?? '';
 const NFT_API_BASE = import.meta.env.VITE_NFT_API_BASE ?? 'https://tezpremium.uz/uzbstar/giftlar.php';
 const ODDIY_API_BASE = import.meta.env.VITE_ODDIY_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/info.php';
-const ORDER_API_BASE =
-  import.meta.env.VITE_ORDER_API_BASE ?? 'https://tezpremium.uz/uzbstar/order_gift.php';
 const NFT_ORDER_API_BASE = import.meta.env.VITE_NFT_ORDER_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/nft.php';
 const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
 
@@ -156,16 +155,12 @@ function oddiyGiftTypeBadge(typeRaw) {
   return { label: label || '—', className };
 }
 
-/** PHP oldidan chiqindi bo‘lsa — birinchi `{` dan JSON */
-function parseJsonMaybeLeadingNoise(text) {
-  if (text == null || typeof text !== 'string') return null;
-  const i = text.indexOf('{');
-  if (i < 0) return null;
-  try {
-    return JSON.parse(text.slice(i));
-  } catch {
-    return null;
+function formatFetchNetworkError(err) {
+  const m = err?.message ?? String(err);
+  if (/load failed|failed to fetch|networkerror|network request failed/i.test(m)) {
+    return "Tarmoq xatosi: server javob bermadi. Internetni tekshiring; agar balans ochilsa — `order_gift.php` (PHP) xato yoki CORS sozlamasini tekshiring.";
   }
+  return m;
 }
 
 function normalizeOddiyGiftFromApi(g) {
@@ -623,6 +618,7 @@ function SuccessOverlay({ text = "Gift muvaffaqiyatli jo'natildi" }) {
 }
 
 function BuyOddiyModal({ gift, onClose, onSuccess }) {
+  const { apiFetch } = useTezpremium();
   const userSearch = useUserSearch();
   const aiComment = useAIComment();
   const [orderLoading, setOrderLoad] = useState(false);
@@ -646,29 +642,14 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
     setOrderError(null);
     try {
       const recipient = cleanUsername.replace(/^@/, '').trim();
-      const body = {
-        initData,
+      const params = {
         gift_id: parseInt(String(gift.id), 10),
         username: recipient,
         anonim: anonim ? 'true' : 'false',
       };
-      if (commentOn && comment.trim()) body.comment = comment.trim();
+      if (commentOn && comment.trim()) params.comment = comment.trim();
 
-      const res = await fetch(ORDER_API_BASE, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json, */*',
-        },
-        body: JSON.stringify(body),
-      });
-      const rawText = await res.text();
-      const data = parseJsonMaybeLeadingNoise(rawText);
-
-      if (!data || typeof data !== 'object') {
-        setOrderError("Server javobi noto‘g‘ri yoki bo‘sh");
-        return;
-      }
+      const data = await apiFetch('order_gift.php', params);
 
       if (data.ok === true) {
         setOrdered(true);
@@ -678,7 +659,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
         setOrderError(data.message || data.error || data.status || 'Xatolik yuz berdi');
       }
     } catch (err) {
-      setOrderError("Serverga ulanib bo'lmadi: " + err.message);
+      setOrderError(formatFetchNetworkError(err));
     } finally {
       setOrderLoad(false);
     }
