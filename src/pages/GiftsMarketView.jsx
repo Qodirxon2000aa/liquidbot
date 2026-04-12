@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BodyPortal } from '../components/BodyPortal';
 import { Card, CardContent, Button } from '../components/UI';
 import { useTelegram } from '../hooks/useTelegram';
-import { useTezpremium } from '../context/TezpremiumContext';
+import { getTelegramInitData, useTezpremium } from '../context/TezpremiumContext';
 
 import heart from '../assets/heart.json';
 import teddy_bear from '../assets/teddy_bear.json';
@@ -623,7 +623,6 @@ function SuccessOverlay({ text = "Gift muvaffaqiyatli jo'natildi" }) {
 }
 
 function BuyOddiyModal({ gift, onClose, onSuccess }) {
-  const { user } = useTelegram();
   const userSearch = useUserSearch();
   const aiComment = useAIComment();
   const [orderLoading, setOrderLoad] = useState(false);
@@ -633,38 +632,50 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
   const { cleanUsername, anonim, userInfo } = userSearch;
   const { commentOn, comment } = aiComment;
 
-  const getSenderId = () => user?.id ?? '';
+  const hasInitData = typeof window !== 'undefined' && Boolean(getTelegramInitData());
 
   const handleOrder = async () => {
     if (!cleanUsername) return;
-    const senderId = getSenderId();
-    if (!senderId) {
-      setOrderError("Foydalanuvchi ID topilmadi. Iltimos qayta kiring.");
+    const initData = getTelegramInitData();
+    if (!initData) {
+      setOrderError("Telegram orqali kirishingiz kerak (initData yo‘q).");
       return;
     }
 
     setOrderLoad(true);
     setOrderError(null);
     try {
-      const params = new URLSearchParams({
-        user_id: String(senderId),
-        gift_id: String(gift.id),
-        username: `@${cleanUsername}`,
+      const recipient = cleanUsername.replace(/^@/, '').trim();
+      const body = {
+        initData,
+        gift_id: parseInt(String(gift.id), 10),
+        username: recipient,
         anonim: anonim ? 'true' : 'false',
-      });
-      if (commentOn && comment.trim()) params.append('comment', comment.trim());
+      };
+      if (commentOn && comment.trim()) body.comment = comment.trim();
 
-      const res = await fetch(`${ORDER_API_BASE}?${params.toString()}`);
+      const res = await fetch(ORDER_API_BASE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, */*',
+        },
+        body: JSON.stringify(body),
+      });
       const rawText = await res.text();
-      const jsonStart = rawText.indexOf('{');
-      const data = JSON.parse(jsonStart >= 0 ? rawText.slice(jsonStart) : rawText);
+      const data = parseJsonMaybeLeadingNoise(rawText);
+
+      if (!data || typeof data !== 'object') {
+        setOrderError("Server javobi noto‘g‘ri yoki bo‘sh");
+        return;
+      }
 
       if (data.ok === true) {
         setOrdered(true);
         onSuccess?.();
         setTimeout(() => onClose(), 3000);
       } else {
-        setOrderError(data.message || data.error || 'Xatolik yuz berdi');
+        setOrderError(data.message || data.error || data.status || 'Xatolik yuz berdi');
       }
     } catch (err) {
       setOrderError("Serverga ulanib bo'lmadi: " + err.message);
@@ -673,7 +684,8 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
     }
   };
 
-  const canOrder = !orderLoading && cleanUsername && (userInfo || anonim) && !ordered;
+  const canOrder =
+    hasInitData && !orderLoading && cleanUsername && (userInfo || anonim) && !ordered;
 
   return (
     <>
@@ -686,6 +698,15 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
         <UserInputSection {...userSearch} />
         <CommentSection {...aiComment} />
         <AnonimToggle anonim={anonim} setAnonim={userSearch.setAnonim} />
+
+        {!hasInitData && (
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              Gift yuborish faqat Telegram orqali ochilganda ishlaydi (initData kerak).
+            </p>
+          </div>
+        )}
 
         {orderError && (
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">

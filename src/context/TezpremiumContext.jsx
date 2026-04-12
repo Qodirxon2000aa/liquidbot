@@ -13,7 +13,9 @@ const TezpremiumContext = createContext(null);
 const API_BASE = 'https://tezpremium.uz/uzbstar';
 const DEV_USER_ID = '7521806735';
 
-function getInitData() {
+/** Telegram Mini App: `order_gift.php` va boshqa POST API lar uchun */
+export function getTelegramInitData() {
+  if (typeof window === 'undefined') return null;
   const initData = window.Telegram?.WebApp?.initData;
   return initData && initData.length > 0 ? initData : null;
 }
@@ -27,7 +29,7 @@ export function TezpremiumProvider({ children }) {
   const fetchedRef = useRef(false);
 
   const apiFetch = useCallback(async (endpoint, params = {}) => {
-    const initData = getInitData();
+    const initData = getTelegramInitData();
     const body = {
       ...(initData ? { initData } : { user_id: DEV_USER_ID }),
       ...params,
