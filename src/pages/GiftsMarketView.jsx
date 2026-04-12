@@ -21,7 +21,6 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { BodyPortal } from '../components/BodyPortal';
 import { Card, CardContent, Button } from '../components/UI';
-import { useTelegram } from '../hooks/useTelegram';
 import { getTelegramInitData, useTezpremium } from '../context/TezpremiumContext';
 import { parseJsonMaybeLeadingNoise } from '../utils/parseJsonResponse';
 
@@ -120,10 +119,15 @@ function prepareLottieAnimationData(data) {
 }
 
 const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_API_KEY ?? '';
-const NFT_API_BASE = import.meta.env.VITE_NFT_API_BASE ?? 'https://tezpremium.uz/uzbstar/giftlar.php';
+/** Market.jsx bilan bir xil: `giftlar.php` + `?type=` */
+const NFT_API_BASE =
+  import.meta.env.VITE_NFT_API_BASE ?? 'https://tezpremium.uz/uzbstar/giftlar.php';
 const ODDIY_API_BASE = import.meta.env.VITE_ODDIY_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/info.php';
 const NFT_ORDER_API_BASE = import.meta.env.VITE_NFT_ORDER_API_BASE ?? 'https://tezpremium.uz/MilliyDokon/gifts/nft.php';
 const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
+
+/** `VITE_NFT_ENABLED=false` bo‘lsa NFT tab kartalari va buyurtma o‘chadi */
+const NFT_SERVICE_ENABLED = import.meta.env.VITE_NFT_ENABLED !== 'false';
 
 const NFT_FILTERS = [
   { key: 'all', label: 'Barcha' },
@@ -230,29 +234,6 @@ async function resolveOddiyGiftFromInfoApi(localGift) {
     return { ok: false, message: "info.php ga ulanib bo‘lmadi" };
   }
 }
-
-const NFT_FALLBACK = [
-  {
-    id: 'nft-demo-1',
-    nft_id: 'CyberCat-NFT',
-    model: 'Demo',
-    backdrop: 'Night',
-    price: 120_000,
-    photo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop',
-    link: 'https://t.me',
-    created_at: '—',
-  },
-  {
-    id: 'nft-demo-2',
-    nft_id: 'GoldenGift-NFT',
-    model: 'Demo',
-    backdrop: 'Sun',
-    price: 350_000,
-    photo: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop',
-    link: 'https://t.me',
-    created_at: '—',
-  },
-];
 
 function GiftAnimation({ name }) {
   const nameKey = normalizeGiftNameKey(name);
@@ -797,8 +778,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
   );
 }
 
-function BuyNftModal({ gift, onClose, onSuccess }) {
-  const { user } = useTelegram();
+function BuyNftModal({ gift, onClose, onSuccess, nftServiceEnabled }) {
   const userSearch = useUserSearch();
   const [orderLoading, setOrderLoad] = useState(false);
   const [orderError, setOrderError] = useState(null);
@@ -812,36 +792,64 @@ function BuyNftModal({ gift, onClose, onSuccess }) {
     return nftId.split('-')[0].replace(/([A-Z])/g, ' $1').trim();
   };
 
-  const getSenderId = () => user?.id ?? '';
-
   const handleOrder = async () => {
     if (!cleanUsername) return;
-    const senderId = getSenderId();
-    if (!senderId) {
-      setOrderError("Foydalanuvchi ID topilmadi. Iltimos qayta kiring.");
+    if (!nftServiceEnabled) {
+      setOrderError("Xizmat vaqtincha o'chirilgan");
+      return;
+    }
+
+    const initData = getTelegramInitData();
+    if (!initData) {
+      setOrderError("Telegram initData topilmadi. Bot orqali qayta kiring.");
       return;
     }
 
     setOrderLoad(true);
     setOrderError(null);
     try {
-      const params = new URLSearchParams({
-        user_id: String(senderId),
-        gift_id: String(gift.id),
-        sent: `@${cleanUsername}`,
+      const giftIdStr = String(gift.id ?? '').trim();
+      if (!giftIdStr) {
+        setOrderError("Noto'g'ri gift ID");
+        setOrderLoad(false);
+        return;
+      }
+
+      const atUser = `@${cleanUsername.replace(/^@/, '').trim()}`;
+      const body = {
+        initData,
+        init_data: initData,
+        gift_id: giftIdStr,
+        username: atUser,
+        sent: atUser,
+      };
+
+      const res = await fetch(NFT_ORDER_API_BASE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, */*',
+        },
+        body: JSON.stringify(body),
       });
-
-      const res = await fetch(`${NFT_ORDER_API_BASE}?${params.toString()}`);
       const rawText = await res.text();
-      const jsonStart = rawText.indexOf('{');
-      const data = JSON.parse(jsonStart >= 0 ? rawText.slice(jsonStart) : rawText);
+      const data = parseJsonMaybeLeadingNoise(rawText);
+      if (!data || typeof data !== 'object') {
+        setOrderError("Server javobi noto‘g‘ri");
+        return;
+      }
 
-      if (data.ok === true) {
+      if (data.ok === true || data.status === 'success') {
         setOrdered(true);
         onSuccess?.();
         setTimeout(() => onClose(), 3000);
       } else {
-        setOrderError(data.message || data.error || 'Xatolik yuz berdi');
+        const msg = data.message || data.error || 'Xatolik yuz berdi';
+        if (/initData is required/i.test(String(msg))) {
+          setOrderError('Sessiya topilmadi. Telegramda mini-appni yoping va botdan qayta oching.');
+        } else {
+          setOrderError(msg);
+        }
       }
     } catch (err) {
       setOrderError("Serverga ulanib bo'lmadi: " + err.message);
@@ -850,7 +858,8 @@ function BuyNftModal({ gift, onClose, onSuccess }) {
     }
   };
 
-  const canOrder = !orderLoading && cleanUsername.length > 2 && !ordered;
+  const canOrder =
+    nftServiceEnabled && !orderLoading && cleanUsername.length > 2 && !ordered;
 
   return (
     <>
@@ -875,6 +884,15 @@ function BuyNftModal({ gift, onClose, onSuccess }) {
       >
         <UserInputSection {...userSearch} />
 
+        {!nftServiceEnabled && (
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <p className="text-xs text-amber-800 dark:text-amber-200/90">
+              Xizmat vaqtincha o&apos;chirilgan
+            </p>
+          </div>
+        )}
+
         {orderError && (
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
@@ -890,13 +908,18 @@ function BuyNftModal({ gift, onClose, onSuccess }) {
             className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all ${
               canOrder
                 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 active:scale-95'
-                : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
+                : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500'
             }`}
           >
             {orderLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Yuborilmoqda...
+              </>
+            ) : !nftServiceEnabled ? (
+              <>
+                <AlertCircle className="h-4 w-4" />
+                Xizmat o&apos;chirilgan
               </>
             ) : (
               <>
@@ -936,21 +959,37 @@ export function GiftsMarketView({ onNavigateHome }) {
 
   const userBalance = apiUser?.balanceUzs ?? 0;
 
-  const fetchNftGifts = useCallback(async (type = 'all') => {
-    setNftLoading(true);
-    setNftError(null);
+  const fetchNftGifts = useCallback(async (type = 'all', opts = {}) => {
+    const silent = opts.silent === true;
+    if (!silent) {
+      setNftLoading(true);
+      setNftError(null);
+    }
     try {
-      const url = type === 'all' ? NFT_API_BASE : `${NFT_API_BASE}?type=${type}`;
+      const url = type === 'all' ? NFT_API_BASE : `${NFT_API_BASE}?type=${encodeURIComponent(type)}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (data.ok) setGifts(data.gifts || []);
-      else setNftError("Ma'lumot olishda xatolik");
+      if (data.ok && Array.isArray(data.gifts)) {
+        const next = data.gifts;
+        setGifts((prev) => {
+          if (silent && JSON.stringify(prev) === JSON.stringify(next)) return prev;
+          return next;
+        });
+        if (!silent) setNftError(null);
+      } else {
+        if (!silent) {
+          setGifts([]);
+          setNftError("Ma'lumot olishda xatolik");
+        }
+      }
     } catch {
-      setGifts(NFT_FALLBACK);
-      setNftError(null);
+      if (!silent) {
+        setGifts([]);
+        setNftError("Serverga ulanib bo'lmadi");
+      }
     } finally {
-      setNftLoading(false);
+      if (!silent) setNftLoading(false);
     }
   }, []);
 
@@ -999,13 +1038,21 @@ export function GiftsMarketView({ onNavigateHome }) {
 
   const handleNftOrderSuccess = useCallback(() => {
     void refreshUser();
-    void fetchNftGifts(activeFilter);
+    void fetchNftGifts(activeFilter, { silent: true });
   }, [refreshUser, fetchNftGifts, activeFilter]);
 
   useEffect(() => {
-    if (mainTab === 'nft') fetchNftGifts(activeFilter);
-    else if (mainTab === 'oddiy' && oddiyGifts.length === 0) fetchOddiyGifts();
-  }, [activeFilter, mainTab, fetchNftGifts, fetchOddiyGifts, oddiyGifts.length]);
+    if (mainTab !== 'nft') return;
+    void fetchNftGifts(activeFilter, { silent: false });
+    const id = window.setInterval(() => {
+      void fetchNftGifts(activeFilter, { silent: true });
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [mainTab, activeFilter, fetchNftGifts]);
+
+  useEffect(() => {
+    if (mainTab === 'oddiy' && oddiyGifts.length === 0) void fetchOddiyGifts();
+  }, [mainTab, oddiyGifts.length, fetchOddiyGifts]);
 
   const handleFilterChange = (key) => {
     if (key === activeFilter) return;
@@ -1024,7 +1071,7 @@ export function GiftsMarketView({ onNavigateHome }) {
   };
 
   const handleCopy = (gift) => {
-    if (gift.link) navigator.clipboard.writeText(gift.link).catch(() => {});
+    if (gift?.link) navigator.clipboard.writeText(gift.link).catch(() => {});
     setCopiedId(gift.id);
     setTimeout(() => setCopiedId(null), 2000);
   };
@@ -1133,6 +1180,17 @@ export function GiftsMarketView({ onNavigateHome }) {
             ))}
           </div>
 
+          {!NFT_SERVICE_ENABLED && (
+            <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+              <p className="text-xs leading-snug text-red-600/90 dark:text-red-400/90">
+                NFT gift yuborish hozircha mumkin emas.{' '}
+                <strong className="font-semibold">Xizmat vaqtincha o&apos;chirilgan</strong> — keyinroq urinib
+                ko&apos;ring.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-0">
               <CardContent className="px-4 pb-4 pt-4">
@@ -1190,7 +1248,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <p className="text-sm">Yuklanmoqda...</p>
                 </div>
               )}
-              {!nftLoading && nftError && gifts.length === 0 && (
+              {!nftLoading && nftError && (
                 <div className="flex flex-col items-center justify-center py-10 text-zinc-500">
                   <AlertCircle className="mb-3 h-8 w-8 text-red-500/60" />
                   <p className="mb-3 text-sm">{nftError}</p>
@@ -1209,18 +1267,21 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <p className="text-sm">Bu kategoriyada giftlar yo&apos;q</p>
                 </div>
               )}
-              {!nftLoading && gifts.length > 0 && (
+              {!nftLoading && !nftError && gifts.length > 0 && (
                 <div className="grid grid-cols-2 gap-2.5">
                   {gifts.map((gift) => {
                     const affordable = canBuy(gift.price);
+                    const canPurchase = affordable && NFT_SERVICE_ENABLED;
                     return (
                       <NftGiftCard
                         key={gift.id}
                         gift={gift}
                         affordable={affordable}
+                        nftServiceEnabled={NFT_SERVICE_ENABLED}
+                        canPurchase={canPurchase}
                         copiedId={copiedId}
                         onCopy={handleCopy}
-                        onBuy={() => affordable && setBuyNftGift(gift)}
+                        onBuy={() => canPurchase && setBuyNftGift(gift)}
                       />
                     );
                   })}
@@ -1418,19 +1479,34 @@ export function GiftsMarketView({ onNavigateHome }) {
         <BuyOddiyModal gift={buyGift} onClose={() => setBuyGift(null)} onSuccess={handleOddiyOrderSuccess} />
       )}
       {buyNftGift && (
-        <BuyNftModal gift={buyNftGift} onClose={() => setBuyNftGift(null)} onSuccess={handleNftOrderSuccess} />
+        <BuyNftModal
+          gift={buyNftGift}
+          nftServiceEnabled={NFT_SERVICE_ENABLED}
+          onClose={() => setBuyNftGift(null)}
+          onSuccess={handleNftOrderSuccess}
+        />
       )}
     </div>
   );
 }
 
-function NftGiftCard({ gift, affordable, copiedId, onCopy, onBuy }) {
+function NftGiftCard({
+  gift,
+  affordable,
+  nftServiceEnabled,
+  canPurchase,
+  copiedId,
+  onCopy,
+  onBuy,
+}) {
   const [imgErr, setImgErr] = useState(false);
+
+  const dimCard = !affordable || !nftServiceEnabled;
 
   return (
     <div
       className={`overflow-hidden rounded-xl border transition-all ${
-        affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200/50 opacity-70 dark:border-zinc-800'
+        dimCard ? 'border-zinc-200/50 opacity-70 dark:border-zinc-800' : 'border-zinc-200 dark:border-zinc-700'
       }`}
     >
       <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
@@ -1447,7 +1523,17 @@ function NftGiftCard({ gift, affordable, copiedId, onCopy, onBuy }) {
             <Gift className="h-10 w-10 text-zinc-400/40" />
           </div>
         )}
-        {!affordable && (
+        {!nftServiceEnabled && (
+          <div className="absolute inset-0 z-[5] flex items-center justify-center bg-black/60 p-1">
+            <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
+              <AlertCircle className="h-3 w-3 shrink-0 text-amber-600" />
+              <span className="text-center text-[10px] font-medium leading-tight text-zinc-600 dark:text-zinc-400">
+                Xizmat o&apos;chirilgan
+              </span>
+            </div>
+          </div>
+        )}
+        {nftServiceEnabled && !affordable && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
               <Wallet className="h-3 w-3 text-zinc-500" />
@@ -1501,14 +1587,19 @@ function NftGiftCard({ gift, affordable, copiedId, onCopy, onBuy }) {
         <button
           type="button"
           onClick={onBuy}
-          disabled={!affordable}
+          disabled={!canPurchase}
           className={`flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-all ${
-            affordable
+            canPurchase
               ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
               : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
           }`}
         >
-          {affordable ? (
+          {!nftServiceEnabled ? (
+            <>
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              O&apos;chirilgan
+            </>
+          ) : affordable ? (
             <>
               <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
               Yuborish
