@@ -678,13 +678,16 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
   const { cleanUsername, anonim, userInfo } = userSearch;
   const { commentOn, comment } = aiComment;
 
-  const hasInitData = typeof window !== 'undefined' && Boolean(getTelegramInitData());
+  const initDataSnapshot = getTelegramInitData();
+  const hasInitData = Boolean(initDataSnapshot);
 
   const handleOrder = async () => {
     if (!cleanUsername) return;
     const initData = getTelegramInitData();
     if (!initData) {
-      setOrderError("Telegram orqali kirishingiz kerak (initData yo‘q).");
+      setOrderError(
+        "initData yo‘q — ilovani bot orqali qayta oching (Telegram Mini App)."
+      );
       return;
     }
 
@@ -715,7 +718,14 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
         onSuccess?.();
         setTimeout(() => onClose(), 3000);
       } else {
-        setOrderError(data.message || data.error || data.status || 'Xatolik yuz berdi');
+        const msg = data.message || data.error || data.status || 'Xatolik yuz berdi';
+        if (/initData is required/i.test(String(msg))) {
+          setOrderError(
+            "Sessiya topilmadi. Telegramda mini-appni yoping va botdan qayta oching."
+          );
+        } else {
+          setOrderError(msg);
+        }
       }
     } catch (err) {
       setOrderError(formatFetchNetworkError(err));
@@ -743,7 +753,8 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <p className="text-xs text-amber-800 dark:text-amber-200">
-              Gift yuborish faqat Telegram orqali ochilganda ishlaydi (initData kerak).
+              Gift yuborish faqat bot orqali ochilgan Mini Appda ishlaydi. Brauzerda ochilsa{' '}
+              <code className="rounded bg-black/10 px-1 dark:bg-white/10">initData</code> bo‘lmaydi.
             </p>
           </div>
         )}

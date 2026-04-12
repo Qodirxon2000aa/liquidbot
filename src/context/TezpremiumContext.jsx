@@ -18,8 +18,10 @@ const DEV_USER_ID = '7521806735';
 /** Telegram Mini App: `gift_order.php` va boshqa POST API lar uchun */
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return null;
-  const initData = window.Telegram?.WebApp?.initData;
-  return initData && initData.length > 0 ? initData : null;
+  const raw = window.Telegram?.WebApp?.initData;
+  if (raw == null) return null;
+  const s = String(raw).trim();
+  return s.length > 0 ? s : null;
 }
 
 export function TezpremiumProvider({ children }) {
@@ -32,9 +34,10 @@ export function TezpremiumProvider({ children }) {
 
   const apiFetch = useCallback(async (endpoint, params = {}) => {
     const initData = getTelegramInitData();
+    const { initData: _dropInit, user_id: _dropUid, ...rest } = params;
     const body = {
+      ...rest,
       ...(initData ? { initData } : { user_id: DEV_USER_ID }),
-      ...params,
     };
 
     const res = await fetch(`${API_BASE}/${endpoint}`, {

@@ -7,6 +7,16 @@ import App from './App.jsx';
 
 initThemeFromStorage();
 
+/** React dan oldin — `initData` va viewport uchun Telegram Mini App SDK */
+if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+  try {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  } catch {
+    /* ignore */
+  }
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <TezpremiumProvider>
