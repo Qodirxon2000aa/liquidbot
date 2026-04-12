@@ -158,7 +158,7 @@ function oddiyGiftTypeBadge(typeRaw) {
 function formatFetchNetworkError(err) {
   const m = err?.message ?? String(err);
   if (/load failed|failed to fetch|networkerror|network request failed/i.test(m)) {
-    return "Tarmoq xatosi: server javob bermadi. Internetni tekshiring; agar balans ochilsa — `order_gift.php` (PHP) xato yoki CORS sozlamasini tekshiring.";
+    return "Tarmoq xatosi: server javob bermadi. Internetni tekshiring; agar balans ochilsa — `gift_order.php` (PHP) xato yoki CORS sozlamasini tekshiring.";
   }
   return m;
 }
@@ -649,7 +649,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
       };
       if (commentOn && comment.trim()) params.comment = comment.trim();
 
-      const data = await apiFetch('order_gift.php', params);
+      const data = await apiFetch('gift_order.php', params);
 
       if (data.ok === true) {
         setOrdered(true);

@@ -15,7 +15,7 @@ const API_BASE =
   import.meta.env.VITE_UZBSTAR_API_BASE ?? 'https://tezpremium.uz/uzbstar';
 const DEV_USER_ID = '7521806735';
 
-/** Telegram Mini App: `order_gift.php` va boshqa POST API lar uchun */
+/** Telegram Mini App: `gift_order.php` va boshqa POST API lar uchun */
 export function getTelegramInitData() {
   if (typeof window === 'undefined') return null;
   const initData = window.Telegram?.WebApp?.initData;
