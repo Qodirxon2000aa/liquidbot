@@ -163,6 +163,19 @@ function formatFetchNetworkError(err) {
   return m;
 }
 
+/** Telegram gift `id` — 64-bit, JS Number dan tashqari; faqat string/BigInt */
+function oddiyGiftIdsEqual(a, b) {
+  const sa = String(a ?? '').trim();
+  const sb = String(b ?? '').trim();
+  if (sa === sb) return true;
+  if (!/^\d+$/.test(sa) || !/^\d+$/.test(sb)) return false;
+  try {
+    return BigInt(sa) === BigInt(sb);
+  } catch {
+    return false;
+  }
+}
+
 function normalizeOddiyGiftFromApi(g) {
   if (!g || typeof g !== 'object') return null;
   const idStr = g.id != null ? String(g.id).trim() : '';
@@ -198,9 +211,7 @@ async function resolveOddiyGiftFromInfoApi(localGift) {
       return { ok: false, message: 'Giftlar ro‘yxati bo‘sh' };
     }
     const sid = String(localGift?.id ?? '').trim();
-    let found =
-      list.find((g) => g.id === sid) ||
-      list.find((g) => parseInt(g.id, 10) === parseInt(sid, 10));
+    let found = list.find((g) => oddiyGiftIdsEqual(g.id, sid));
     if (!found && localGift?.name) {
       const key = normalizeGiftNameKey(localGift.name);
       found = list.find((g) => normalizeGiftNameKey(g.name) === key);
@@ -689,7 +700,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
 
       const recipient = cleanUsername.replace(/^@/, '').trim();
       const params = {
-        gift_id: parseInt(fromInfo.id, 10),
+        gift_id: String(fromInfo.id),
         price: fromInfo.price,
         username: recipient,
         anonim: anonim ? 'true' : 'false',
