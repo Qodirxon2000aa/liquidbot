@@ -181,6 +181,45 @@ function normalizeOddiyGiftFromApi(g) {
   };
 }
 
+/** Buyurtma: `gift_order.php` bilan bir xil manbadan — info.php dan `id` va `price` */
+async function resolveOddiyGiftFromInfoApi(localGift) {
+  try {
+    const res = await fetch(ODDIY_API_BASE, {
+      headers: { Accept: 'application/json, */*' },
+      cache: 'no-store',
+    });
+    const rawText = await res.text();
+    const data = parseJsonMaybeLeadingNoise(rawText);
+    if (!data?.ok || !Array.isArray(data.gifts)) {
+      return { ok: false, message: "info.php dan ro‘yxat olinmadi" };
+    }
+    const list = data.gifts.map(normalizeOddiyGiftFromApi).filter(Boolean);
+    if (list.length === 0) {
+      return { ok: false, message: 'Giftlar ro‘yxati bo‘sh' };
+    }
+    const sid = String(localGift?.id ?? '').trim();
+    let found =
+      list.find((g) => g.id === sid) ||
+      list.find((g) => parseInt(g.id, 10) === parseInt(sid, 10));
+    if (!found && localGift?.name) {
+      const key = normalizeGiftNameKey(localGift.name);
+      found = list.find((g) => normalizeGiftNameKey(g.name) === key);
+    }
+    if (!found) {
+      return {
+        ok: false,
+        message: "Bu gift hozirgi ro‘yxatda yo‘q. Sahifani yangilab qayta urinib ko‘ring.",
+      };
+    }
+    if (found.price <= 0) {
+      return { ok: false, message: 'Bu gift uchun narx info.php da yo‘q' };
+    }
+    return { ok: true, gift: found };
+  } catch {
+    return { ok: false, message: "info.php ga ulanib bo‘lmadi" };
+  }
+}
+
 const NFT_FALLBACK = [
   {
     id: 'nft-demo-1',
@@ -641,12 +680,21 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
     setOrderLoad(true);
     setOrderError(null);
     try {
+      const resolved = await resolveOddiyGiftFromInfoApi(gift);
+      if (!resolved.ok) {
+        setOrderError(resolved.message);
+        return;
+      }
+      const fromInfo = resolved.gift;
+
       const recipient = cleanUsername.replace(/^@/, '').trim();
       const params = {
-        gift_id: parseInt(String(gift.id), 10),
+        gift_id: parseInt(fromInfo.id, 10),
+        price: fromInfo.price,
         username: recipient,
         anonim: anonim ? 'true' : 'false',
       };
+      if (fromInfo.amount) params.amount = fromInfo.amount;
       if (commentOn && comment.trim()) params.comment = comment.trim();
 
       const data = await apiFetch('gift_order.php', params);
