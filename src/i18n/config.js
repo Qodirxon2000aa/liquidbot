@@ -112,6 +112,30 @@ const resources = {
         paymentOff: 'Payments temporarily disabled',
         paymentOffHint: 'Top-up via the web app is not available right now.',
         payViaBot: 'Use the bot to complete payment.'
+      },
+      history: {
+        openTitle: 'Payments & orders',
+        openSubtitle: 'API history, complete pending transfers',
+        title: 'History',
+        tabOrders: 'Orders ({{count}})',
+        tabPayments: 'Payments ({{count}})',
+        loading: 'Loading…',
+        emptyOrders: 'No orders yet',
+        emptyPayments: 'No payments yet',
+        orderRow: 'Order',
+        paymentRow: 'Payment',
+        cardMethod: 'Card',
+        unknown: 'Unknown',
+        noUsername: 'No username',
+        orderSum: 'Paid',
+        recipient: 'Recipient',
+        method: 'Method',
+        amount: 'Amount',
+        cardNumber: 'Card number',
+        timeLeft: 'Time left:',
+        pendingHint:
+          'Transfer the exact amount to this card; status updates automatically.',
+        copied: 'Copied ✓'
       }
     }
   },
@@ -224,6 +248,30 @@ const resources = {
         paymentOff: 'Оплата временно отключена',
         paymentOffHint: 'Сейчас пополнение через веб-приложение недоступно.',
         payViaBot: 'Оформите оплату через бота.'
+      },
+      history: {
+        openTitle: 'Платежи и заказы',
+        openSubtitle: 'История API, завершите ожидающие переводы',
+        title: 'История',
+        tabOrders: 'Заказы ({{count}})',
+        tabPayments: 'Платежи ({{count}})',
+        loading: 'Загрузка…',
+        emptyOrders: 'Заказов пока нет',
+        emptyPayments: 'Платежей пока нет',
+        orderRow: 'Заказ',
+        paymentRow: 'Платёж',
+        cardMethod: 'Карта',
+        unknown: 'Неизвестно',
+        noUsername: 'Нет username',
+        orderSum: 'Оплата',
+        recipient: 'Получатель',
+        method: 'Способ',
+        amount: 'Сумма',
+        cardNumber: 'Номер карты',
+        timeLeft: 'Осталось:',
+        pendingHint:
+          'Переведите точную сумму на карту; статус обновится автоматически.',
+        copied: 'Скопировано ✓'
       }
     }
   },
@@ -336,6 +384,30 @@ const resources = {
         paymentOff: 'To\'lov vaqtincha o\'chirilgan',
         paymentOffHint: 'Hozir web appdan to\'lov qilish imkoni yo\'q.',
         payViaBot: 'To\'lovni bot orqali amalga oshiring.'
+      },
+      history: {
+        openTitle: 'To\'lovlar va buyurtmalar',
+        openSubtitle: 'API tarixi, kutilayotgan to\'lovlarni yakunlang',
+        title: 'Tarix',
+        tabOrders: 'Buyurtmalar ({{count}})',
+        tabPayments: 'To\'lovlar ({{count}})',
+        loading: 'Yuklanmoqda…',
+        emptyOrders: 'Buyurtmalar yo\'q',
+        emptyPayments: 'To\'lovlar yo\'q',
+        orderRow: 'Buyurtma',
+        paymentRow: 'To\'lov',
+        cardMethod: 'Karta orqali',
+        unknown: 'Noma\'lum',
+        noUsername: 'Username yo\'q',
+        orderSum: 'To\'lov',
+        recipient: 'Qabul qiluvchi',
+        method: 'Usul',
+        amount: 'Summa',
+        cardNumber: 'Karta raqami',
+        timeLeft: 'Qolgan vaqt:',
+        pendingHint:
+          'Aniq summani shu kartaga o\'tkazing; holat avtomatik yangilanadi.',
+        copied: 'Nusxa olindi ✓'
       }
     }
   }

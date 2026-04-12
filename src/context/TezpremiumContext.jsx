@@ -19,7 +19,10 @@ function getInitData() {
 
 export function TezpremiumProvider({ children }) {
   const [apiUser, setApiUser] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const fetchedRef = useRef(false);
 
   const apiFetch = useCallback(async (endpoint, params = {}) => {
@@ -56,21 +59,54 @@ export function TezpremiumProvider({ children }) {
     }
   }, [apiFetch]);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      const data = await apiFetch('history.php');
+      setOrders(data.ok && Array.isArray(data.orders) ? data.orders : []);
+    } catch {
+      setOrders([]);
+    }
+  }, [apiFetch]);
+
+  const fetchPayments = useCallback(async () => {
+    try {
+      const data = await apiFetch('payments.php');
+      setPayments(data.ok && Array.isArray(data.payments) ? data.payments : []);
+    } catch {
+      setPayments([]);
+    }
+  }, [apiFetch]);
+
+  const refreshHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      await Promise.all([fetchOrders(), fetchPayments()]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [fetchOrders, fetchPayments]);
+
   const refreshUser = useCallback(async () => {
     await fetchUserFromApi();
-  }, [fetchUserFromApi]);
+    await refreshHistory();
+  }, [fetchUserFromApi, refreshHistory]);
 
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
     fetchUserFromApi();
-  }, [fetchUserFromApi]);
+    refreshHistory();
+  }, [fetchUserFromApi, refreshHistory]);
 
   const value = {
     apiUser,
+    orders,
+    payments,
     loading,
+    historyLoading,
     apiFetch,
     refreshUser,
+    refreshHistory,
   };
 
   return (

@@ -1,26 +1,34 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wallet, History, CreditCard, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Wallet, History, ChevronRight, Receipt, CreditCard, ShieldCheck } from 'lucide-react';
 import { Card, Button } from '../components/UI';
 import { MoneyModal } from '../components/MoneyModal';
+import { ProfileHistoryModal } from '../components/ProfileHistoryModal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
 
-const TelegramStar = ({ className = "w-6 h-6" }) => (
-  <svg 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
+const TelegramStar = ({ className = 'w-6 h-6' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
-    <path 
-      d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
+    <path
+      d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
       fill="url(#star-gradient-profile)"
       stroke="#FFD700"
       strokeWidth="0.5"
     />
     <defs>
-      <linearGradient id="star-gradient-profile" x1="12" y1="2" x2="12" y2="21.02" gradientUnits="userSpaceOnUse">
+      <linearGradient
+        id="star-gradient-profile"
+        x1="12"
+        y1="2"
+        x2="12"
+        y2="21.02"
+        gradientUnits="userSpaceOnUse"
+      >
         <stop stopColor="#FFD700" />
         <stop offset="1" stopColor="#FFA500" />
       </linearGradient>
@@ -33,14 +41,36 @@ export const ProfilePage = () => {
   const { user } = useTelegram();
   const { apiUser, loading: apiLoading } = useTezpremium();
   const [moneyOpen, setMoneyOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const balanceDisplay =
     apiLoading && !apiUser ? '…' : String(apiUser?.balance ?? '0');
 
   const transactions = [
-    { id: 1, type: 'Stars Purchase', amount: '+100 Stars', date: 'Today, 14:20', icon: TelegramStar, color: 'text-yellow-500' },
-    { id: 2, type: 'Premium Subscription', amount: '-$11.99', date: 'Yesterday, 09:15', icon: ShieldCheck, color: 'text-purple-500' },
-    { id: 3, type: 'Gift Sent', amount: '-50 Stars', date: '2 days ago', icon: CreditCard, color: 'text-blue-500' },
+    {
+      id: 1,
+      type: 'Stars Purchase',
+      amount: '+100 Stars',
+      date: 'Today, 14:20',
+      icon: TelegramStar,
+      color: 'text-yellow-500',
+    },
+    {
+      id: 2,
+      type: 'Premium Subscription',
+      amount: '-$11.99',
+      date: 'Yesterday, 09:15',
+      icon: ShieldCheck,
+      color: 'text-purple-500',
+    },
+    {
+      id: 3,
+      type: 'Gift Sent',
+      amount: '-50 Stars',
+      date: '2 days ago',
+      icon: CreditCard,
+      color: 'text-blue-500',
+    },
   ];
 
   return (
@@ -80,19 +110,53 @@ export const ProfilePage = () => {
       </Card>
 
       <MoneyModal open={moneyOpen} onClose={() => setMoneyOpen(false)} />
+      <ProfileHistoryModal
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+      />
 
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">{t('profile.history')}</h3>
+          <h3 className="text-sm font-bold text-zinc-900 dark:text-white">
+            {t('profile.history')}
+          </h3>
           <History className="w-4 h-4 text-zinc-400" />
         </div>
+        <Card className="p-0 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setHistoryOpen(true)}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">
+                <Receipt className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  {t('history.openTitle')}
+                </p>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                  {t('history.openSubtitle')}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
+          </button>
+        </Card>
+
         <div className="space-y-2">
           {transactions.map((tx) => {
             const Icon = tx.icon;
             return (
-              <div key={tx.id} className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+              <div
+                key={tx.id}
+                className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800"
+              >
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center ${tx.color}`}>
+                  <div
+                    className={`w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center ${tx.color}`}
+                  >
                     <Icon className="w-5 h-5" />
                   </div>
                   <div>
@@ -101,7 +165,9 @@ export const ProfilePage = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${tx.amount.startsWith('+') ? 'text-green-500' : 'dark:text-white'}`}>
+                  <span
+                    className={`text-sm font-bold ${tx.amount.startsWith('+') ? 'text-green-500' : 'dark:text-white'}`}
+                  >
                     {tx.amount}
                   </span>
                   <ChevronRight className="w-4 h-4 text-zinc-300" />
