@@ -95,11 +95,57 @@ const NFT_FILTERS = [
   { key: 'old', label: 'Eski' },
 ];
 
-const ODDIY_FALLBACK = Object.keys(GIFT_ANIMATIONS).map((name, i) => ({
-  id: 200 + i,
-  name,
-  price: 45_000 + i * 18_000,
-}));
+const ODDIY_TYPE_FILTERS = [
+  { key: 'all', label: 'Barcha' },
+  { key: 'common', label: 'Common' },
+  { key: 'unique', label: 'Unique' },
+];
+
+const ODDIY_TYPE_BADGE_STYLE = {
+  common:
+    'border-zinc-200/50 bg-white/75 text-zinc-600 shadow-sm shadow-black/5 dark:border-zinc-600 dark:bg-zinc-800/75 dark:text-zinc-400',
+  unique:
+    'border-violet-400/35 bg-gradient-to-br from-violet-600/92 via-fuchsia-600/88 to-purple-700/92 text-white shadow-md shadow-violet-500/25',
+};
+
+function oddiyGiftTypeBadge(typeRaw) {
+  const label = String(typeRaw ?? '').trim();
+  const key = label.toLowerCase();
+  const className =
+    ODDIY_TYPE_BADGE_STYLE[key] ??
+    'border-zinc-200/50 bg-zinc-100/80 text-zinc-600 dark:border-zinc-600 dark:bg-zinc-800/80 dark:text-zinc-400';
+  return { label: label || '—', className };
+}
+
+/** PHP oldidan chiqindi bo‘lsa — birinchi `{` dan JSON */
+function parseJsonMaybeLeadingNoise(text) {
+  if (text == null || typeof text !== 'string') return null;
+  const i = text.indexOf('{');
+  if (i < 0) return null;
+  try {
+    return JSON.parse(text.slice(i));
+  } catch {
+    return null;
+  }
+}
+
+function normalizeOddiyGiftFromApi(g) {
+  if (!g || typeof g !== 'object') return null;
+  const idStr = g.id != null ? String(g.id).trim() : '';
+  if (!idStr || !/^\d+$/.test(idStr)) return null;
+  const name = String(g.name ?? '').trim();
+  if (!name) return null;
+  const price = Number(g.price);
+  const priceNum = Number.isFinite(price) && price >= 0 ? price : 0;
+  return {
+    ...g,
+    id: idStr,
+    name,
+    price: priceNum,
+    amount: g.amount != null ? String(g.amount) : '',
+    type: String(g.type ?? '').trim(),
+  };
+}
 
 const NFT_FALLBACK = [
   {
@@ -743,9 +789,10 @@ function formatNftName(nftId) {
 }
 
 export function GiftsMarketView({ onNavigateHome }) {
-  const { apiUser } = useTezpremium();
+  const { apiUser, refreshUser } = useTezpremium();
   const [mainTab, setMainTab] = useState('nft');
   const [oddiyFilter, setOddiyFilter] = useState('cheap');
+  const [oddiyTypeFilter, setOddiyTypeFilter] = useState('all');
   const [activeFilter, setActiveFilter] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
   const [gifts, setGifts] = useState([]);
@@ -781,18 +828,49 @@ export function GiftsMarketView({ onNavigateHome }) {
     setOddiyLoading(true);
     setOddiyError(null);
     try {
-      const res = await fetch(ODDIY_API_BASE);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.ok) setOddiyGifts(data.gifts || []);
-      else setOddiyError("Ma'lumot olishda xatolik");
+      const res = await fetch(ODDIY_API_BASE, {
+        headers: { Accept: 'application/json, */*' },
+        cache: 'no-store',
+      });
+      const rawText = await res.text();
+      const data = parseJsonMaybeLeadingNoise(rawText);
+      if (!data) {
+        setOddiyGifts([]);
+        setOddiyError("Javobni o'qib bo'lmadi");
+        return;
+      }
+      if (!res.ok) {
+        setOddiyGifts([]);
+        setOddiyError(`HTTP ${res.status}`);
+        return;
+      }
+      if (data.ok && Array.isArray(data.gifts)) {
+        const normalized = data.gifts.map(normalizeOddiyGiftFromApi).filter(Boolean);
+        setOddiyGifts(normalized);
+        if (normalized.length === 0 && data.gifts.length > 0) {
+          setOddiyError("Noto'g'ri gift ma'lumoti");
+        }
+      } else {
+        setOddiyGifts([]);
+        setOddiyError(data.message || data.error || "Ma'lumot olishda xatolik");
+      }
     } catch {
-      setOddiyGifts(ODDIY_FALLBACK);
-      setOddiyError(null);
+      setOddiyGifts([]);
+      setOddiyError("Serverga ulanib bo'lmadi");
     } finally {
       setOddiyLoading(false);
     }
   }, []);
+
+  const handleOddiyOrderSuccess = useCallback(() => {
+    void refreshUser();
+    void fetchOddiyGifts();
+  }, [refreshUser, fetchOddiyGifts]);
+
+  const handleNftOrderSuccess = useCallback(() => {
+    void refreshUser();
+    void fetchNftGifts(activeFilter);
+  }, [refreshUser, fetchNftGifts, activeFilter]);
 
   useEffect(() => {
     if (mainTab === 'nft') fetchNftGifts(activeFilter);
@@ -823,15 +901,25 @@ export function GiftsMarketView({ onNavigateHome }) {
 
   const canBuy = (price) => userBalance >= price;
 
-  const oddiyList = useMemo(
-    () =>
-      [...oddiyGifts].sort((a, b) => (oddiyFilter === 'cheap' ? a.price - b.price : b.price - a.price)),
-    [oddiyGifts, oddiyFilter]
-  );
+  const oddiyList = useMemo(() => {
+    let list = [...oddiyGifts];
+    if (oddiyTypeFilter !== 'all') {
+      list = list.filter(
+        (g) => String(g.type ?? '').trim().toLowerCase() === oddiyTypeFilter
+      );
+    }
+    list.sort((a, b) => (oddiyFilter === 'cheap' ? a.price - b.price : b.price - a.price));
+    return list;
+  }, [oddiyGifts, oddiyFilter, oddiyTypeFilter]);
 
   const minOddiyPrice = useMemo(
     () => (oddiyGifts.length > 0 ? Math.min(...oddiyGifts.map((g) => g.price)) : 0),
     [oddiyGifts]
+  );
+
+  const minVisibleOddiyPrice = useMemo(
+    () => (oddiyList.length > 0 ? Math.min(...oddiyList.map((g) => g.price)) : 0),
+    [oddiyList]
   );
 
   const minNftPrice = useMemo(
@@ -840,6 +928,7 @@ export function GiftsMarketView({ onNavigateHome }) {
   );
 
   const canAffordAny = gifts.length > 0 && userBalance >= minNftPrice;
+  const canAffordAnyOddiy = oddiyGifts.length > 0 && userBalance >= minOddiyPrice;
 
   return (
     <div className="min-h-0 space-y-4 pb-2">
@@ -857,7 +946,8 @@ export function GiftsMarketView({ onNavigateHome }) {
               <Wallet className="h-6 w-6" />
             </div>
           </div>
-          {mainTab === 'nft' && !nftLoading && gifts.length > 0 && !canAffordAny && (
+          {((mainTab === 'nft' && !nftLoading && gifts.length > 0 && !canAffordAny) ||
+            (mainTab === 'oddiy' && !oddiyLoading && oddiyGifts.length > 0 && !canAffordAnyOddiy)) && (
             <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
               <AlertCircle className="h-4 w-4 shrink-0 text-white/80" />
               <p className="text-xs text-white/80">Giftlar sotib olish uchun balansingizni to&apos;ldiring</p>
@@ -1033,6 +1123,23 @@ export function GiftsMarketView({ onNavigateHome }) {
             ))}
           </div>
 
+          <div className="scrollbar-hide flex gap-1.5 overflow-x-auto pb-0.5">
+            {ODDIY_TYPE_FILTERS.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setOddiyTypeFilter(f.key)}
+                className={`shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                  oddiyTypeFilter === f.key
+                    ? 'border-blue-500 bg-blue-500 text-white'
+                    : 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <Card className="p-0">
               <CardContent className="px-4 pb-4 pt-4">
@@ -1056,7 +1163,9 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <div className="min-w-0">
                     <p className="truncate text-xs text-zinc-500">Eng arzon</p>
                     <p className="mt-0.5 text-xl font-bold leading-none">
-                      {oddiyLoading || oddiyGifts.length === 0 ? '—' : minOddiyPrice.toLocaleString('uz-UZ')}
+                      {oddiyLoading || oddiyList.length === 0
+                        ? '—'
+                        : minVisibleOddiyPrice.toLocaleString('uz-UZ')}
                     </p>
                   </div>
                 </div>
@@ -1109,6 +1218,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                 <div className="grid grid-cols-2 gap-2.5">
                   {oddiyList.map((gift) => {
                     const affordable = canBuy(gift.price);
+                    const typeBadge = oddiyGiftTypeBadge(gift.type);
                     return (
                       <div
                         key={gift.id}
@@ -1117,6 +1227,11 @@ export function GiftsMarketView({ onNavigateHome }) {
                         }`}
                       >
                         <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-50 dark:from-zinc-800 dark:to-zinc-900">
+                          <span
+                            className={`pointer-events-none absolute right-2 top-2 z-30 max-w-[calc(100%-1rem)] truncate rounded-lg border px-2 py-0.5 text-[10px] font-semibold leading-tight backdrop-blur-md ${typeBadge.className}`}
+                          >
+                            {typeBadge.label}
+                          </span>
                           <GiftAnimation name={gift.name} />
                           {!affordable && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -1170,10 +1285,10 @@ export function GiftsMarketView({ onNavigateHome }) {
       )}
 
       {buyGift && (
-        <BuyOddiyModal gift={buyGift} onClose={() => setBuyGift(null)} onSuccess={() => {}} />
+        <BuyOddiyModal gift={buyGift} onClose={() => setBuyGift(null)} onSuccess={handleOddiyOrderSuccess} />
       )}
       {buyNftGift && (
-        <BuyNftModal gift={buyNftGift} onClose={() => setBuyNftGift(null)} onSuccess={() => {}} />
+        <BuyNftModal gift={buyNftGift} onClose={() => setBuyNftGift(null)} onSuccess={handleNftOrderSuccess} />
       )}
     </div>
   );
