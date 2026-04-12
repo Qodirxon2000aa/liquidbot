@@ -67,7 +67,11 @@ const resources = {
         balance: 'Balance',
         topup: 'Top up',
         history: 'Transaction History',
-        id: 'Telegram ID'
+        id: 'Telegram ID',
+        starsPurchase: 'Stars purchase',
+        noStarOrders: 'No orders yet',
+        starsOrdersHeader: 'Stars orders',
+        starsOrdersSubtitle: '{{count}} purchase(s) — tap to expand'
       },
       settings: {
         title: 'Settings',
@@ -114,8 +118,10 @@ const resources = {
         payViaBot: 'Use the bot to complete payment.'
       },
       history: {
-        openTitle: 'Payments & orders',
-        openSubtitle: 'API history, complete pending transfers',
+        openTitle: 'Payments',
+        openSubtitle: 'Top-ups & card transfers',
+        paymentsTitle: 'Payments',
+        paymentsCount: '{{count}} total',
         title: 'History',
         tabOrders: 'Orders ({{count}})',
         tabPayments: 'Payments ({{count}})',
@@ -203,7 +209,11 @@ const resources = {
         balance: 'Баланс',
         topup: 'Пополнить',
         history: 'История транзакций',
-        id: 'Telegram ID'
+        id: 'Telegram ID',
+        starsPurchase: 'Покупка Stars',
+        noStarOrders: 'Заказов пока нет',
+        starsOrdersHeader: 'Заказы Stars',
+        starsOrdersSubtitle: '{{count}} шт. — нажмите, чтобы открыть'
       },
       settings: {
         title: 'Настройки',
@@ -250,8 +260,10 @@ const resources = {
         payViaBot: 'Оформите оплату через бота.'
       },
       history: {
-        openTitle: 'Платежи и заказы',
-        openSubtitle: 'История API, завершите ожидающие переводы',
+        openTitle: 'Платежи',
+        openSubtitle: 'Пополнения и переводы',
+        paymentsTitle: 'Платежи',
+        paymentsCount: 'Всего: {{count}}',
         title: 'История',
         tabOrders: 'Заказы ({{count}})',
         tabPayments: 'Платежи ({{count}})',
@@ -339,7 +351,11 @@ const resources = {
         balance: 'Balans',
         topup: 'To\'ldirish',
         history: 'Tranzaksiyalar tarixi',
-        id: 'Telegram ID'
+        id: 'Telegram ID',
+        starsPurchase: 'Yulduz sotib olish',
+        noStarOrders: 'Hozircha buyurtma yo\'q',
+        starsOrdersHeader: 'Yulduz buyurtmalari',
+        starsOrdersSubtitle: '{{count}} ta — bosib oching'
       },
       settings: {
         title: 'Sozlamalar',
@@ -386,8 +402,10 @@ const resources = {
         payViaBot: 'To\'lovni bot orqali amalga oshiring.'
       },
       history: {
-        openTitle: 'To\'lovlar va buyurtmalar',
-        openSubtitle: 'API tarixi, kutilayotgan to\'lovlarni yakunlang',
+        openTitle: 'To\'lovlar',
+        openSubtitle: 'Hisob to\'ldirish va karta',
+        paymentsTitle: 'To\'lovlar',
+        paymentsCount: 'Jami: {{count}}',
         title: 'Tarix',
         tabOrders: 'Buyurtmalar ({{count}})',
         tabPayments: 'To\'lovlar ({{count}})',

@@ -1,13 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  X,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  ShoppingBag,
-  CreditCard,
-} from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Copy, CreditCard } from 'lucide-react';
 import { BodyPortal } from './BodyPortal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
@@ -64,7 +57,6 @@ export function ProfileHistoryModal({ open, onClose }) {
   const { user, webApp } = useTelegram();
   const {
     apiUser,
-    orders,
     payments,
     historyLoading,
     refreshHistory,
@@ -72,7 +64,6 @@ export function ProfileHistoryModal({ open, onClose }) {
   } = useTezpremium();
 
   const [expandedRow, setExpandedRow] = useState(null);
-  const [activeTab, setActiveTab] = useState('orders');
   const [timers, setTimers] = useState({});
   const [toast, setToast] = useState('');
   const [globalCardNumber, setGlobalCardNumber] = useState(
@@ -88,20 +79,6 @@ export function ProfileHistoryModal({ open, onClose }) {
     const s = String(u).replace(/^@/, '');
     return `@${s}`;
   }, [user?.username, t]);
-
-  const ordersHistory = useMemo(
-    () =>
-      (orders || []).map((o, index) => ({
-        id: `order-${o.order_id ?? o.id ?? index}`,
-        typeLabel: t('history.orderRow'),
-        amount: `${o.amount ?? 0} ⭐️`,
-        summa: `${formatUzNumber(o.summa ?? 0)} UZS`,
-        date: o.date || o.created_at || t('history.unknown'),
-        status: (o.status || 'pending').toLowerCase(),
-        sent: o.sent || o.recipient || '—',
-      })),
-    [orders, t]
-  );
 
   const paymentsHistory = useMemo(() => {
     return (payments || []).map((p, index) => {
@@ -123,8 +100,6 @@ export function ProfileHistoryModal({ open, onClose }) {
       };
     });
   }, [payments, t]);
-
-  const historyData = activeTab === 'orders' ? ordersHistory : paymentsHistory;
 
   useEffect(() => {
     if (!open) return;
@@ -156,7 +131,7 @@ export function ProfileHistoryModal({ open, onClose }) {
   }, [open]);
 
   useEffect(() => {
-    if (activeTab !== 'payments') return;
+    if (!open) return;
     const interval = setInterval(() => {
       setTimers(() => {
         const next = {};
@@ -170,7 +145,7 @@ export function ProfileHistoryModal({ open, onClose }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [activeTab, payments, paymentsHistory]);
+  }, [open, payments, paymentsHistory]);
 
   const haptic = (type = 'light') => {
     try {
@@ -227,165 +202,116 @@ export function ProfileHistoryModal({ open, onClose }) {
 
   return (
     <BodyPortal>
-    <div
-      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/70 p-0 sm:p-4"
-      onClick={handleClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-lg">
-          {toast}
-        </div>
-      )}
-
       <div
-        className="w-full max-w-md max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/70 p-0 sm:p-4"
+        onClick={handleClose}
+        role="dialog"
+        aria-modal="true"
       >
-        <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-blue-500 shrink-0 bg-zinc-200 dark:bg-zinc-700">
-              {profilePhotoUrl ? (
-                <img
-                  src={profilePhotoUrl}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-zinc-600">
-                  {(user?.first_name?.[0] || '?').toUpperCase()}
-                </div>
-              )}
+        {toast && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-lg">
+            {toast}
+          </div>
+        )}
+
+        <div
+          className="w-full max-w-md max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-blue-500 shrink-0 bg-zinc-200 dark:bg-zinc-700">
+                {profilePhotoUrl ? (
+                  <img
+                    src={profilePhotoUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm font-bold text-zinc-600">
+                    {(user?.first_name?.[0] || '?').toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
+                  {user?.first_name} {user?.last_name || ''}
+                </p>
+                <p className="text-xs text-zinc-500 truncate">{displayUsername}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
-                {user?.first_name} {user?.last_name || ''}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
+              aria-label={t('money.close')}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="px-4 pt-4 pb-2 shrink-0 flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                {t('history.paymentsTitle')}
+              </h2>
+              <p className="text-[10px] text-zinc-400 mt-0.5">
+                {t('history.paymentsCount', { count: paymentsHistory.length })}
               </p>
-              <p className="text-xs text-zinc-500 truncate">{displayUsername}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
-            aria-label={t('money.close')}
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
 
-        <div className="px-4 pt-4 pb-2 shrink-0">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-            {t('history.title')}
-          </h2>
-          <div className="flex gap-2 mt-3">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('orders');
-                setExpandedRow(null);
-              }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === 'orders'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-              }`}
-            >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              {t('history.tabOrders', { count: ordersHistory.length })}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab('payments');
-                setExpandedRow(null);
-              }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === 'payments'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
-              }`}
-            >
-              <CreditCard className="w-3.5 h-3.5" />
-              {t('history.tabPayments', { count: paymentsHistory.length })}
-            </button>
-          </div>
-        </div>
+          <div className="flex-1 overflow-y-auto px-4 pb-6 min-h-0">
+            {historyLoading ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-10 h-10 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                <p className="text-sm text-zinc-500">{t('history.loading')}</p>
+              </div>
+            ) : paymentsHistory.length === 0 ? (
+              <p className="text-center text-sm text-zinc-500 py-12">
+                {t('history.emptyPayments')}
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {paymentsHistory.map((item) => {
+                  const expanded = expandedRow === item.id;
+                  const timerLeft = timers[item.id] ?? item.timeRemaining;
+                  const pendingPayment = item.status === 'pending';
+                  const cardToShow =
+                    pendingPayment && (item.cardFromApi || globalCardNumber);
 
-        <div className="flex-1 overflow-y-auto px-4 pb-6 min-h-0">
-          {historyLoading ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="w-10 h-10 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-              <p className="text-sm text-zinc-500">{t('history.loading')}</p>
-            </div>
-          ) : historyData.length === 0 ? (
-            <p className="text-center text-sm text-zinc-500 py-12">
-              {activeTab === 'orders'
-                ? t('history.emptyOrders')
-                : t('history.emptyPayments')}
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {historyData.map((item) => {
-                const expanded = expandedRow === item.id;
-                const timerLeft =
-                  activeTab === 'payments'
-                    ? timers[item.id] ?? item.timeRemaining
-                    : null;
-                const pendingPayment =
-                  activeTab === 'payments' && item.status === 'pending';
-                const cardToShow =
-                  pendingPayment &&
-                  (item.cardFromApi || globalCardNumber);
-
-                return (
-                  <li
-                    key={item.id}
-                    className="rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleRow(item.id)}
-                      className="w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-colors"
+                  return (
+                    <li
+                      key={item.id}
+                      className="rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
                     >
-                      <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300 shrink-0 max-w-[28%] truncate">
-                        {item.typeLabel}
-                      </span>
-                      <span className="text-xs font-bold text-zinc-900 dark:text-white flex-1 min-w-0 truncate">
-                        {item.amount}
-                      </span>
-                      <span className="text-[10px] text-zinc-500 truncate max-w-[32%]">
-                        {item.date}
-                      </span>
-                      {expanded ? (
-                        <ChevronUp className="w-4 h-4 text-zinc-400 shrink-0" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
-                      )}
-                    </button>
-
-                    {expanded && (
-                      <div className="px-3 pb-3 pt-0 border-t border-zinc-200/60 dark:border-zinc-700/60 space-y-3">
-                        {activeTab === 'orders' && (
-                          <div className="text-xs text-zinc-600 dark:text-zinc-400 space-y-1 pt-2">
-                            <p>
-                              <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                                {t('history.orderSum')}:
-                              </span>{' '}
-                              {item.summa}
-                            </p>
-                            <p>
-                              <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                                {t('history.recipient')}:
-                              </span>{' '}
-                              {item.sent}
-                            </p>
-                          </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleRow(item.id)}
+                        className="w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-colors"
+                      >
+                        <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300 shrink-0 max-w-[28%] truncate">
+                          {item.typeLabel}
+                        </span>
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white flex-1 min-w-0 truncate">
+                          {item.amount}
+                        </span>
+                        <span className="text-[10px] text-zinc-500 truncate max-w-[32%]">
+                          {item.date}
+                        </span>
+                        {expanded ? (
+                          <ChevronUp className="w-4 h-4 text-zinc-400 shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
                         )}
+                      </button>
 
-                        {activeTab === 'payments' && (
+                      {expanded && (
+                        <div className="px-3 pb-3 pt-0 border-t border-zinc-200/60 dark:border-zinc-700/60 space-y-3">
                           <div className="text-xs text-zinc-600 dark:text-zinc-400 space-y-2 pt-2">
                             <p>
                               <span className="font-bold text-zinc-800 dark:text-zinc-200">
@@ -444,23 +370,22 @@ export function ProfileHistoryModal({ open, onClose }) {
                               </div>
                             )}
                           </div>
-                        )}
 
-                        <span
-                          className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${statusClass(item.status)}`}
-                        >
-                          {item.status}
-                        </span>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+                          <span
+                            className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${statusClass(item.status)}`}
+                          >
+                            {item.status}
+                          </span>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </BodyPortal>
   );
 }

@@ -1,6 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wallet, History, ChevronRight, Receipt, CreditCard, ShieldCheck } from 'lucide-react';
+import {
+  Wallet,
+  History,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+  ShieldCheck,
+} from 'lucide-react';
 import { Card, Button } from '../components/UI';
 import { MoneyModal } from '../components/MoneyModal';
 import { ProfileHistoryModal } from '../components/ProfileHistoryModal';
@@ -39,39 +47,42 @@ const TelegramStar = ({ className = 'w-6 h-6' }) => (
 export const ProfilePage = () => {
   const { t } = useTranslation();
   const { user } = useTelegram();
-  const { apiUser, loading: apiLoading } = useTezpremium();
+  const { apiUser, orders, loading: apiLoading } = useTezpremium();
   const [moneyOpen, setMoneyOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [starsOpen, setStarsOpen] = useState(false);
 
   const balanceDisplay =
     apiLoading && !apiUser ? '…' : String(apiUser?.balance ?? '0');
 
-  const transactions = [
-    {
-      id: 1,
-      type: 'Stars Purchase',
-      amount: '+100 Stars',
-      date: 'Today, 14:20',
-      icon: TelegramStar,
-      color: 'text-yellow-500',
-    },
-    {
-      id: 2,
-      type: 'Premium Subscription',
-      amount: '-$11.99',
-      date: 'Yesterday, 09:15',
-      icon: ShieldCheck,
-      color: 'text-purple-500',
-    },
-    {
-      id: 3,
-      type: 'Gift Sent',
-      amount: '-50 Stars',
-      date: '2 days ago',
-      icon: CreditCard,
-      color: 'text-blue-500',
-    },
-  ];
+  const otherActivity = useMemo(
+    () => [
+      {
+        id: 'demo-premium',
+        type: 'Premium Subscription',
+        amount: '-$11.99',
+        date: 'Yesterday, 09:15',
+        icon: ShieldCheck,
+        color: 'text-purple-500',
+      },
+      {
+        id: 'demo-gift',
+        type: 'Gift Sent',
+        amount: '-50 Stars',
+        date: '2 days ago',
+        icon: CreditCard,
+        color: 'text-blue-500',
+      },
+    ],
+    []
+  );
+
+  const formatOrderSumma = (summa) => {
+    if (summa == null || summa === '') return null;
+    const num = Number(String(summa).replace(/\s/g, ''));
+    if (Number.isNaN(num)) return String(summa);
+    return `${num.toLocaleString('ru-RU')} UZS`;
+  };
 
   return (
     <div className="space-y-6">
@@ -122,17 +133,95 @@ export const ProfilePage = () => {
           </h3>
           <History className="w-4 h-4 text-zinc-400" />
         </div>
-        <Card className="p-0 overflow-hidden">
+        <div className="space-y-2">
+          {(orders || []).length === 0 ? (
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 border-dashed">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-yellow-500">
+                  <TelegramStar className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold dark:text-white">
+                    {t('profile.starsPurchase')}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">{t('profile.noStarOrders')}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setStarsOpen((v) => !v)}
+                className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
+              >
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-yellow-500 shrink-0">
+                    <TelegramStar className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                      {t('profile.starsOrdersHeader')}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                      {t('profile.starsOrdersSubtitle', { count: (orders || []).length })}
+                    </p>
+                  </div>
+                </div>
+                {starsOpen ? (
+                  <ChevronUp className="w-5 h-5 text-zinc-400 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-zinc-400 shrink-0" />
+                )}
+              </button>
+              {starsOpen && (
+                <div className="space-y-2 pl-1 sm:pl-2 border-l-2 border-amber-200/80 dark:border-amber-700/50 ml-5 sm:ml-6 py-1">
+                  {(orders || []).map((o, index) => {
+                    const sent = o.sent || o.recipient;
+                    const meta = [o.date || o.created_at, sent].filter(Boolean).join(' · ');
+                    const summaStr = formatOrderSumma(o.summa);
+                    return (
+                      <div
+                        key={`order-${o.order_id ?? o.id ?? index}`}
+                        className="flex items-center justify-between p-3 sm:p-4 bg-zinc-50/90 dark:bg-zinc-800/60 rounded-xl border border-zinc-100 dark:border-zinc-700/80"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-lg bg-white dark:bg-zinc-900 flex items-center justify-center text-yellow-500 shrink-0">
+                            <TelegramStar className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold dark:text-white">
+                              {t('profile.starsPurchase')}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 truncate">
+                              {meta || t('history.unknown')}
+                            </p>
+                            {summaStr && (
+                              <p className="text-[10px] text-zinc-400 mt-0.5">{summaStr}</p>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold text-green-500 shrink-0 ml-2">
+                          {o.amount ?? 0} ⭐
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
           <button
             type="button"
             onClick={() => setHistoryOpen(true)}
-            className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
+            className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-colors"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400">
-                <Receipt className="w-5 h-5" />
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-violet-500 dark:text-violet-400 shrink-0">
+                <CreditCard className="w-5 h-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-bold text-zinc-900 dark:text-white">
                   {t('history.openTitle')}
                 </p>
@@ -143,10 +232,8 @@ export const ProfilePage = () => {
             </div>
             <ChevronRight className="w-5 h-5 text-zinc-300 shrink-0" />
           </button>
-        </Card>
 
-        <div className="space-y-2">
-          {transactions.map((tx) => {
+          {otherActivity.map((tx) => {
             const Icon = tx.icon;
             return (
               <div
