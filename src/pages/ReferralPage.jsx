@@ -1,20 +1,52 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Share2, Copy, Users, Trophy } from 'lucide-react';
 import { Card, Button } from '../components/UI';
-import { motion } from 'motion/react';
+import { useTezpremium } from '../context/TezpremiumContext';
 
 export const ReferralPage = () => {
   const { t } = useTranslation();
-  const referralLink = 'https://t.me/app?start=12345';
+  const { apiFetch } = useTezpremium();
+  const [invitedFriends, setInvitedFriends] = useState(0);
+  const [shareLink, setShareLink] = useState('');
+  const [earnedAmount, setEarnedAmount] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchReferrals = async () => {
+      try {
+        const data = await apiFetch('referals.php');
+        if (!cancelled && data?.ok) {
+          setInvitedFriends(Number(data.ref_count || 0));
+          setShareLink(String(data.share_link || ''));
+          setEarnedAmount(Number(data.earned || data.bonus || 0));
+        }
+      } catch {
+        if (!cancelled) {
+          setInvitedFriends(0);
+          setShareLink('');
+          setEarnedAmount(0);
+        }
+      }
+    };
+    fetchReferrals();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiFetch]);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralLink);
-    // In real TWA we would use tg.showToast or similar
+    if (!shareLink) return;
+    navigator.clipboard.writeText(shareLink).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
   };
 
-  const shareLink = () => {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Join me on this awesome app!')}`;
-    window.open(url, '_blank');
+  const handleInvite = () => {
+    if (!shareLink) return;
+    window.open(shareLink, '_blank');
   };
 
   return (
@@ -29,24 +61,26 @@ export const ReferralPage = () => {
         </div>
         
         <div className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl flex items-center justify-between gap-2 border border-zinc-100 dark:border-zinc-700">
-          <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 truncate">{referralLink}</span>
+          <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 truncate">
+            {shareLink || '—'}
+          </span>
           <button onClick={copyToClipboard} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
-            <Copy className="w-4 h-4 text-zinc-500" />
+            <Copy className={`w-4 h-4 ${copied ? 'text-green-500' : 'text-zinc-500'}`} />
           </button>
         </div>
 
-        <Button onClick={shareLink}>{t('referral.invite')}</Button>
+        <Button onClick={handleInvite}>{t('referral.invite')}</Button>
       </Card>
 
       <div className="grid grid-cols-2 gap-4">
         <Card className="flex flex-col items-center gap-2 py-6">
           <Users className="w-6 h-6 text-blue-500" />
-          <span className="text-2xl font-bold dark:text-white">12</span>
+          <span className="text-2xl font-bold dark:text-white">{invitedFriends}</span>
           <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">{t('referral.invited')}</span>
         </Card>
         <Card className="flex flex-col items-center gap-2 py-6">
           <Trophy className="w-6 h-6 text-yellow-500" />
-          <span className="text-2xl font-bold dark:text-white">450</span>
+          <span className="text-2xl font-bold dark:text-white">{earnedAmount.toLocaleString('uz-UZ')}</span>
           <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">{t('referral.earned')}</span>
         </Card>
       </div>
