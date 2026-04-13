@@ -329,11 +329,25 @@ export const HomePage = () => {
                 <Input placeholder="@username" value={username} onChange={setUsername} />
               ) : (
                 <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
-                  <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
+                    {userInfo.photo ? (
+                      <img
+                        src={userInfo.photo}
+                        alt=""
+                        className="h-8 w-8 shrink-0 rounded-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600/20 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                        {String(userInfo.name || userInfo.first_name || userInfo.username || '?')[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
                       {userInfo.name || userInfo.first_name || userInfo.username}
                     </p>
                     <p className="text-xs text-zinc-500">@{userInfo.username}</p>
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -501,11 +515,25 @@ export const HomePage = () => {
                 <Input placeholder="@username" value={username} onChange={setUsername} />
               ) : (
                 <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
-                  <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
+                    {userInfo.photo ? (
+                      <img
+                        src={userInfo.photo}
+                        alt=""
+                        className="h-8 w-8 shrink-0 rounded-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600/20 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                        {String(userInfo.name || userInfo.first_name || userInfo.username || '?')[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
                       {userInfo.name || userInfo.first_name || userInfo.username}
                     </p>
                     <p className="text-xs text-zinc-500">@{userInfo.username}</p>
+                    </div>
                   </div>
                   <button
                     type="button"
