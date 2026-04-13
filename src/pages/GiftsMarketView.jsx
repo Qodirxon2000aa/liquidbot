@@ -586,7 +586,8 @@ function CommentSection({
               placeholder="Tabrik yoki xabar yozing..."
               maxLength={200}
               rows={3}
-              className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-400/50 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+              className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-400/50 focus:border-blue-500 focus:bg-zinc-50 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:bg-zinc-900"
+              style={{ WebkitAppearance: 'none', appearance: 'none' }}
             />
             <p className="mt-1 text-right text-[10px] text-zinc-400">{comment.length}/200</p>
           </motion.div>

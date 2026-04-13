@@ -10,6 +10,7 @@ export const ReferralPage = () => {
   const [invitedFriends, setInvitedFriends] = useState(0);
   const [shareLink, setShareLink] = useState('');
   const [earnedAmount, setEarnedAmount] = useState(0);
+  const [friends, setFriends] = useState([]);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -21,12 +22,14 @@ export const ReferralPage = () => {
           setInvitedFriends(Number(data.ref_count || 0));
           setShareLink(String(data.share_link || ''));
           setEarnedAmount(Number(data.earned || data.bonus || 0));
+          setFriends(Array.isArray(data.friends) ? data.friends : []);
         }
       } catch {
         if (!cancelled) {
           setInvitedFriends(0);
           setShareLink('');
           setEarnedAmount(0);
+          setFriends([]);
         }
       }
     };
@@ -88,20 +91,37 @@ export const ReferralPage = () => {
       <div className="space-y-3">
         <h3 className="text-sm font-bold text-zinc-900 dark:text-white ml-1">{t('referral.stats')}</h3>
         <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                  <img src={`https://picsum.photos/seed/user${i}/100`} alt="User" referrerPolicy="no-referrer" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold dark:text-white">User #{i}452</p>
-                  <p className="text-[10px] text-zinc-500">Joined 2 days ago</p>
-                </div>
-              </div>
-              <span className="text-sm font-bold text-green-500">+50</span>
+          {friends.length === 0 ? (
+            <div className="rounded-xl border border-zinc-100 bg-white p-3 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
+              Taklif qilingan do&apos;stlar hozircha yo&apos;q
             </div>
-          ))}
+          ) : (
+            friends.map((friend, idx) => {
+              const uid = String(friend?.user_id ?? '');
+              const nameRaw = friend?.name;
+              const displayName =
+                typeof nameRaw === 'string' && nameRaw.trim()
+                  ? nameRaw.trim()
+                  : `User #${uid || idx + 1}`;
+              return (
+                <div
+                  key={`${uid || idx}-${displayName}`}
+                  className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-zinc-500">
+                      {displayName[0]?.toUpperCase() || '?'}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold dark:text-white">{displayName}</p>
+                      <p className="text-[10px] text-zinc-500">ID: {uid || '—'}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-emerald-500">Taklif qilingan</span>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
