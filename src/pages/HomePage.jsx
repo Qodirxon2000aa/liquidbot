@@ -279,14 +279,19 @@ export const HomePage = () => {
             </div>
 
             <div className="space-y-2">
-              <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
-              <button
-                type="button"
-                onClick={handleSelf}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              >
-                O&apos;zimga
-              </button>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  {t('home.username')}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSelf}
+                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                >
+                  O&apos;zimga
+                </button>
+              </div>
+              <Input placeholder="@username" value={username} onChange={setUsername} />
             </div>
 
             <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/95 via-white to-orange-50/60 p-4 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/15 dark:border-amber-500/25 dark:from-amber-950/35 dark:via-zinc-900 dark:to-orange-950/25 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] dark:ring-amber-500/10">
@@ -415,14 +420,19 @@ export const HomePage = () => {
             </div>
 
             <div className="space-y-2">
-              <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
-              <button
-                type="button"
-                onClick={handleSelf}
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              >
-                O&apos;zimga
-              </button>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  {t('home.username')}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSelf}
+                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                >
+                  O&apos;zimga
+                </button>
+              </div>
+              <Input placeholder="@username" value={username} onChange={setUsername} />
             </div>
 
             <div className="space-y-2">
