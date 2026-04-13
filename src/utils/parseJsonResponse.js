@@ -1,7 +1,7 @@
 /** PHP oldi/oxirida chiqindi bo‘lsa ham JSON objectni ajratib parse qiladi */
 
 function stripBomAndTrim(text) {
-  return String(text).replace(/^\uFEFF/, '').trimStart();
+  return String(text).replace(/^\uFEFF/, '').trim();
 }
 
 function tryParseBalancedObject(text, start) {
@@ -40,34 +40,93 @@ function tryParseBalancedObject(text, start) {
   return null;
 }
 
+function isPlainObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+
 /**
- * Matndan bir yoki bir nechta `{...}` dan birinchisini emas, har birini sinab,
- * to‘g‘ri JSON bo‘lganini qaytaradi (prefixda noto‘g‘ri `{` bo‘lsa ham).
+ * Har bir `{` dan boshlab sinab, barcha muvaffaqiyatli objectlarni yig‘adi.
+ * Oldinda log/JSON chiqindi bo‘lsa, birinchi parse noto‘g‘ri object bo‘lishi mumkin —
+ * shuning uchun `ok` kaliti borlaridan oxirgisini tanlaymiz (asosan API javobi).
+ */
+function collectJsonObjectsFromText(normalized) {
+  const candidates = [];
+  let searchFrom = 0;
+  while (searchFrom < normalized.length) {
+    const start = normalized.indexOf('{', searchFrom);
+    if (start < 0) break;
+
+    try {
+      const o = JSON.parse(normalized.slice(start));
+      if (isPlainObject(o)) candidates.push(o);
+    } catch {
+      /* trailing noise yoki yaroqsiz — balanced sinaymiz */
+    }
+
+    const fromBraces = tryParseBalancedObject(normalized, start);
+    if (isPlainObject(fromBraces)) {
+      candidates.push(fromBraces);
+    }
+
+    searchFrom = start + 1;
+  }
+  return candidates;
+}
+
+function dedupeObjects(objects) {
+  const seen = new Set();
+  const unique = [];
+  for (const o of objects) {
+    let key;
+    try {
+      key = JSON.stringify(o);
+    } catch {
+      continue;
+    }
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(o);
+    }
+  }
+  return unique;
+}
+
+/**
+ * Matndan JSON object (yoki noise keyin/asosiy javob).
  */
 export function parseJsonMaybeLeadingNoise(text) {
   if (text == null || typeof text !== 'string') return null;
   const normalized = stripBomAndTrim(text);
   if (!normalized) return null;
 
-  let searchFrom = 0;
-  while (searchFrom < normalized.length) {
-    const start = normalized.indexOf('{', searchFrom);
-    if (start < 0) return null;
-
-    try {
-      return JSON.parse(normalized.slice(start));
-    } catch {
-      /* continue */
-    }
-
-    const fromBraces = tryParseBalancedObject(normalized, start);
-    if (fromBraces && typeof fromBraces === 'object') {
-      return fromBraces;
-    }
-
-    searchFrom = start + 1;
+  try {
+    const direct = JSON.parse(normalized);
+    if (isPlainObject(direct) || Array.isArray(direct)) return direct;
+    return null;
+  } catch {
+    /* noise yoki faqat qismi JSON */
   }
-  return null;
+
+  const collected = collectJsonObjectsFromText(normalized);
+  const unique = dedupeObjects(collected);
+  if (unique.length === 0) {
+    const bracket = normalized.indexOf('[');
+    if (bracket >= 0) {
+      try {
+        return JSON.parse(normalized.slice(bracket));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  const withOk = unique.filter((o) => Object.prototype.hasOwnProperty.call(o, 'ok'));
+  if (withOk.length > 0) {
+    return withOk[withOk.length - 1];
+  }
+
+  return unique[unique.length - 1];
 }
 
 /**
