@@ -1,8 +1,10 @@
-import { useState, useId } from 'react';
+import { useEffect, useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles } from 'lucide-react';
 import { Button, Input, Tabs } from '../components/UI';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTezpremium } from '../context/TezpremiumContext';
+import { useTelegram } from '../hooks/useTelegram';
 
 const TelegramStar = ({ className = 'w-6 h-6' }) => {
   const gid = useId().replace(/:/g, '');
@@ -31,32 +33,41 @@ const TelegramStar = ({ className = 'w-6 h-6' }) => {
 };
 
 const STAR_PRIMARY = [
-  { amount: 50, price: '$0.99' },
-  { amount: 100, price: '$1.89' },
-  { amount: 500, price: '$8.99' },
+  { amount: 50 },
+  { amount: 100 },
+  { amount: 500 },
 ];
 
 const STAR_EXTRA = [
-  { amount: 1000, price: '$16.99' },
-  { amount: 2500, price: '$39.99' },
-  { amount: 5000, price: '$74.99' },
+  { amount: 1000 },
+  { amount: 5000 },
+  { amount: 10000 },
 ];
 
 const PREMIUM_PLANS = [
-  { id: 'p3', months: 3, price: '$11.99', discount: '15%', note: 'HADYA ORQALI' },
-  { id: 'p6', months: 6, price: '$19.99', discount: '25%', note: 'HADYA ORQALI' },
-  { id: 'p12', months: 12, price: '$35.99', discount: '40%', note: 'HADYA ORQALI' },
-  { id: 'p12-login', months: 12, price: '$29.99', discount: '50%', note: 'AKKOUNTGA KIRIB' },
+  { id: 'p3', months: 3, discount: '20%', note: 'HADYA ORQALI' },
+  { id: 'p6', months: 6, discount: '37%', note: 'HADYA ORQALI' },
+  { id: 'p12', months: 12, discount: '42%', note: 'HADYA ORQALI' },
 ];
 
 export const HomePage = () => {
   const { t } = useTranslation();
+  const { user } = useTelegram();
+  const { apiUser, createOrder, createPremiumOrder, refreshUser } = useTezpremium();
   const tabLabels = [t('home.stars'), t('home.premium')];
   const [tabIdx, setTabIdx] = useState(0);
   const activeTab = tabLabels[tabIdx];
 
   const [username, setUsername] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [toast, setToast] = useState({ show: false, ok: true, text: '' });
+  const [sending, setSending] = useState(false);
+  const [loadingPrices, setLoadingPrices] = useState(true);
+  const [pricePerStar, setPricePerStar] = useState(0);
+  const [premiumPrices, setPremiumPrices] = useState({
+    3: 170000,
+    6: 225000,
+    12: 295000,
+  });
 
   const [starsMoreOpen, setStarsMoreOpen] = useState(false);
   const [starsCustomInput, setStarsCustomInput] = useState('');
@@ -64,14 +75,35 @@ export const HomePage = () => {
   const [starsSelected, setStarsSelected] = useState(() => ({
     type: 'preset',
     amount: STAR_PRIMARY[0].amount,
-    price: STAR_PRIMARY[0].price,
   }));
 
   const [premSelected, setPremSelected] = useState(() => PREMIUM_PLANS[0]);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch('https://tezpremium.uz/uzbstar/settings.php')
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d?.ok || !d?.settings || cancelled) return;
+        if (d.settings.price) setPricePerStar(Number(d.settings.price) || 0);
+        setPremiumPrices({
+          3: Number(d.settings['3oylik']) || 170000,
+          6: Number(d.settings['6oylik']) || 225000,
+          12: Number(d.settings['12oylik']) || 295000,
+        });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingPrices(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const selectStarPreset = (pkg) => {
     setStarsLastPreset(pkg);
-    setStarsSelected({ type: 'preset', amount: pkg.amount, price: pkg.price });
+    setStarsSelected({ type: 'preset', amount: pkg.amount });
     setStarsCustomInput('');
   };
 
@@ -82,7 +114,6 @@ export const HomePage = () => {
       setStarsSelected({
         type: 'preset',
         amount: starsLastPreset.amount,
-        price: starsLastPreset.price,
       });
       return;
     }
@@ -96,9 +127,81 @@ export const HomePage = () => {
 
   const isPremPresetActive = (pkg) => premSelected.id === pkg.id;
 
-  const handleBuy = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+  const balance = Number(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
+  const starsAmount = Number(starsSelected.amount || 0);
+  const starsOverall = starsAmount * pricePerStar;
+  const premOverall = Number(premiumPrices[premSelected.months] || 0);
+
+  const showToast = (ok, text) => {
+    setToast({ show: true, ok, text });
+    setTimeout(() => setToast({ show: false, ok: true, text: '' }), 3000);
+  };
+
+  const handleSelf = () => {
+    if (user?.username) {
+      setUsername(`@${String(user.username).replace(/^@/, '')}`);
+    }
+  };
+
+  const handleBuy = async () => {
+    const cleanUsername = String(username || '').trim();
+    if (!cleanUsername || cleanUsername.replace(/^@/, '').length < 4) {
+      showToast(false, 'Username kiriting');
+      return;
+    }
+
+    if (tabIdx === 0) {
+      if (starsAmount < 50 || starsAmount > 10000) {
+        showToast(false, "50 - 10 000 oralig'ida bo'lishi kerak");
+        return;
+      }
+      if (!pricePerStar || loadingPrices) {
+        showToast(false, "Narxlar hali yuklanmadi");
+        return;
+      }
+      if (balance < starsOverall) {
+        showToast(false, 'Balans yetarli emas');
+        return;
+      }
+      setSending(true);
+      const res = await createOrder({
+        amount: starsAmount,
+        sent: cleanUsername,
+        type: 'Stars',
+        overall: starsOverall,
+      });
+      setSending(false);
+      if (res?.ok) {
+        await refreshUser();
+        setUsername('');
+        setStarsCustomInput('');
+        setStarsSelected({ type: 'preset', amount: STAR_PRIMARY[0].amount });
+        showToast(true, 'Telegram Stars yuborildi');
+      } else {
+        showToast(false, res?.message || 'Buyurtma bajarilmadi');
+      }
+      return;
+    }
+
+    if (balance < premOverall) {
+      showToast(false, 'Balans yetarli emas');
+      return;
+    }
+    setSending(true);
+    const result = await createPremiumOrder({
+      months: premSelected.months,
+      sent: cleanUsername.startsWith('@') ? cleanUsername : `@${cleanUsername}`,
+      overall: premOverall,
+    });
+    setSending(false);
+    if (result?.ok) {
+      await refreshUser();
+      setUsername('');
+      setPremSelected(PREMIUM_PLANS[0]);
+      showToast(true, 'Telegram Premium yuborildi');
+    } else {
+      showToast(false, result?.message || 'Premium yuborilmadi');
+    }
   };
 
   const starsCustomInvalid =
@@ -108,11 +211,11 @@ export const HomePage = () => {
       parseInt(starsCustomInput, 10) < 1);
 
   const starsBuyLabel =
-    starsSelected.type === 'preset'
-      ? `${t('home.buy')} · ${starsSelected.price}`
+    starsSelected.type === 'preset' || !pricePerStar
+      ? `${t('home.buy')} · ${(starsAmount * pricePerStar).toLocaleString('uz-UZ')} UZS`
       : `${t('home.buy')} · ${starsSelected.amount} ★`;
 
-  const premBuyLabel = `${t('home.buy')} · ${premSelected.price}`;
+  const premBuyLabel = `${t('home.buy')} · ${premOverall.toLocaleString('uz-UZ')} UZS`;
 
   const rowStar = (active) =>
     active
@@ -175,7 +278,16 @@ export const HomePage = () => {
               </div>
             </div>
 
-            <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
+            <div className="space-y-2">
+              <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
+              <button
+                type="button"
+                onClick={handleSelf}
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                O&apos;zimga
+              </button>
+            </div>
 
             <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/95 via-white to-orange-50/60 p-4 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/15 dark:border-amber-500/25 dark:from-amber-950/35 dark:via-zinc-900 dark:to-orange-950/25 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] dark:ring-amber-500/10">
               <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-400/15 blur-2xl dark:bg-amber-500/10" aria-hidden />
@@ -231,7 +343,9 @@ export const HomePage = () => {
                     <span className="text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
                       {pkg.amount} Stars
                     </span>
-                    <span className="shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">{pkg.price}</span>
+                    <span className="shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                      {(pkg.amount * pricePerStar).toLocaleString('uz-UZ')} UZS
+                    </span>
                   </div>
                 </button>
               ))}
@@ -259,7 +373,7 @@ export const HomePage = () => {
                             {pkg.amount} Stars
                           </span>
                           <span className="shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                            {pkg.price}
+                            {(pkg.amount * pricePerStar).toLocaleString('uz-UZ')} UZS
                           </span>
                         </div>
                       </button>
@@ -278,7 +392,7 @@ export const HomePage = () => {
               </button>
             </div>
 
-            <Button onClick={handleBuy} disabled={starsCustomInvalid} className="text-sm">
+            <Button onClick={handleBuy} disabled={starsCustomInvalid || sending || loadingPrices} className="text-sm">
               {starsBuyLabel}
             </Button>
           </motion.div>
@@ -300,7 +414,16 @@ export const HomePage = () => {
               </div>
             </div>
 
-            <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
+            <div className="space-y-2">
+              <Input label={t('home.username')} placeholder="@username" value={username} onChange={setUsername} />
+              <button
+                type="button"
+                onClick={handleSelf}
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              >
+                O&apos;zimga
+              </button>
+            </div>
 
             <div className="space-y-2">
               <p className="ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
@@ -337,14 +460,16 @@ export const HomePage = () => {
                           {pkg.note}
                         </span>
                       )}
-                      <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">{pkg.price}</span>
+                      <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                        {(premiumPrices[pkg.months] || 0).toLocaleString('uz-UZ')} UZS
+                      </span>
                     </div>
                   </div>
                 </button>
               ))}
             </div>
 
-            <Button onClick={handleBuy} className="text-sm">
+            <Button onClick={handleBuy} disabled={sending || loadingPrices} className="text-sm">
               {premBuyLabel}
             </Button>
           </motion.div>
@@ -352,16 +477,16 @@ export const HomePage = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showSuccess && (
+        {toast.show && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-4 right-4 z-[100] flex justify-center"
           >
-            <div className="flex items-center gap-2 rounded-2xl bg-green-500 px-6 py-3 text-white shadow-lg">
+            <div className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-white shadow-lg ${toast.ok ? 'bg-green-500' : 'bg-red-500'}`}>
               <CheckCircle2 className="h-5 w-5" />
-              <span className="font-bold">{t('home.success')}</span>
+              <span className="font-bold">{toast.text || t('home.success')}</span>
             </div>
           </motion.div>
         )}

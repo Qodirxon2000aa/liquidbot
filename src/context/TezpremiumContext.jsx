@@ -107,6 +107,49 @@ export function TezpremiumProvider({ children }) {
     }
   }, [apiFetch]);
 
+  const createOrder = useCallback(
+    async ({ amount, sent, type, overall }) => {
+      try {
+        const data = await apiFetch('order.php', {
+          amount,
+          sent: `@${String(sent ?? '').replace(/^@/, '')}`,
+          type,
+          overall,
+        });
+        if (data?.ok) {
+          await fetchUserFromApi();
+          await fetchOrders();
+          return { ok: true, ...data };
+        }
+        return { ok: false, message: data?.message || 'Buyurtma bajarilmadi' };
+      } catch (e) {
+        return { ok: false, message: e?.message || 'Server xatosi' };
+      }
+    },
+    [apiFetch, fetchUserFromApi, fetchOrders]
+  );
+
+  const createPremiumOrder = useCallback(
+    async ({ months, sent, overall }) => {
+      try {
+        const data = await apiFetch('premium.php', {
+          amount: months,
+          sent: String(sent ?? '').replace(/^@/, ''),
+          overall,
+        });
+        if (data?.ok) {
+          await fetchUserFromApi();
+          await fetchOrders();
+          return { ok: true, ...data };
+        }
+        return { ok: false, message: data?.message || 'Premium yuborilmadi' };
+      } catch (e) {
+        return { ok: false, message: e?.message || 'Server xatosi' };
+      }
+    },
+    [apiFetch, fetchUserFromApi, fetchOrders]
+  );
+
   const refreshHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
@@ -143,6 +186,8 @@ export function TezpremiumProvider({ children }) {
     refreshUser,
     refreshHistory,
     refreshHistorySilent,
+    createOrder,
+    createPremiumOrder,
   };
 
   return (
