@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Globe, Settings as SettingsIcon } from 'lucide-react';
+import { Globe, Settings as SettingsIcon, Wallet, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClick }) => {
+export const Header = ({ title, balanceDisplay = '0', onTopupClick, onSettingsClick }) => {
   const { i18n, t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -22,18 +22,18 @@ export const Header = ({ title, profileAvatarSrc, onSettingsClick, onProfileClic
     <header className="relative z-50 w-full shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800 safe-top">
       <div className="relative max-w-md mx-auto px-4 h-14 flex items-center justify-between">
 
-        {/* PROFILE */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 rounded-xl border border-zinc-200 bg-zinc-100/80 px-2 py-1 dark:border-zinc-700 dark:bg-zinc-800/80">
+          <Wallet className="h-3.5 w-3.5 text-emerald-500" />
+          <span className="max-w-[80px] truncate text-[11px] font-bold text-zinc-800 dark:text-zinc-100">
+            {balanceDisplay}
+          </span>
           <button
             type="button"
-            onClick={onProfileClick}
-            className="shrink-0 rounded-full ring-2 ring-zinc-200 dark:ring-zinc-700 overflow-hidden"
+            onClick={onTopupClick}
+            className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-md bg-emerald-500 text-white hover:bg-emerald-600"
+            aria-label={t('profile.topup')}
           >
-            <img
-              src={profileAvatarSrc}
-              alt=""
-              className="w-9 h-9 object-cover"
-            />
+            <Plus className="h-3.5 w-3.5" />
           </button>
         </div>
 

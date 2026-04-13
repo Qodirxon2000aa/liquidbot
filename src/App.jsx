@@ -12,8 +12,11 @@ import { MarketPage } from './pages/MarketPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { PaymentPage } from './pages/PaymentPage';
+import { MoneyModal } from './components/MoneyModal';
+import { useTezpremium } from './context/TezpremiumContext';
 
 import { useTelegram } from './hooks/useTelegram';
+import { formatBalanceUzs } from './utils/balanceUzs';
 
 const START_PARAM_TO_TAB = {
   payment: 'payment',
@@ -28,16 +31,28 @@ const START_PARAM_TO_TAB = {
 
 import { AnimatePresence, motion } from 'motion/react';
 
+function formatHeaderCompactBalance(value) {
+  const n = Number(value || 0);
+  if (!Number.isFinite(n)) return '0';
+  if (Math.abs(n) < 100000) return formatBalanceUzs(n);
+  const compact = n / 1000;
+  const oneDecimal = compact >= 1000 ? Math.round(compact) : Math.round(compact * 10) / 10;
+  const label = Number.isInteger(oneDecimal)
+    ? oneDecimal.toLocaleString('uz-UZ')
+    : oneDecimal.toLocaleString('uz-UZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return `${label}K`;
+}
+
 export default function App() {
   const { t } = useTranslation();
   const { webApp, user, startParam } = useTelegram();
+  const { apiUser } = useTezpremium();
 
   const [activeTab, setActiveTab] = useState('home');
+  const [moneyOpen, setMoneyOpen] = useState(false);
   const startParamAppliedRef = useRef(false);
 
-  // ✅ user safe (Chrome + Telegram)
-  const profileAvatarSrc =
-    user?.photo_url || `https://picsum.photos/seed/${user?.id || 1}/200`;
+  const headerBalance = formatHeaderCompactBalance(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
 
   useEffect(() => {
     if (!webApp) return;
@@ -101,9 +116,9 @@ export default function App() {
     <div className="app">
       <Header
         title={getPageTitle()}
-        profileAvatarSrc={profileAvatarSrc}
+        balanceDisplay={`${headerBalance} UZS`}
+        onTopupClick={() => setMoneyOpen(true)}
         onSettingsClick={() => setActiveTab('settings')}
-        onProfileClick={() => setActiveTab('profile')}
       />
 
       <main className="content">
@@ -120,6 +135,8 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <MoneyModal open={moneyOpen} onClose={() => setMoneyOpen(false)} />
 
       <BottomNav
         activeTab={
