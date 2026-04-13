@@ -1,6 +1,6 @@
 import { useEffect, useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X } from 'lucide-react';
 import { Button, Input, Tabs } from '../components/UI';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTezpremium } from '../context/TezpremiumContext';
@@ -49,6 +49,7 @@ const PREMIUM_PLANS = [
   { id: 'p6', months: 6, discount: '37%', note: 'HADYA ORQALI' },
   { id: 'p12', months: 12, discount: '42%', note: 'HADYA ORQALI' },
 ];
+const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
 
 export const HomePage = () => {
   const { t } = useTranslation();
@@ -59,6 +60,8 @@ export const HomePage = () => {
   const activeTab = tabLabels[tabIdx];
 
   const [username, setUsername] = useState('');
+  const [userInfo, setUserInfo] = useState(null);
+  const [checkingUser, setCheckingUser] = useState(false);
   const [toast, setToast] = useState({ show: false, ok: true, text: '' });
   const [sending, setSending] = useState(false);
   const [loadingPrices, setLoadingPrices] = useState(true);
@@ -100,6 +103,33 @@ export const HomePage = () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const cleanUsername = String(username || '').trim().replace(/^@/, '');
+    if (!cleanUsername || cleanUsername.length < 4) {
+      setUserInfo(null);
+      setCheckingUser(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setCheckingUser(true);
+      try {
+        const res = await fetch(`${USER_CHECK_API}?username=@${encodeURIComponent(cleanUsername)}`);
+        const data = await res.json();
+        if (data?.username) {
+          setUserInfo(data);
+        } else {
+          setUserInfo(null);
+        }
+      } catch {
+        setUserInfo(null);
+      } finally {
+        setCheckingUser(false);
+      }
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [username]);
 
   const selectStarPreset = (pkg) => {
     setStarsLastPreset(pkg);
@@ -149,6 +179,10 @@ export const HomePage = () => {
       showToast(false, 'Username kiriting');
       return;
     }
+    if (!userInfo?.username) {
+      showToast(false, 'Foydalanuvchi topilmadi');
+      return;
+    }
 
     if (tabIdx === 0) {
       if (starsAmount < 50 || starsAmount > 10000) {
@@ -166,7 +200,7 @@ export const HomePage = () => {
       setSending(true);
       const res = await createOrder({
         amount: starsAmount,
-        sent: cleanUsername,
+        sent: `@${String(userInfo.username).replace(/^@/, '')}`,
         type: 'Stars',
         overall: starsOverall,
       });
@@ -190,7 +224,7 @@ export const HomePage = () => {
     setSending(true);
     const result = await createPremiumOrder({
       months: premSelected.months,
-      sent: cleanUsername.startsWith('@') ? cleanUsername : `@${cleanUsername}`,
+      sent: `@${String(userInfo.username).replace(/^@/, '')}`,
       overall: premOverall,
     });
     setSending(false);
@@ -291,7 +325,34 @@ export const HomePage = () => {
                   O&apos;zimga
                 </button>
               </div>
-              <Input placeholder="@username" value={username} onChange={setUsername} />
+              {!userInfo ? (
+                <Input placeholder="@username" value={username} onChange={setUsername} />
+              ) : (
+                <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+                      {userInfo.name || userInfo.first_name || userInfo.username}
+                    </p>
+                    <p className="text-xs text-zinc-500">@{userInfo.username}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsername('');
+                      setUserInfo(null);
+                    }}
+                    className="rounded-lg p-1 text-zinc-500 hover:bg-white/20"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              {checkingUser && (
+                <div className="flex items-center gap-1 text-xs text-zinc-500">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Tekshirilmoqda...
+                </div>
+              )}
             </div>
 
             <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/95 via-white to-orange-50/60 p-4 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/15 dark:border-amber-500/25 dark:from-amber-950/35 dark:via-zinc-900 dark:to-orange-950/25 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] dark:ring-amber-500/10">
@@ -397,7 +458,11 @@ export const HomePage = () => {
               </button>
             </div>
 
-            <Button onClick={handleBuy} disabled={starsCustomInvalid || sending || loadingPrices} className="text-sm">
+            <Button
+              onClick={handleBuy}
+              disabled={starsCustomInvalid || sending || loadingPrices || !userInfo}
+              className="text-sm"
+            >
               {starsBuyLabel}
             </Button>
           </motion.div>
@@ -432,7 +497,34 @@ export const HomePage = () => {
                   O&apos;zimga
                 </button>
               </div>
-              <Input placeholder="@username" value={username} onChange={setUsername} />
+              {!userInfo ? (
+                <Input placeholder="@username" value={username} onChange={setUsername} />
+              ) : (
+                <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+                      {userInfo.name || userInfo.first_name || userInfo.username}
+                    </p>
+                    <p className="text-xs text-zinc-500">@{userInfo.username}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsername('');
+                      setUserInfo(null);
+                    }}
+                    className="rounded-lg p-1 text-zinc-500 hover:bg-white/20"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              {checkingUser && (
+                <div className="flex items-center gap-1 text-xs text-zinc-500">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Tekshirilmoqda...
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -479,7 +571,7 @@ export const HomePage = () => {
               ))}
             </div>
 
-            <Button onClick={handleBuy} disabled={sending || loadingPrices} className="text-sm">
+            <Button onClick={handleBuy} disabled={sending || loadingPrices || !userInfo} className="text-sm">
               {premBuyLabel}
             </Button>
           </motion.div>

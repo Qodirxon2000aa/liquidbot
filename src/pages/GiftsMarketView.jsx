@@ -1425,14 +1425,6 @@ export function GiftsMarketView({ onNavigateHome }) {
                             {typeBadge.label}
                           </span>
                           <GiftAnimation name={gift.name} />
-                          {!affordable && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                              <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
-                                <Wallet className="h-3 w-3 text-zinc-500" />
-                                <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-400">Balans yetmaydi</span>
-                              </div>
-                            </div>
-                          )}
                         </div>
                         <div className="h-px bg-zinc-200/80 dark:bg-zinc-800" />
                         <div className="space-y-1.5 p-2.5">
@@ -1531,14 +1523,6 @@ function NftGiftCard({
               <span className="text-center text-[10px] font-medium leading-tight text-zinc-600 dark:text-zinc-400">
                 Xizmat o&apos;chirilgan
               </span>
-            </div>
-          </div>
-        )}
-        {nftServiceEnabled && !affordable && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
-              <Wallet className="h-3 w-3 text-zinc-500" />
-              <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-400">Balans yetmaydi</span>
             </div>
           </div>
         )}
