@@ -695,7 +695,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
 
       const data = await apiFetch('gift_order.php', params);
 
-      if (data.ok === true) {
+      if (data.ok === true || data.status === 'success') {
         setOrdered(true);
         onSuccess?.();
         setTimeout(() => onClose(), 3000);
