@@ -1,17 +1,10 @@
-/** PHP oldi/oxirida chiqindi bo‘lsa ham birinchi JSON objectni ajratib oladi */
-export function parseJsonMaybeLeadingNoise(text) {
-  if (text == null || typeof text !== 'string') return null;
-  const start = text.indexOf('{');
-  if (start < 0) return null;
+/** PHP oldi/oxirida chiqindi bo‘lsa ham JSON objectni ajratib parse qiladi */
 
-  // Fast path: first "{" dan boshlab to'liq JSON bo'lsa.
-  try {
-    return JSON.parse(text.slice(start));
-  } catch {
-    /* continue */
-  }
+function stripBomAndTrim(text) {
+  return String(text).replace(/^\uFEFF/, '').trimStart();
+}
 
-  // Slow path: birinchi tugallangan {} blokni topib parse qilish.
+function tryParseBalancedObject(text, start) {
   let depth = 0;
   let inString = false;
   let escaped = false;
@@ -45,4 +38,54 @@ export function parseJsonMaybeLeadingNoise(text) {
     }
   }
   return null;
+}
+
+/**
+ * Matndan bir yoki bir nechta `{...}` dan birinchisini emas, har birini sinab,
+ * to‘g‘ri JSON bo‘lganini qaytaradi (prefixda noto‘g‘ri `{` bo‘lsa ham).
+ */
+export function parseJsonMaybeLeadingNoise(text) {
+  if (text == null || typeof text !== 'string') return null;
+  const normalized = stripBomAndTrim(text);
+  if (!normalized) return null;
+
+  let searchFrom = 0;
+  while (searchFrom < normalized.length) {
+    const start = normalized.indexOf('{', searchFrom);
+    if (start < 0) return null;
+
+    try {
+      return JSON.parse(normalized.slice(start));
+    } catch {
+      /* continue */
+    }
+
+    const fromBraces = tryParseBalancedObject(normalized, start);
+    if (fromBraces && typeof fromBraces === 'object') {
+      return fromBraces;
+    }
+
+    searchFrom = start + 1;
+  }
+  return null;
+}
+
+/**
+ * JSON.parse butunlay yiqilganda ham, server muvaffaqiyat javobini matndan aniqlash.
+ */
+export function parseGiftOrderLooseResponse(text) {
+  if (text == null || typeof text !== 'string') return null;
+  const s = stripBomAndTrim(text);
+  if (!s) return null;
+  const okTrue = /"ok"\s*:\s*true/.test(s);
+  const statusOk = /"status"\s*:\s*"success"/i.test(s);
+  const orderM = s.match(/"order_id"\s*:\s*(\d+)/);
+  const order_id = orderM ? Number(orderM[1]) : undefined;
+  if (!okTrue) return null;
+  if (!statusOk && order_id == null) return null;
+  return {
+    ok: true,
+    status: 'success',
+    ...(order_id != null && !Number.isNaN(order_id) ? { order_id } : {}),
+  };
 }

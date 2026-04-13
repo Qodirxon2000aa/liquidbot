@@ -167,6 +167,13 @@ function formatFetchNetworkError(err) {
   return m;
 }
 
+/** Backend `gift_order.php` muvaffaqiyat: `{ ok: true, status: "success", order_id, api }` */
+function isGiftOrderApiSuccess(data) {
+  if (!data || typeof data !== 'object') return false;
+  if (data.ok === true) return true;
+  return String(data.status ?? '').toLowerCase() === 'success';
+}
+
 /** Telegram gift `id` — 64-bit, JS Number dan tashqari; faqat string/BigInt */
 function oddiyGiftIdsEqual(a, b) {
   const sa = String(a ?? '').trim();
@@ -695,7 +702,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
 
       const data = await apiFetch('gift_order.php', params);
 
-      if (data.ok === true || data.status === 'success') {
+      if (isGiftOrderApiSuccess(data)) {
         setOrdered(true);
         onSuccess?.();
         setTimeout(() => onClose(), 3000);

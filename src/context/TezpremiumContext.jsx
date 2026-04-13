@@ -7,7 +7,10 @@ import {
   useState,
 } from 'react';
 import { parseBalanceUzs } from '../utils/balanceUzs';
-import { parseJsonMaybeLeadingNoise } from '../utils/parseJsonResponse';
+import {
+  parseJsonMaybeLeadingNoise,
+  parseGiftOrderLooseResponse,
+} from '../utils/parseJsonResponse';
 
 const TezpremiumContext = createContext(null);
 
@@ -50,7 +53,14 @@ export function TezpremiumProvider({ children }) {
     });
 
     const text = await res.text();
-    const parsed = parseJsonMaybeLeadingNoise(text);
+    let parsed = parseJsonMaybeLeadingNoise(text);
+    if (
+      (!parsed || typeof parsed !== 'object') &&
+      endpoint === 'gift_order.php' &&
+      res.ok
+    ) {
+      parsed = parseGiftOrderLooseResponse(text);
+    }
     if (!parsed || typeof parsed !== 'object') {
       const snippet = text.slice(0, 160).replace(/\s+/g, ' ').trim();
       throw new Error(
