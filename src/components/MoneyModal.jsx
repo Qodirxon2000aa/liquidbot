@@ -54,6 +54,7 @@ export function MoneyModal({ open, onClose }) {
   const [showResult, setShowResult] = useState(false);
   const [resultType, setResultType] = useState('');
   const [payStatus, setPayStatus] = useState('off');
+  const [payStatusLoading, setPayStatusLoading] = useState(false);
   const [showPaymentDisabled, setShowPaymentDisabled] = useState(false);
   const [systemStatus, setSystemStatus] = useState({
     humo: 'on',
@@ -140,10 +141,12 @@ export function MoneyModal({ open, onClose }) {
       setResultType('');
       setIsSubmitting(false);
       setPaymentType('humo');
+      setPayStatusLoading(false);
       return;
     }
 
     const fetchSettings = async () => {
+      setPayStatusLoading(true);
       try {
         const res = await fetch(endpoints.settings);
         const data = await res.json();
@@ -173,6 +176,8 @@ export function MoneyModal({ open, onClose }) {
         }
       } catch {
         setPayStatus('off');
+      } finally {
+        setPayStatusLoading(false);
       }
     };
 
@@ -406,7 +411,27 @@ export function MoneyModal({ open, onClose }) {
             </div>
           )}
 
-          {!waiting ? (
+          {payStatusLoading ? (
+            <div className="flex min-h-[180px] flex-col items-center justify-center gap-3 text-zinc-500">
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              <p className="text-sm">Tekshirilmoqda...</p>
+            </div>
+          ) : payStatus === 'off' ? (
+            <div className="mx-auto max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 text-center shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+              <p className="mb-2 text-3xl">⚠️</p>
+              <h3 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">Ogohlantirish</h3>
+              <p className="text-lg text-zinc-500 dark:text-zinc-400">
+                To&apos;lov tizimi vaqtincha o&apos;chirilgan. Adminga murojaat qiling.
+              </p>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="mt-5 h-12 w-full rounded-xl bg-blue-500 text-xl font-semibold text-white hover:bg-blue-600"
+              >
+                Tushunarli
+              </button>
+            </div>
+          ) : !waiting ? (
             <>
               <div>
                 <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block mb-2">
@@ -574,20 +599,7 @@ export function MoneyModal({ open, onClose }) {
         </div>
       )}
 
-      {showPaymentDisabled && (
-        <div className="fixed inset-0 z-[215] flex items-center justify-center p-6 bg-black/50">
-          <div className="max-w-sm w-full rounded-2xl bg-white dark:bg-zinc-900 p-6 text-center border border-zinc-200 dark:border-zinc-700 shadow-xl">
-            <p className="text-2xl mb-2">🚫</p>
-            <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-2">
-              {t('money.paymentOff')}
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-1">
-              {t('money.paymentOffHint')}
-            </p>
-            <p className="text-xs text-zinc-500">{t('money.payViaBot')}</p>
-          </div>
-        </div>
-      )}
+      {showPaymentDisabled && null}
 
       {prettyAlert.open && (
         <div className="fixed inset-0 z-[225] flex items-center justify-center p-6 bg-black/50">
