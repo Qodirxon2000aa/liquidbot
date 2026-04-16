@@ -224,9 +224,6 @@ export const HomePage = () => {
       if (res?.ok) {
         await refreshUser();
         const recipient = `@${String(userInfo.username).replace(/^@/, '')}`;
-        setUsername('');
-        setStarsCustomInput('');
-        setStarsSelected({ type: 'preset', amount: STAR_PRIMARY[0].amount });
         showSuccessModal({
           message: 'Telegram Stars muvaffaqiyatli yuborildi',
           recipient,
@@ -252,8 +249,6 @@ export const HomePage = () => {
     if (result?.ok) {
       await refreshUser();
       const recipient = `@${String(userInfo.username).replace(/^@/, '')}`;
-      setUsername('');
-      setPremSelected(PREMIUM_PLANS[0]);
       showSuccessModal({
         message: 'Telegram Premium muvaffaqiyatli yuborildi',
         recipient,
@@ -503,7 +498,7 @@ export const HomePage = () => {
               disabled={starsCustomInvalid || sending || loadingPrices || !userInfo}
               className="text-sm"
             >
-              {starsBuyLabel}
+              {sending ? 'Yuborilyabdi...' : starsBuyLabel}
             </Button>
           </motion.div>
         ) : (
@@ -626,7 +621,7 @@ export const HomePage = () => {
             </div>
 
             <Button onClick={handleBuy} disabled={sending || loadingPrices || !userInfo} className="text-sm">
-              {premBuyLabel}
+              {sending ? 'Yuborilyabdi...' : premBuyLabel}
             </Button>
           </motion.div>
         )}
