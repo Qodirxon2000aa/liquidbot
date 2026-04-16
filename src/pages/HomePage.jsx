@@ -65,8 +65,10 @@ export const HomePage = () => {
   const [toast, setToast] = useState({ show: false, ok: true, text: '' });
   const [successModal, setSuccessModal] = useState({
     open: false,
-    title: "Muvaffaqiyatli",
+    title: 'Muvaffaqiyatli',
     message: '',
+    recipient: '',
+    item: '',
   });
   const [sending, setSending] = useState(false);
   const [loadingPrices, setLoadingPrices] = useState(true);
@@ -171,11 +173,13 @@ export const HomePage = () => {
     setToast({ show: true, ok, text });
     setTimeout(() => setToast({ show: false, ok: true, text: '' }), 3000);
   };
-  const showSuccessModal = (message) => {
+  const showSuccessModal = ({ message, recipient, item }) => {
     setSuccessModal({
       open: true,
-      title: "Muvaffaqiyatli",
+      title: 'Muvaffaqiyatli',
       message,
+      recipient: recipient || '',
+      item: item || '',
     });
   };
 
@@ -219,10 +223,15 @@ export const HomePage = () => {
       setSending(false);
       if (res?.ok) {
         await refreshUser();
+        const recipient = `@${String(userInfo.username).replace(/^@/, '')}`;
         setUsername('');
         setStarsCustomInput('');
         setStarsSelected({ type: 'preset', amount: STAR_PRIMARY[0].amount });
-        showSuccessModal('Telegram Stars muvaffaqiyatli yuborildi');
+        showSuccessModal({
+          message: 'Telegram Stars muvaffaqiyatli yuborildi',
+          recipient,
+          item: `${starsAmount} Stars`,
+        });
       } else {
         showToast(false, res?.message || 'Buyurtma bajarilmadi');
       }
@@ -242,9 +251,14 @@ export const HomePage = () => {
     setSending(false);
     if (result?.ok) {
       await refreshUser();
+      const recipient = `@${String(userInfo.username).replace(/^@/, '')}`;
       setUsername('');
       setPremSelected(PREMIUM_PLANS[0]);
-      showSuccessModal('Telegram Premium muvaffaqiyatli yuborildi');
+      showSuccessModal({
+        message: 'Telegram Premium muvaffaqiyatli yuborildi',
+        recipient,
+        item: `${premSelected.months} oy Premium`,
+      });
     } else {
       showToast(false, result?.message || 'Premium yuborilmadi');
     }
@@ -640,6 +654,16 @@ export const HomePage = () => {
               </div>
               <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{successModal.title}</h3>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{successModal.message}</p>
+              <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-sm dark:border-zinc-700 dark:bg-zinc-800">
+                <p className="text-zinc-700 dark:text-zinc-300">
+                  <span className="font-semibold text-zinc-900 dark:text-white">Kimga:</span>{' '}
+                  {successModal.recipient || '—'}
+                </p>
+                <p className="mt-1 text-zinc-700 dark:text-zinc-300">
+                  <span className="font-semibold text-zinc-900 dark:text-white">Yuborildi:</span>{' '}
+                  {successModal.item || '—'}
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setSuccessModal((prev) => ({ ...prev, open: false }))}
