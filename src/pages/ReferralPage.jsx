@@ -20,7 +20,9 @@ export const ReferralPage = () => {
         const data = await apiFetch('referals.php');
         if (!cancelled && data?.ok) {
           setInvitedFriends(Number(data.ref_count || 0));
-          setShareLink(String(data.share_link || ''));
+          // Faqat botga yo'naltiradigan asl referral link ko'rsatiladi.
+          // Backend: { link, share_link, ... }
+          setShareLink(String(data.link || data.share_link || ''));
           setEarnedAmount(Number(data.earned || data.bonus || 0));
           setFriends(Array.isArray(data.friends) ? data.friends : []);
         }
