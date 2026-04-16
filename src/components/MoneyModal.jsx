@@ -10,7 +10,7 @@ const STATUS_URL = 'https://tezpremium.uz/uzbstar/payments/status.php';
 const REVIEW_URL = 'https://tezpremium.uz/uzbstar/payments/review.php';
 const UZCARD_SETTINGS_URL = 'https://tezpremium.uz/uzbstar/uzcard/settings.php';
 const UZCARD_STATUS_URL = 'https://tezpremium.uz/uzbstar/uzcard/payments/status.php';
-const UZCARD_REVIEW_URL = 'https://tezpremium.uz/uzbstar/uzcard/payments/review.php';
+const UZCARD_REVIEW_URL = 'https://tezpremium.uz/uzbstar/uzcard/review.php';
 const SYSTEM_STATUS_URL = 'https://tezpremium.uz/uzbstar/status.php';
 const DEV_USER_ID = '7521806735';
 
@@ -283,13 +283,14 @@ export function MoneyModal({ open, onClose }) {
 
   const handleSubmit = async () => {
     setErrorMsg('');
-    if (paymentOptions.length === 0) {
-      showPrettyAlert("To'lov turlari vaqtincha o'chirilgan. Adminga murojaat qiling.");
-      return;
-    }
 
     if (payStatus === 'off') {
       showPrettyAlert("To'lov tizimi vaqtincha o'chirilgan. Adminga murojaat qiling.");
+      return;
+    }
+
+    if (paymentOptions.length === 0) {
+      setErrorMsg("Hozircha mavjud to'lov turi yo'q.");
       return;
     }
 
