@@ -85,7 +85,10 @@ export const ReferralPage = () => {
         </Card>
         <Card className="flex flex-col items-center gap-2 py-6">
           <Trophy className="w-6 h-6 text-yellow-500" />
-          <span className="text-2xl font-bold dark:text-white">{earnedAmount.toLocaleString('uz-UZ')}</span>
+          <span className="text-2xl font-bold dark:text-white">
+            {earnedAmount.toLocaleString('uz-UZ')}
+            <span className="ml-1 text-xs font-semibold text-zinc-500">so&apos;m</span>
+          </span>
           <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">{t('referral.earned')}</span>
         </Card>
       </div>
@@ -101,6 +104,7 @@ export const ReferralPage = () => {
             friends.map((friend, idx) => {
               const uid = String(friend?.user_id ?? '');
               const nameRaw = friend?.name;
+              const reward = Number(friend?.reward || 0);
               const displayName =
                 typeof nameRaw === 'string' && nameRaw.trim()
                   ? nameRaw.trim()
@@ -119,7 +123,9 @@ export const ReferralPage = () => {
                       <p className="text-[10px] text-zinc-500">ID: {uid || '—'}</p>
                     </div>
                   </div>
-                  <span className="text-xs font-semibold text-emerald-500">Taklif qilingan</span>
+                  <span className="text-xs font-semibold text-emerald-500">
+                    + {reward.toLocaleString('uz-UZ')} so&apos;m
+                  </span>
                 </div>
               );
             })
