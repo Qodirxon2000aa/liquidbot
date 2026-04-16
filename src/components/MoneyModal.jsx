@@ -4,6 +4,7 @@ import { Wallet, X, Copy } from 'lucide-react';
 import { BodyPortal } from './BodyPortal';
 import { Button } from './UI';
 import { getTelegramInitData, useTezpremium } from '../context/TezpremiumContext';
+import { parseJsonMaybeLeadingNoise } from '../utils/parseJsonResponse';
 
 const SETTINGS_URL = 'https://tezpremium.uz/uzbstar/settings.php';
 const STATUS_URL = 'https://tezpremium.uz/uzbstar/payments/status.php';
@@ -13,6 +14,28 @@ const UZCARD_STATUS_URL = 'https://tezpremium.uz/uzbstar/uzcard/status.php';
 const UZCARD_REVIEW_URL = 'https://tezpremium.uz/uzbstar/uzcard/review.php';
 const SYSTEM_STATUS_URL = 'https://tezpremium.uz/uzbstar/status.php';
 const DEV_USER_ID = '7521806735';
+
+function pickPaymentId(data) {
+  const candidates = [
+    data?.payment_id,
+    data?.paymentId,
+    data?.id,
+    data?.order_id,
+    data?.orderId,
+    data?.result?.payment_id,
+    data?.result?.id,
+    data?.payment?.payment_id,
+    data?.payment?.id,
+    data?.data?.payment_id,
+    data?.data?.id,
+  ];
+  for (const c of candidates) {
+    if (c == null) continue;
+    const s = String(c).trim();
+    if (s) return s;
+  }
+  return null;
+}
 
 export function MoneyModal({ open, onClose }) {
   const { t } = useTranslation();
@@ -81,11 +104,11 @@ export function MoneyModal({ open, onClose }) {
       body: JSON.stringify(body),
     });
     const text = await res.text();
-    try {
-      return JSON.parse(text);
-    } catch {
+    const parsed = parseJsonMaybeLeadingNoise(text);
+    if (!parsed || typeof parsed !== 'object') {
       throw new Error(res.ok ? t('money.requestError') : `HTTP ${res.status}`);
     }
+    return parsed;
   };
 
   const clearStatusPolling = () => {
@@ -303,8 +326,10 @@ export function MoneyModal({ open, onClose }) {
     setIsSubmitting(true);
     try {
       const data = await postReviewRequest(numAmount);
-      if (data.ok && data.payment_id) {
-        setPaymentId(data.payment_id);
+      const pid = pickPaymentId(data);
+      const ok = data?.ok === true || String(data?.status || '').toLowerCase() === 'success';
+      if (ok && pid) {
+        setPaymentId(pid);
         setWaiting(true);
         setTimeLeft(600);
         const selectedCard = paymentCards[paymentType] || paymentCards.humo;
@@ -317,9 +342,9 @@ export function MoneyModal({ open, onClose }) {
           number: cardNumber,
           owner: selectedCard.owner || 'M/U',
         });
-        checkPaymentStatus(data.payment_id);
+        checkPaymentStatus(pid);
       } else {
-        setErrorMsg(data.message || t('money.createError'));
+        setErrorMsg(data?.message || data?.error || t('money.createError'));
       }
     } catch (err) {
       setErrorMsg(err?.message || t('money.requestError'));
