@@ -1422,7 +1422,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                       <div
                         key={gift.id}
                         className={`overflow-hidden rounded-xl border transition-all ${
-                          affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200/50 opacity-70 dark:border-zinc-800'
+                          affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200 dark:border-zinc-700'
                         }`}
                       >
                         <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-50 dark:from-zinc-800 dark:to-zinc-900">
@@ -1501,12 +1501,10 @@ function NftGiftCard({
 }) {
   const [imgErr, setImgErr] = useState(false);
 
-  const dimCard = !affordable || !nftServiceEnabled;
-
   return (
     <div
       className={`overflow-hidden rounded-xl border transition-all ${
-        dimCard ? 'border-zinc-200/50 opacity-70 dark:border-zinc-800' : 'border-zinc-200 dark:border-zinc-700'
+        'border-zinc-200 dark:border-zinc-700'
       }`}
     >
       <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
