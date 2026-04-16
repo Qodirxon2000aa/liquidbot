@@ -62,7 +62,10 @@ export const ReferralPage = () => {
         </div>
         <div className="space-y-1">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{t('referral.title')}</h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">Share your link and earn rewards</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Sizning havolangizdan yangi do&apos;stingiz tashrif buyursa <b>100 so&apos;m bonus</b> olasiz va
+            do&apos;stlaringizni har bir hisob to&apos;ldirishidan <b>2%</b> qismini olasiz.
+          </p>
         </div>
         
         <div className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl flex items-center justify-between gap-2 border border-zinc-100 dark:border-zinc-700">
