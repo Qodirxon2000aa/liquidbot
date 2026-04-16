@@ -63,6 +63,11 @@ export const HomePage = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [checkingUser, setCheckingUser] = useState(false);
   const [toast, setToast] = useState({ show: false, ok: true, text: '' });
+  const [successModal, setSuccessModal] = useState({
+    open: false,
+    title: "Muvaffaqiyatli",
+    message: '',
+  });
   const [sending, setSending] = useState(false);
   const [loadingPrices, setLoadingPrices] = useState(true);
   const [pricePerStar, setPricePerStar] = useState(0);
@@ -166,6 +171,13 @@ export const HomePage = () => {
     setToast({ show: true, ok, text });
     setTimeout(() => setToast({ show: false, ok: true, text: '' }), 3000);
   };
+  const showSuccessModal = (message) => {
+    setSuccessModal({
+      open: true,
+      title: "Muvaffaqiyatli",
+      message,
+    });
+  };
 
   const handleSelf = () => {
     if (user?.username) {
@@ -210,7 +222,7 @@ export const HomePage = () => {
         setUsername('');
         setStarsCustomInput('');
         setStarsSelected({ type: 'preset', amount: STAR_PRIMARY[0].amount });
-        showToast(true, 'Telegram Stars yuborildi');
+        showSuccessModal('Telegram Stars muvaffaqiyatli yuborildi');
       } else {
         showToast(false, res?.message || 'Buyurtma bajarilmadi');
       }
@@ -232,7 +244,7 @@ export const HomePage = () => {
       await refreshUser();
       setUsername('');
       setPremSelected(PREMIUM_PLANS[0]);
-      showToast(true, 'Telegram Premium yuborildi');
+      showSuccessModal('Telegram Premium muvaffaqiyatli yuborildi');
     } else {
       showToast(false, result?.message || 'Premium yuborilmadi');
     }
@@ -607,6 +619,37 @@ export const HomePage = () => {
       </AnimatePresence>
 
       <AnimatePresence>
+        {successModal.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 px-4"
+            onClick={() => setSuccessModal((prev) => ({ ...prev, open: false }))}
+          >
+            <motion.div
+              initial={{ y: 20, scale: 0.96, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 20, scale: 0.96, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-5 text-center shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+              </div>
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{successModal.title}</h3>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{successModal.message}</p>
+              <button
+                type="button"
+                onClick={() => setSuccessModal((prev) => ({ ...prev, open: false }))}
+                className="mt-4 h-10 w-full rounded-xl bg-blue-500 text-sm font-semibold text-white hover:bg-blue-600"
+              >
+                Yopish
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
         {toast.show && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}

@@ -3,14 +3,21 @@ import { useTranslation } from 'react-i18next';
 import { Wallet, X, Copy } from 'lucide-react';
 import { BodyPortal } from './BodyPortal';
 import { Button } from './UI';
-import { useTezpremium } from '../context/TezpremiumContext';
+import { getTelegramInitData, useTezpremium } from '../context/TezpremiumContext';
 
 const SETTINGS_URL = 'https://tezpremium.uz/uzbstar/settings.php';
 const STATUS_URL = 'https://tezpremium.uz/uzbstar/payments/status.php';
+const REVIEW_URL = 'https://tezpremium.uz/uzbstar/payments/review.php';
+const UZCARD_SETTINGS_URL = 'https://tezpremium.uz/uzbstar/uzcard/settings.php';
+const UZCARD_STATUS_URL = 'https://tezpremium.uz/uzbstar/uzcard/payments/status.php';
+const UZCARD_REVIEW_URL = 'https://tezpremium.uz/uzbstar/uzcard/payments/review.php';
+const SYSTEM_STATUS_URL = 'https://tezpremium.uz/uzbstar/status.php';
+const DEV_USER_ID = '7521806735';
 
 export function MoneyModal({ open, onClose }) {
   const { t } = useTranslation();
-  const { refreshUser, apiFetch } = useTezpremium();
+  const { refreshUser } = useTezpremium();
+  const [paymentType, setPaymentType] = useState('humo');
 
   const [amount, setAmount] = useState('');
   const [rawAmount, setRawAmount] = useState('');
@@ -25,13 +32,61 @@ export function MoneyModal({ open, onClose }) {
   const [resultType, setResultType] = useState('');
   const [payStatus, setPayStatus] = useState('off');
   const [showPaymentDisabled, setShowPaymentDisabled] = useState(false);
+  const [systemStatus, setSystemStatus] = useState({
+    humo: 'on',
+    uzcard: 'on',
+  });
+  const [prettyAlert, setPrettyAlert] = useState({
+    open: false,
+    message: '',
+  });
 
-  const [globalCardNumber, setGlobalCardNumber] = useState(
-    '9860 1766 1888 4538'
-  );
+  const [paymentCards, setPaymentCards] = useState({
+    humo: { number: '9860 1766 1888 4538', owner: 'M/U' },
+    uzcard: { number: '5614 6865 0435 6364', owner: 'M/A' },
+  });
 
   const statusIntervalRef = useRef(null);
   const statusTimeoutRef = useRef(null);
+
+  const endpoints =
+    paymentType === 'uzcard'
+      ? {
+          settings: UZCARD_SETTINGS_URL,
+          status: UZCARD_STATUS_URL,
+          review: UZCARD_REVIEW_URL,
+        }
+      : {
+          settings: SETTINGS_URL,
+          status: STATUS_URL,
+          review: REVIEW_URL,
+        };
+  const paymentOptions = [
+    { value: 'humo', label: 'Humo', on: systemStatus.humo === 'on' },
+    { value: 'uzcard', label: 'Uzcard', on: systemStatus.uzcard === 'on' },
+  ].filter((x) => x.on);
+
+  const postReviewRequest = async (amountValue) => {
+    const initData = getTelegramInitData();
+    const body = {
+      amount: amountValue,
+      ...(initData ? { initData } : { user_id: DEV_USER_ID }),
+    };
+    const res = await fetch(endpoints.review, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json, */*',
+      },
+      body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(res.ok ? t('money.requestError') : `HTTP ${res.status}`);
+    }
+  };
 
   const clearStatusPolling = () => {
     if (statusIntervalRef.current) {
@@ -42,6 +97,10 @@ export function MoneyModal({ open, onClose }) {
       clearTimeout(statusTimeoutRef.current);
       statusTimeoutRef.current = null;
     }
+  };
+
+  const showPrettyAlert = (message) => {
+    setPrettyAlert({ open: true, message });
   };
 
   useEffect(() => {
@@ -57,23 +116,35 @@ export function MoneyModal({ open, onClose }) {
       setShowResult(false);
       setResultType('');
       setIsSubmitting(false);
+      setPaymentType('humo');
       return;
     }
 
     const fetchSettings = async () => {
       try {
-        const res = await fetch(SETTINGS_URL);
+        const res = await fetch(endpoints.settings);
         const data = await res.json();
         if (data.ok && data.settings) {
           setPayStatus(data.settings.pay_status || 'off');
-          if (data.settings.card) {
-            const rawCard = String(data.settings.card).replace(/\s/g, '');
-            if (rawCard.length === 16) {
-              setGlobalCardNumber(
-                rawCard.replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4')
-              );
+          // Hozirgi payment endpointidan karta ma'lumotlarini yangilab olamiz.
+          setPaymentCards((prev) => {
+            const next = { ...prev };
+            const cardRaw = String(data.settings.card || '').replace(/\s/g, '');
+            if (cardRaw.length === 16) {
+              next.humo = {
+                number: cardRaw.replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4'),
+                owner: String(data.settings.humo_name || prev.humo.owner || 'M/U'),
+              };
             }
-          }
+            const uzcardRaw = String(data.settings.uzcard || '').replace(/\s/g, '');
+            if (uzcardRaw.length === 16) {
+              next.uzcard = {
+                number: uzcardRaw.replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4'),
+                owner: String(data.settings.uzcard_name || prev.uzcard.owner || 'M/A'),
+              };
+            }
+            return next;
+          });
         } else {
           setPayStatus('off');
         }
@@ -82,10 +153,40 @@ export function MoneyModal({ open, onClose }) {
       }
     };
 
+    const fetchSystemStatus = async () => {
+      try {
+        const res = await fetch(SYSTEM_STATUS_URL);
+        const data = await res.json();
+        if (data?.ok && data?.status) {
+          setSystemStatus({
+            humo: String(data.status.humo || 'off').toLowerCase(),
+            uzcard: String(data.status.uzcard || 'off').toLowerCase(),
+          });
+        }
+      } catch {
+        setSystemStatus({ humo: 'off', uzcard: 'off' });
+      }
+    };
+
     fetchSettings();
-    const interval = setInterval(fetchSettings, 5000);
+    fetchSystemStatus();
+    const interval = setInterval(() => {
+      fetchSettings();
+      fetchSystemStatus();
+    }, 5000);
     return () => clearInterval(interval);
-  }, [open]);
+  }, [open, endpoints.settings]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (paymentType === 'humo' && systemStatus.humo !== 'on' && systemStatus.uzcard === 'on') {
+      setPaymentType('uzcard');
+      return;
+    }
+    if (paymentType === 'uzcard' && systemStatus.uzcard !== 'on' && systemStatus.humo === 'on') {
+      setPaymentType('humo');
+    }
+  }, [open, paymentType, systemStatus]);
 
   useEffect(() => {
     return () => clearStatusPolling();
@@ -160,7 +261,7 @@ export function MoneyModal({ open, onClose }) {
     clearStatusPolling();
     statusIntervalRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`${STATUS_URL}?payment_id=${pid}`);
+        const res = await fetch(`${endpoints.status}?payment_id=${pid}`);
         if (!res.ok) return;
         const data = await res.json();
         if (data.ok && data.status === 'paid') {
@@ -182,10 +283,13 @@ export function MoneyModal({ open, onClose }) {
 
   const handleSubmit = async () => {
     setErrorMsg('');
+    if (paymentOptions.length === 0) {
+      showPrettyAlert("To'lov turlari vaqtincha o'chirilgan. Adminga murojaat qiling.");
+      return;
+    }
 
     if (payStatus === 'off') {
-      setShowPaymentDisabled(true);
-      setTimeout(() => setShowPaymentDisabled(false), 3000);
+      showPrettyAlert("To'lov tizimi vaqtincha o'chirilgan. Adminga murojaat qiling.");
       return;
     }
 
@@ -197,13 +301,21 @@ export function MoneyModal({ open, onClose }) {
 
     setIsSubmitting(true);
     try {
-      const data = await apiFetch('payments/review.php', { amount: numAmount });
+      const data = await postReviewRequest(numAmount);
       if (data.ok && data.payment_id) {
         setPaymentId(data.payment_id);
         setWaiting(true);
         setTimeLeft(600);
-        const cardNumber = data.card ? data.card : globalCardNumber;
-        setCardInfo({ number: cardNumber, owner: 'M/U' });
+        const selectedCard = paymentCards[paymentType] || paymentCards.humo;
+        const fromApiRaw = data.card ? String(data.card).replace(/\s/g, '') : '';
+        const cardNumber =
+          fromApiRaw.length === 16
+            ? fromApiRaw.replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4')
+            : selectedCard.number;
+        setCardInfo({
+          number: cardNumber,
+          owner: selectedCard.owner || 'M/U',
+        });
         checkPaymentStatus(data.payment_id);
       } else {
         setErrorMsg(data.message || t('money.createError'));
@@ -271,12 +383,31 @@ export function MoneyModal({ open, onClose }) {
           {!waiting ? (
             <>
               <div>
-                <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider block mb-2">
                   {t('money.method')}
-                </p>
-                <div className="px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-sm font-medium text-zinc-900 dark:text-white">
-                  {t('money.cardPayment')}
-                </div>
+                </label>
+                <select
+                  value={paymentType}
+                  onChange={(e) => setPaymentType(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {paymentOptions.length === 0 ? (
+                    <option value="" disabled>
+                      Adminga murojaat qiling
+                    </option>
+                  ) : (
+                    paymentOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {paymentOptions.length === 0 && (
+                  <p className="mt-2 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                    To&apos;lov turlari vaqtincha yopilgan. Adminga murojaat qiling.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -428,6 +559,27 @@ export function MoneyModal({ open, onClose }) {
               {t('money.paymentOffHint')}
             </p>
             <p className="text-xs text-zinc-500">{t('money.payViaBot')}</p>
+          </div>
+        </div>
+      )}
+
+      {prettyAlert.open && (
+        <div className="fixed inset-0 z-[225] flex items-center justify-center p-6 bg-black/50">
+          <div className="max-w-sm w-full rounded-2xl bg-white dark:bg-zinc-900 p-6 text-center border border-zinc-200 dark:border-zinc-700 shadow-xl">
+            <p className="text-2xl mb-2">⚠️</p>
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-2">
+              Ogohlantirish
+            </h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {prettyAlert.message}
+            </p>
+            <button
+              type="button"
+              onClick={() => setPrettyAlert({ open: false, message: '' })}
+              className="mt-4 h-10 w-full rounded-xl bg-blue-500 text-sm font-semibold text-white hover:bg-blue-600"
+            >
+              Tushunarli
+            </button>
           </div>
         </div>
       )}
