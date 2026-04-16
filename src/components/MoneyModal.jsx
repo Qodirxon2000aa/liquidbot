@@ -145,8 +145,8 @@ export function MoneyModal({ open, onClose }) {
       return;
     }
 
-    const fetchSettings = async () => {
-      setPayStatusLoading(true);
+    const fetchSettings = async (silent = false) => {
+      if (!silent) setPayStatusLoading(true);
       try {
         const res = await fetch(endpoints.settings);
         const data = await res.json();
@@ -177,11 +177,11 @@ export function MoneyModal({ open, onClose }) {
       } catch {
         setPayStatus('off');
       } finally {
-        setPayStatusLoading(false);
+        if (!silent) setPayStatusLoading(false);
       }
     };
 
-    const fetchSystemStatus = async () => {
+    const fetchSystemStatus = async (silent = false) => {
       try {
         const res = await fetch(SYSTEM_STATUS_URL);
         const data = await res.json();
@@ -192,15 +192,17 @@ export function MoneyModal({ open, onClose }) {
           });
         }
       } catch {
-        setSystemStatus({ humo: 'off', uzcard: 'off' });
+        if (!silent) {
+          setSystemStatus({ humo: 'off', uzcard: 'off' });
+        }
       }
     };
 
-    fetchSettings();
-    fetchSystemStatus();
+    fetchSettings(false);
+    fetchSystemStatus(false);
     const interval = setInterval(() => {
-      fetchSettings();
-      fetchSystemStatus();
+      fetchSettings(true);
+      fetchSystemStatus(true);
     }, 5000);
     return () => clearInterval(interval);
   }, [open, endpoints.settings]);
