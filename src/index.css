@@ -9,7 +9,7 @@
 @layer base {
   :root {
     --tg-height: 100dvh; /* fallback */
-    
+    --tg-header-top-offset: 40px;
   }
 
   html,
@@ -78,7 +78,7 @@
 
   /* Safe areas */
   .safe-top {
-    padding-top: calc(env(safe-area-inset-top) + 40px);
+    padding-top: calc(max(var(--tg-safe-top), env(safe-area-inset-top)) + var(--tg-header-top-offset));
   }
 
   /* .safe-bottom {
@@ -105,6 +105,7 @@
   --tg-height: 100vh;
   --tg-safe-top: 0px;
   --tg-safe-bottom: 0px;
+  --tg-header-top-offset: 40px;
 }
 
 /* ✅ Root wrapper — butun ekranni egallaydi */

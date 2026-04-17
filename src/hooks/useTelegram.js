@@ -13,6 +13,8 @@ export const useTelegram = () => {
           .setProperty('--tg-safe-top', '0px');
         document.documentElement.style
           .setProperty('--tg-safe-bottom', '0px');
+        document.documentElement.style
+          .setProperty('--tg-header-top-offset', '40px');
       };
       setHeight();
       window.addEventListener('resize', setHeight);
@@ -21,6 +23,7 @@ export const useTelegram = () => {
 
     // TELEGRAM MODE
     const tg = window.Telegram.WebApp;
+    const isAndroid = String(tg.platform || '').toLowerCase().includes('android');
 
     tg.ready();
     tg.expand();
@@ -45,6 +48,8 @@ export const useTelegram = () => {
         .setProperty('--tg-safe-top', `${Math.max(safeTop, contentTop)}px`);
       document.documentElement.style
         .setProperty('--tg-safe-bottom', `${safeBottom}px`);
+      document.documentElement.style
+        .setProperty('--tg-header-top-offset', isAndroid ? '54px' : '40px');
     };
 
     updateSizes();
