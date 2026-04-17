@@ -502,7 +502,7 @@ export function MoneyModal({ open, onClose }) {
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {t('money.waitingHint')}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                <p className="mt-2 text-sm font-semibold text-red-500 dark:text-red-400">
                   {t('money.exactHint')}
                 </p>
               </div>
