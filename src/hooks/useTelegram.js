@@ -49,7 +49,7 @@ export const useTelegram = () => {
       document.documentElement.style
         .setProperty('--tg-safe-bottom', `${safeBottom}px`);
       document.documentElement.style
-        .setProperty('--tg-header-top-offset', isAndroid ? '30px' : '40px');
+        .setProperty('--tg-header-top-offset', isAndroid ? '20px' : '40px');
     };
 
     updateSizes();
