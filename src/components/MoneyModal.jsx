@@ -456,6 +456,11 @@ export function MoneyModal({ open, onClose }) {
                     ))
                   )}
                 </select>
+                {paymentOptions.length > 0 && (
+                  <p className="mt-2 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                    {t('money.methodHint')}
+                  </p>
+                )}
                 {paymentOptions.length === 0 && (
                   <p className="mt-2 text-[11px] font-medium text-amber-600 dark:text-amber-400">
                     To&apos;lov turlari vaqtincha yopilgan. Adminga murojaat qiling.

@@ -97,6 +97,8 @@ const resources = {
         title: 'Top up balance',
         close: 'Close',
         method: 'Payment method',
+        methodHint:
+          'Ignore the payment type field — you can transfer money from any card.',
         cardPayment: 'By card',
         amountLabel: 'Amount (UZS)',
         placeholder: 'e.g. 50 000',
@@ -256,6 +258,8 @@ const resources = {
         title: 'Пополнение счёта',
         close: 'Закрыть',
         method: 'Способ оплаты',
+        methodHint:
+          'Не обращайте внимания на поле способа оплаты — перевести можно с любой карты.',
         cardPayment: 'Картой',
         amountLabel: 'Сумма (UZS)',
         placeholder: 'напр. 50 000',
@@ -415,6 +419,8 @@ const resources = {
         title: 'Hisobni to\'ldirish',
         close: 'Yopish',
         method: 'To\'lov turi',
+        methodHint:
+          'To\'lov turi degan joyga e\'tibor bermang! Har qanday kartadan pul otkazishingiz mumkn',
         cardPayment: 'Karta orqali',
         amountLabel: 'To\'lov summasi (UZS)',
         placeholder: 'masalan: 50 000',
