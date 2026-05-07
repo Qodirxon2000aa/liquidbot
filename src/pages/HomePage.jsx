@@ -49,8 +49,6 @@ const PREMIUM_PLANS = [
   { id: 'p6', months: 6, discount: '37%', note: 'HADYA ORQALI' },
   { id: 'p12', months: 12, discount: '42%', note: 'HADYA ORQALI' },
 ];
-const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
-
 export const HomePage = () => {
   const { t } = useTranslation();
   const { user } = useTelegram();
@@ -113,29 +111,16 @@ export const HomePage = () => {
 
   useEffect(() => {
     const cleanUsername = String(username || '').trim().replace(/^@/, '');
-    if (!cleanUsername || cleanUsername.length < 4) {
+    if (!cleanUsername) {
       setUserInfo(null);
       setCheckingUser(false);
       return;
     }
-    const timer = setTimeout(async () => {
-      setCheckingUser(true);
-      try {
-        const res = await fetch(`${USER_CHECK_API}?username=@${encodeURIComponent(cleanUsername)}`);
-        const data = await res.json();
-        if (data?.username) {
-          setUserInfo(data);
-        } else {
-          setUserInfo(null);
-        }
-      } catch {
-        setUserInfo(null);
-      } finally {
-        setCheckingUser(false);
-      }
-    }, 450);
-
-    return () => clearTimeout(timer);
+    setCheckingUser(false);
+    setUserInfo({
+      username: cleanUsername,
+      name: cleanUsername,
+    });
   }, [username]);
 
   const selectStarPreset = (pkg) => {
@@ -191,14 +176,11 @@ export const HomePage = () => {
 
   const handleBuy = async () => {
     const cleanUsername = String(username || '').trim();
-    if (!cleanUsername || cleanUsername.replace(/^@/, '').length < 4) {
+    if (!cleanUsername || !cleanUsername.replace(/^@/, '').trim()) {
       showToast(false, 'Username kiriting');
       return;
     }
-    if (!userInfo?.username) {
-      showToast(false, 'Foydalanuvchi topilmadi');
-      return;
-    }
+    const normalizedRecipient = `@${cleanUsername.replace(/^@/, '')}`;
 
     if (tabIdx === 0) {
       if (starsAmount < 50 || starsAmount > 10000) {
@@ -216,14 +198,14 @@ export const HomePage = () => {
       setSending(true);
       const res = await createOrder({
         amount: starsAmount,
-        sent: `@${String(userInfo.username).replace(/^@/, '')}`,
+        sent: normalizedRecipient,
         type: 'Stars',
         overall: starsOverall,
       });
       setSending(false);
       if (res?.ok) {
         await refreshUser();
-        const recipient = `@${String(userInfo.username).replace(/^@/, '')}`;
+        const recipient = normalizedRecipient;
         showSuccessModal({
           message: 'Telegram Stars muvaffaqiyatli yuborildi',
           recipient,
@@ -242,13 +224,13 @@ export const HomePage = () => {
     setSending(true);
     const result = await createPremiumOrder({
       months: premSelected.months,
-      sent: `@${String(userInfo.username).replace(/^@/, '')}`,
+      sent: normalizedRecipient,
       overall: premOverall,
     });
     setSending(false);
     if (result?.ok) {
       await refreshUser();
-      const recipient = `@${String(userInfo.username).replace(/^@/, '')}`;
+      const recipient = normalizedRecipient;
       showSuccessModal({
         message: 'Telegram Premium muvaffaqiyatli yuborildi',
         recipient,
