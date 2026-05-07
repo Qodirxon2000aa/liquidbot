@@ -1,6 +1,6 @@
 import { useEffect, useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X, Check } from 'lucide-react';
 import { Button, Input, Tabs } from '../components/UI';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTezpremium } from '../context/TezpremiumContext';
@@ -116,12 +116,11 @@ export const HomePage = () => {
       setCheckingUser(false);
       return;
     }
+    if (userInfo?.username && userInfo.username !== cleanUsername) {
+      setUserInfo(null);
+    }
     setCheckingUser(false);
-    setUserInfo({
-      username: cleanUsername,
-      name: cleanUsername,
-    });
-  }, [username]);
+  }, [username, userInfo?.username]);
 
   const selectStarPreset = (pkg) => {
     setStarsLastPreset(pkg);
@@ -170,8 +169,25 @@ export const HomePage = () => {
 
   const handleSelf = () => {
     if (user?.username) {
-      setUsername(`@${String(user.username).replace(/^@/, '')}`);
+      const own = String(user.username).replace(/^@/, '');
+      setUsername(`@${own}`);
+      setUserInfo({
+        username: own,
+        name: own,
+      });
     }
+  };
+
+  const handleConfirmUsername = () => {
+    const cleanUsername = String(username || '').trim().replace(/^@/, '');
+    if (cleanUsername.length < 4) {
+      showToast(false, "Username kamida 4 ta belgidan bo'lsin");
+      return;
+    }
+    setUserInfo({
+      username: cleanUsername,
+      name: cleanUsername,
+    });
   };
 
   const handleBuy = async () => {
@@ -329,7 +345,18 @@ export const HomePage = () => {
                 </button>
               </div>
               {!userInfo ? (
-                <Input placeholder="@username" value={username} onChange={setUsername} />
+                <div className="flex items-center gap-2">
+                  <Input placeholder="@username" value={username} onChange={setUsername} />
+                  <button
+                    type="button"
+                    onClick={handleConfirmUsername}
+                    disabled={String(username || '').trim().replace(/^@/, '').length < 4}
+                    className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    Tayyor
+                  </button>
+                </div>
               ) : (
                 <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
                   <div className="flex min-w-0 items-center gap-2">
@@ -515,7 +542,18 @@ export const HomePage = () => {
                 </button>
               </div>
               {!userInfo ? (
-                <Input placeholder="@username" value={username} onChange={setUsername} />
+                <div className="flex items-center gap-2">
+                  <Input placeholder="@username" value={username} onChange={setUsername} />
+                  <button
+                    type="button"
+                    onClick={handleConfirmUsername}
+                    disabled={String(username || '').trim().replace(/^@/, '').length < 4}
+                    className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    Tayyor
+                  </button>
+                </div>
               ) : (
                 <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
                   <div className="flex min-w-0 items-center gap-2">
