@@ -140,12 +140,13 @@ export function TezpremiumProvider({ children }) {
   );
 
   const createPremiumOrder = useCallback(
-    async ({ months, sent, overall }) => {
+    async ({ months, sent, overall, type }) => {
       try {
         const data = await apiFetch('premium.php', {
           amount: months,
           sent: String(sent ?? '').replace(/^@/, ''),
           overall,
+          ...(type ? { type } : {}),
         });
         if (data?.ok) {
           await fetchUserFromApi();

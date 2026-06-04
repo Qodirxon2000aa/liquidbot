@@ -45,9 +45,18 @@ const STAR_EXTRA = [
 ];
 
 const PREMIUM_PLANS = [
-  { id: 'p3', months: 3, discount: '20%', note: 'HADYA ORQALI' },
-  { id: 'p6', months: 6, discount: '37%', note: 'HADYA ORQALI' },
-  { id: 'p12', months: 12, discount: '42%', note: 'HADYA ORQALI' },
+  { id: 'p3', months: 3, discount: '20%', note: 'HADYA ORQALI', priceKey: 3 },
+  { id: 'p6', months: 6, discount: '37%', note: 'HADYA ORQALI', priceKey: 6 },
+  { id: 'p12', months: 12, discount: '42%', note: 'HADYA ORQALI', priceKey: 12 },
+  {
+    id: 'p12-account',
+    months: 12,
+    discount: '42%',
+    label: 'AKKOUNTGA KIRIB 12 OYLIK',
+    note: 'AKKOUNTGA KIRIB',
+    priceKey: '12account',
+    delivery: 'account',
+  },
 ];
 export const HomePage = () => {
   const { t } = useTranslation();
@@ -75,6 +84,7 @@ export const HomePage = () => {
     3: 170000,
     6: 225000,
     12: 295000,
+    '12account': 295000,
   });
 
   const [starsMoreOpen, setStarsMoreOpen] = useState(false);
@@ -94,10 +104,13 @@ export const HomePage = () => {
       .then((d) => {
         if (!d?.ok || !d?.settings || cancelled) return;
         if (d.settings.price) setPricePerStar(Number(d.settings.price) || 0);
+        const price12 = Number(d.settings['12oylik']) || 295000;
         setPremiumPrices({
           3: Number(d.settings['3oylik']) || 170000,
           6: Number(d.settings['6oylik']) || 225000,
-          12: Number(d.settings['12oylik']) || 295000,
+          12: price12,
+          '12account':
+            Number(d.settings['12oylik_akkount'] ?? d.settings['akkount12oylik']) || price12,
         });
       })
       .catch(() => {})
@@ -151,7 +164,9 @@ export const HomePage = () => {
   const balance = Number(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
   const starsAmount = Number(starsSelected.amount || 0);
   const starsOverall = starsAmount * pricePerStar;
-  const premOverall = Number(premiumPrices[premSelected.months] || 0);
+  const premPriceKey = premSelected.priceKey ?? premSelected.months;
+  const premOverall = Number(premiumPrices[premPriceKey] || 0);
+  const getPlanPrice = (pkg) => Number(premiumPrices[pkg.priceKey ?? pkg.months] || 0);
 
   const showToast = (ok, text) => {
     setToast({ show: true, ok, text });
@@ -242,6 +257,7 @@ export const HomePage = () => {
       months: premSelected.months,
       sent: normalizedRecipient,
       overall: premOverall,
+      ...(premSelected.delivery === 'account' ? { type: 'akkount' } : {}),
     });
     setSending(false);
     if (result?.ok) {
@@ -250,7 +266,10 @@ export const HomePage = () => {
       showSuccessModal({
         message: 'Telegram Premium muvaffaqiyatli yuborildi',
         recipient,
-        item: `${premSelected.months} oy Premium`,
+        item:
+          premSelected.delivery === 'account'
+            ? 'AKKOUNTGA KIRIB · 12 oy Premium'
+            : `${premSelected.months} oy Premium`,
       });
     } else {
       showToast(false, result?.message || 'Premium yuborilmadi');
@@ -612,8 +631,12 @@ export const HomePage = () => {
                   </div>
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                     <div className="min-w-0">
-                      <span className="text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
-                        {pkg.months} {t('home.months')}
+                      <span
+                        className={`text-sm font-bold text-zinc-900 dark:text-white ${
+                          pkg.label ? 'uppercase tracking-wide' : 'tabular-nums'
+                        }`}
+                      >
+                        {pkg.label ?? `${pkg.months} ${t('home.months')}`}
                       </span>
                       <span className="ml-2 inline-block rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
                         −{pkg.discount}
@@ -623,7 +646,7 @@ export const HomePage = () => {
                       {pkg.note && (
                         <span
                           className={`inline-block rounded-full px-2 py-[1px] text-[9px] font-bold uppercase tracking-wide text-white shadow-[0_5px_12px_-7px_rgba(0,0,0,0.55)] ring-1 ${
-                            pkg.note === 'AKKOUNTGA KIRIB'
+                            pkg.delivery === 'account'
                               ? 'border-violet-300/50 bg-gradient-to-r from-violet-500 to-fuchsia-500 ring-white/20 dark:border-violet-400/40 dark:from-violet-600 dark:to-fuchsia-600'
                               : 'border-emerald-300/50 bg-gradient-to-r from-emerald-500 to-teal-500 ring-white/20 dark:border-emerald-400/40 dark:from-emerald-600 dark:to-teal-600'
                           }`}
@@ -632,7 +655,7 @@ export const HomePage = () => {
                         </span>
                       )}
                       <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                        {(premiumPrices[pkg.months] || 0).toLocaleString('uz-UZ')} UZS
+                        {getPlanPrice(pkg).toLocaleString('uz-UZ')} UZS
                       </span>
                     </div>
                   </div>
