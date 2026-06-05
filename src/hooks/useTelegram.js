@@ -65,7 +65,7 @@ export const useTelegram = () => {
   }, []);
 
   const user = webApp?.initDataUnsafe?.user || {
-    id: 12345678,
+    id: 1234567811,
     first_name: 'John', last_name: 'Doe',
     username: 'johndoe',
     photo_url: 'https://picsum.photos/seed/john/200'
