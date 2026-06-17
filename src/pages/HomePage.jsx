@@ -47,7 +47,6 @@ const STAR_EXTRA = [
 const PREMIUM_PLANS = [
   { id: 'p3', months: 3, discount: '20%', note: 'HADYA ORQALI', priceKey: 3 },
   { id: 'p6', months: 6, discount: '37%', note: 'HADYA ORQALI', priceKey: 6 },
-  { id: 'p12', months: 12, discount: '42%', note: 'HADYA ORQALI', priceKey: 12 },
   {
     id: 'p12-account',
     months: 12,
@@ -83,7 +82,6 @@ export const HomePage = () => {
   const [premiumPrices, setPremiumPrices] = useState({
     3: 170000,
     6: 225000,
-    12: 295000,
     '12account': 295000,
   });
 
@@ -108,7 +106,6 @@ export const HomePage = () => {
         setPremiumPrices({
           3: Number(d.settings['3oylik']) || 170000,
           6: Number(d.settings['6oylik']) || 225000,
-          12: price12,
           '12account':
             Number(d.settings['12oylik_akkount'] ?? d.settings['akkount12oylik']) || price12,
         });
