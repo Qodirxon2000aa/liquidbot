@@ -1,7 +1,7 @@
 import { useEffect, useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X, Check } from 'lucide-react';
-import { Button, Input, Tabs } from '../components/UI';
+import { Button, Tabs } from '../components/UI';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTezpremium } from '../context/TezpremiumContext';
 import { useTelegram } from '../hooks/useTelegram';
@@ -57,6 +57,104 @@ const PREMIUM_PLANS = [
     delivery: 'account',
   },
 ];
+const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
+
+function UsernameRecipientField({
+  label,
+  username,
+  onUsernameChange,
+  userInfo,
+  onClear,
+  onConfirm,
+  onSelf,
+  checkingUser,
+}) {
+  const cleanLen = String(username || '').trim().replace(/^@/, '').length;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          {label}
+        </p>
+        <button
+          type="button"
+          onClick={onSelf}
+          disabled={checkingUser}
+          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          O&apos;zimga
+        </button>
+      </div>
+
+      {userInfo ? (
+        <div className="flex w-full items-center gap-2.5 rounded-xl bg-zinc-50 px-3 py-2.5 dark:bg-zinc-800">
+          {userInfo.photo ? (
+            <img
+              src={userInfo.photo}
+              alt=""
+              className="h-9 w-9 shrink-0 rounded-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-sm font-bold text-blue-600 dark:text-blue-400">
+              {String(userInfo.name || userInfo.username || '?')[0]?.toUpperCase()}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+              {userInfo.name || userInfo.username}
+            </p>
+            <p className="truncate text-xs text-zinc-500">@{userInfo.username}</p>
+          </div>
+          {userInfo.has_premium && (
+            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-bold text-violet-600 dark:text-violet-400">
+              <ShieldCheck className="h-3 w-3" />
+              Premium
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={onClear}
+            className="shrink-0 rounded-lg p-1 text-zinc-500 hover:bg-zinc-200/80 dark:hover:bg-zinc-700"
+            aria-label="Tozalash"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => onUsernameChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') onConfirm();
+              }}
+              placeholder="@username"
+              disabled={checkingUser}
+              className="w-full rounded-xl bg-zinc-50 px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500 disabled:opacity-60 dark:bg-zinc-800 dark:text-white"
+            />
+            {checkingUser && (
+              <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-400" />
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={cleanLen < 4 || checkingUser}
+            className="inline-flex h-[46px] shrink-0 items-center gap-1 rounded-xl bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
+          >
+            <Check className="h-3.5 w-3.5" />
+            Tayyor
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export const HomePage = () => {
   const { t } = useTranslation();
   const { user } = useTelegram();
@@ -119,19 +217,6 @@ export const HomePage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const cleanUsername = String(username || '').trim().replace(/^@/, '');
-    if (!cleanUsername) {
-      setUserInfo(null);
-      setCheckingUser(false);
-      return;
-    }
-    if (userInfo?.username && userInfo.username !== cleanUsername) {
-      setUserInfo(null);
-    }
-    setCheckingUser(false);
-  }, [username, userInfo?.username]);
-
   const selectStarPreset = (pkg) => {
     setStarsLastPreset(pkg);
     setStarsSelected({ type: 'preset', amount: pkg.amount });
@@ -179,27 +264,49 @@ export const HomePage = () => {
     });
   };
 
-  const handleSelf = () => {
-    if (user?.username) {
-      const own = String(user.username).replace(/^@/, '');
-      setUsername(`@${own}`);
-      setUserInfo({
-        username: own,
-        name: own,
-      });
+  const lookupUsername = async (rawUsername) => {
+    const cleanUsername = String(rawUsername || '').trim().replace(/^@/, '');
+    if (cleanUsername.length < 4) {
+      showToast(false, "Username kamida 4 ta belgidan bo'lsin");
+      return null;
+    }
+    setCheckingUser(true);
+    try {
+      const res = await fetch(
+        `${USER_CHECK_API}?username=${encodeURIComponent(`@${cleanUsername}`)}`
+      );
+      const data = await res.json();
+      if (data?.username) {
+        setUserInfo(data);
+        setUsername(`@${data.username}`);
+        return data;
+      }
+      setUserInfo(null);
+      showToast(false, data?.message || data?.error || 'Foydalanuvchi topilmadi');
+      return null;
+    } catch {
+      setUserInfo(null);
+      showToast(false, "Tekshirib bo'lmadi");
+      return null;
+    } finally {
+      setCheckingUser(false);
     }
   };
 
+  const handleSelf = async () => {
+    if (!user?.username) return;
+    const own = String(user.username).replace(/^@/, '');
+    setUsername(`@${own}`);
+    await lookupUsername(own);
+  };
+
   const handleConfirmUsername = () => {
-    const cleanUsername = String(username || '').trim().replace(/^@/, '');
-    if (cleanUsername.length < 4) {
-      showToast(false, "Username kamida 4 ta belgidan bo'lsin");
-      return;
-    }
-    setUserInfo({
-      username: cleanUsername,
-      name: cleanUsername,
-    });
+    lookupUsername(username);
+  };
+
+  const clearUsername = () => {
+    setUsername('');
+    setUserInfo(null);
   };
 
   const handleBuy = async () => {
@@ -347,73 +454,16 @@ export const HomePage = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  {t('home.username')}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleSelf}
-                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                >
-                  O&apos;zimga
-                </button>
-              </div>
-              {!userInfo ? (
-                <div className="flex items-center gap-2">
-                  <Input placeholder="@username" value={username} onChange={setUsername} />
-                  <button
-                    type="button"
-                    onClick={handleConfirmUsername}
-                    disabled={String(username || '').trim().replace(/^@/, '').length < 4}
-                    className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    Tayyor
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    {userInfo.photo ? (
-                      <img
-                        src={userInfo.photo}
-                        alt=""
-                        className="h-8 w-8 shrink-0 rounded-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600/20 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                        {String(userInfo.name || userInfo.first_name || userInfo.username || '?')[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
-                      {userInfo.name || userInfo.first_name || userInfo.username}
-                    </p>
-                    <p className="text-xs text-zinc-500">@{userInfo.username}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUsername('');
-                      setUserInfo(null);
-                    }}
-                    className="rounded-lg p-1 text-zinc-500 hover:bg-white/20"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              {checkingUser && (
-                <div className="flex items-center gap-1 text-xs text-zinc-500">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Tekshirilmoqda...
-                </div>
-              )}
-            </div>
+            <UsernameRecipientField
+              label={t('home.username')}
+              username={username}
+              onUsernameChange={setUsername}
+              userInfo={userInfo}
+              onClear={clearUsername}
+              onConfirm={handleConfirmUsername}
+              onSelf={handleSelf}
+              checkingUser={checkingUser}
+            />
 
             <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/95 via-white to-orange-50/60 p-4 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/15 dark:border-amber-500/25 dark:from-amber-950/35 dark:via-zinc-900 dark:to-orange-950/25 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] dark:ring-amber-500/10">
               <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-400/15 blur-2xl dark:bg-amber-500/10" aria-hidden />
@@ -544,73 +594,16 @@ export const HomePage = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  {t('home.username')}
-                </p>
-                <button
-                  type="button"
-                  onClick={handleSelf}
-                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                >
-                  O&apos;zimga
-                </button>
-              </div>
-              {!userInfo ? (
-                <div className="flex items-center gap-2">
-                  <Input placeholder="@username" value={username} onChange={setUsername} />
-                  <button
-                    type="button"
-                    onClick={handleConfirmUsername}
-                    disabled={String(username || '').trim().replace(/^@/, '').length < 4}
-                    className="inline-flex h-10 shrink-0 items-center gap-1 rounded-xl bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    Tayyor
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
-                  <div className="flex min-w-0 items-center gap-2">
-                    {userInfo.photo ? (
-                      <img
-                        src={userInfo.photo}
-                        alt=""
-                        className="h-8 w-8 shrink-0 rounded-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600/20 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                        {String(userInfo.name || userInfo.first_name || userInfo.username || '?')[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
-                      {userInfo.name || userInfo.first_name || userInfo.username}
-                    </p>
-                    <p className="text-xs text-zinc-500">@{userInfo.username}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUsername('');
-                      setUserInfo(null);
-                    }}
-                    className="rounded-lg p-1 text-zinc-500 hover:bg-white/20"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              {checkingUser && (
-                <div className="flex items-center gap-1 text-xs text-zinc-500">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Tekshirilmoqda...
-                </div>
-              )}
-            </div>
+            <UsernameRecipientField
+              label={t('home.username')}
+              username={username}
+              onUsernameChange={setUsername}
+              userInfo={userInfo}
+              onClear={clearUsername}
+              onConfirm={handleConfirmUsername}
+              onSelf={handleSelf}
+              checkingUser={checkingUser}
+            />
 
             <div className="space-y-2">
               <p className="ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
