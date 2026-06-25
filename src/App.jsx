@@ -7,16 +7,19 @@ import { BottomNav } from './components/BottomNav';
 
 import { ReferralPage } from './pages/ReferralPage';
 import { EventsPage } from './pages/EventsPage';
+import { BarabanPage } from './pages/BarabanPage';
 import { HomePage } from './pages/HomePage';
 import { MarketPage } from './pages/MarketPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { PaymentPage } from './pages/PaymentPage';
 import { MoneyModal } from './components/MoneyModal';
+import { AppSplash } from './components/AppSplash';
 import { useTezpremium } from './context/TezpremiumContext';
 
 import { useTelegram } from './hooks/useTelegram';
 import { formatBalanceUzs } from './utils/balanceUzs';
+import { applyTelegramChrome } from './utils/telegramWebApp';
 
 const START_PARAM_TO_TAB = {
   payment: 'payment',
@@ -25,6 +28,7 @@ const START_PARAM_TO_TAB = {
   profile: 'profile',
   referral: 'referral',
   events: 'events',
+  baraban: 'baraban',
   gifts: 'market',
   settings: 'settings',
 };
@@ -50,18 +54,13 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [moneyOpen, setMoneyOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const startParamAppliedRef = useRef(false);
 
   const headerBalance = formatHeaderCompactBalance(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
 
   useEffect(() => {
-    if (!webApp) return;
-
-    webApp.setHeaderColor(
-      webApp.colorScheme === 'dark' ? '#18181b' : '#ffffff'
-    );
-
-    webApp.expand();
+    applyTelegramChrome(webApp);
   }, [webApp]);
 
   useEffect(() => {
@@ -79,13 +78,13 @@ export default function App() {
   }, [webApp]);
 
   useEffect(() => {
-    if (!webApp || !startParam || startParamAppliedRef.current) return;
+    if (!startParam || startParamAppliedRef.current) return;
     const tab = START_PARAM_TO_TAB[startParam.toLowerCase()];
     if (tab) {
       setActiveTab(tab);
       startParamAppliedRef.current = true;
     }
-  }, [webApp, startParam]);
+  }, [startParam]);
 
   const renderPage = () => {
     switch (activeTab) {
@@ -93,6 +92,8 @@ export default function App() {
         return <ReferralPage />;
       case 'events':
         return <EventsPage />;
+      case 'baraban':
+        return <BarabanPage />;
       case 'market':
         return <MarketPage onNavigateHome={() => setActiveTab('home')} />;
       case 'profile':
@@ -114,40 +115,50 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header
-        title={getPageTitle()}
-        balanceDisplay={`${headerBalance} UZS`}
-        onTopupClick={() => setMoneyOpen(true)}
-        onSettingsClick={() => setActiveTab('settings')}
-      />
+      {showSplash ? <AppSplash onDone={() => setShowSplash(false)} /> : null}
 
-      <main className="content">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-md mx-auto px-4 pb-24 pt-4"
-          >
-            {renderPage()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <div className="v2-mesh" aria-hidden>
+        <div className="v2-mesh__blob v2-mesh__blob--gold" />
+        <div className="v2-mesh__blob v2-mesh__blob--violet" />
+        <div className="v2-mesh__blob v2-mesh__blob--rose" />
+      </div>
 
-      <MoneyModal open={moneyOpen} onClose={() => setMoneyOpen(false)} />
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        <Header
+          title={getPageTitle()}
+          balanceDisplay={`${headerBalance} UZS`}
+          onTopupClick={() => setMoneyOpen(true)}
+          onSettingsClick={() => setActiveTab('settings')}
+        />
 
-      <BottomNav
-        activeTab={
-          activeTab === 'settings'
-            ? 'profile'
-            : activeTab === 'payment'
-              ? 'home'
-              : activeTab
-        }
-        onTabChange={setActiveTab}
-      />
+        <main className="content v2-main-with-header">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              className="relative mx-auto w-full max-w-md px-4 pb-28 pt-2"
+            >
+              {renderPage()}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+
+        <MoneyModal open={moneyOpen} onClose={() => setMoneyOpen(false)} />
+
+        <BottomNav
+          activeTab={
+            activeTab === 'settings'
+              ? 'profile'
+              : activeTab === 'payment'
+                ? 'home'
+                : activeTab
+          }
+          onTabChange={setActiveTab}
+        />
+      </div>
     </div>
   );
 }

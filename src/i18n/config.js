@@ -14,7 +14,8 @@ const resources = {
         home: 'Home',
         market: 'Market',
         profile: 'Profile',
-        payment: 'Top up'
+        payment: 'Top up',
+        baraban: 'Wheel'
       },
       payment: {
         subtitle: 'Manage your UZS balance and payments.',
@@ -35,6 +36,16 @@ const resources = {
         finished: 'Finished',
         reward: 'Reward',
         deadline: 'Deadline'
+      },
+      baraban: {
+        title: 'Prize Wheel',
+        subtitle: 'Spin the wheel and win a random gift',
+        spin: 'Spin the wheel',
+        spinning: 'Spinning...',
+        winTitle: 'Congratulations!',
+        winMessage: 'You won:',
+        spinAgain: 'Spin again',
+        close: 'Close'
       },
       home: {
         title: 'Home',
@@ -175,7 +186,8 @@ const resources = {
         home: 'Главная',
         market: 'Маркет',
         profile: 'Профиль',
-        payment: 'Пополнение'
+        payment: 'Пополнение',
+        baraban: 'Барабан'
       },
       payment: {
         subtitle: 'Баланс в UZS и способы оплаты.',
@@ -196,6 +208,16 @@ const resources = {
         finished: 'Завершено',
         reward: 'Награда',
         deadline: 'Дедлайн'
+      },
+      baraban: {
+        title: 'Барабан',
+        subtitle: 'Крутите барабан и выиграйте случайный подарок',
+        spin: 'Крутить барабан',
+        spinning: 'Крутится...',
+        winTitle: 'Поздравляем!',
+        winMessage: 'Вы выиграли:',
+        spinAgain: 'Крутить снова',
+        close: 'Закрыть'
       },
       home: {
         title: 'Главная',
@@ -336,7 +358,8 @@ const resources = {
         home: 'Asosiy',
         market: 'Market',
         profile: 'Profil',
-        payment: 'To\'ldirish'
+        payment: 'To\'ldirish',
+        baraban: 'Baraban'
       },
       payment: {
         subtitle: 'UZS balansi va to\'lovlar.',
@@ -357,6 +380,16 @@ const resources = {
         finished: 'Tugallangan',
         reward: 'Mukofot',
         deadline: 'Muddati'
+      },
+      baraban: {
+        title: 'Baraban',
+        subtitle: 'Barabanni aylantiring va random gift yutib oling',
+        spin: 'Barabanni aylantirish',
+        spinning: 'Aylanmoqda...',
+        winTitle: 'Tabriklaymiz!',
+        winMessage: 'Siz yutdingiz:',
+        spinAgain: 'Yana aylantirish',
+        close: 'Yopish'
       },
       home: {
         title: 'Asosiy',

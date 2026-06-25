@@ -1,80 +1,77 @@
 import { useEffect, useState } from 'react';
+import {
+  getStartParam,
+  initBrowserViewport,
+  initTelegramWebApp,
+  isInsideTelegram,
+  safeWebAppCall,
+  supportsWebAppVersion,
+} from '../utils/telegramWebApp';
+
+const BROWSER_MOCK_USER = {
+  id: 1234567811,
+  first_name: 'John',
+  last_name: 'Doe',
+  username: 'johndoe',
+  photo_url: 'https://picsum.photos/seed/john/200',
+};
 
 export const useTelegram = () => {
   const [webApp, setWebApp] = useState(null);
+  const insideTelegram = isInsideTelegram();
 
   useEffect(() => {
-    // LOCAL MODE (Chrome)
-    if (!window.Telegram?.WebApp) {
-      const setHeight = () => {
-        document.documentElement.style
-          .setProperty('--tg-height', `${window.innerHeight}px`);
-        document.documentElement.style
-          .setProperty('--tg-safe-top', '0px');
-        document.documentElement.style
-          .setProperty('--tg-safe-bottom', '0px');
-        document.documentElement.style
-          .setProperty('--tg-header-top-offset', '40px');
-      };
-      setHeight();
-      window.addEventListener('resize', setHeight);
-      return () => window.removeEventListener('resize', setHeight);
+    if (!insideTelegram) {
+      return initBrowserViewport();
     }
 
-    // TELEGRAM MODE
-    const tg = window.Telegram.WebApp;
+    const tg = initTelegramWebApp();
+    if (!tg) return undefined;
+
     const isAndroid = String(tg.platform || '').toLowerCase().includes('android');
 
-    tg.ready();
-    tg.expand();
-    tg.disableVerticalSwipes?.();
-    tg.MainButton.hide();
-
-    // ✅ Fullscreen so'rash
-    if (typeof tg.requestFullscreen === 'function') {
-      tg.requestFullscreen();
-    }
-
     const updateSizes = () => {
-      // ✅ safeAreaInset — status bar va bottom nav uchun
-      const safeTop    = tg.safeAreaInset?.top    ?? 0;
+      const safeTop = tg.safeAreaInset?.top ?? 0;
       const safeBottom = tg.safeAreaInset?.bottom ?? 0;
       const contentTop = tg.contentSafeAreaInset?.top ?? 0;
 
-      document.documentElement.style
-        .setProperty('--tg-height',
-          `${tg.viewportStableHeight || tg.viewportHeight || window.innerHeight}px`);
-      document.documentElement.style
-        .setProperty('--tg-safe-top', `${Math.max(safeTop, contentTop)}px`);
-      document.documentElement.style
-        .setProperty('--tg-safe-bottom', `${safeBottom}px`);
-      document.documentElement.style
-        .setProperty('--tg-header-top-offset', isAndroid ? '20px' : '40px');
+      document.documentElement.style.setProperty(
+        '--tg-height',
+        `${tg.viewportStableHeight || tg.viewportHeight || window.innerHeight}px`
+      );
+      document.documentElement.style.setProperty(
+        '--tg-safe-top',
+        `${Math.max(safeTop, contentTop)}px`
+      );
+      document.documentElement.style.setProperty('--tg-safe-bottom', `${safeBottom}px`);
+      document.documentElement.style.setProperty(
+        '--tg-header-top-offset',
+        isAndroid ? '9px' : '13px'
+      );
     };
 
     updateSizes();
-    tg.onEvent('viewportChanged', updateSizes);
-    tg.onEvent('fullscreenChanged', updateSizes); // ✅ yangi event
+    safeWebAppCall(() => tg.onEvent('viewportChanged', updateSizes));
+    if (supportsWebAppVersion(tg, '8.0')) {
+      safeWebAppCall(() => tg.onEvent('fullscreenChanged', updateSizes));
+    }
 
     setWebApp(tg);
 
     return () => {
-      tg.offEvent('viewportChanged', updateSizes);
-      tg.offEvent('fullscreenChanged', updateSizes);
+      safeWebAppCall(() => tg.offEvent('viewportChanged', updateSizes));
+      safeWebAppCall(() => tg.offEvent('fullscreenChanged', updateSizes));
     };
-  }, []);
+  }, [insideTelegram]);
 
-  const user = webApp?.initDataUnsafe?.user || {
-    id: 1234567811,
-    first_name: 'John', last_name: 'Doe',
-    username: 'johndoe',
-    photo_url: 'https://picsum.photos/seed/john/200'
-  };
+  const user = webApp?.initDataUnsafe?.user || BROWSER_MOCK_USER;
 
   return {
-    webApp,
+    webApp: insideTelegram ? webApp : null,
     user,
+    startParam: getStartParam(webApp),
+    isInsideTelegram: insideTelegram,
     isDark: webApp?.colorScheme === 'dark',
-    isFullscreen: webApp?.isFullscreen ?? false, // ✅
+    isFullscreen: webApp?.isFullscreen ?? false,
   };
 };

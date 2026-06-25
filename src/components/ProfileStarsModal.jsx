@@ -180,7 +180,7 @@ export function ProfileStarsModal({ open, onClose }) {
           </div>
 
           <div className="px-4 pt-4 pb-2 shrink-0 flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+            <div className="w-9 h-9 rounded-3xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
               <StarGlyph className="w-5 h-5" />
             </div>
             <div>
@@ -210,7 +210,7 @@ export function ProfileStarsModal({ open, onClose }) {
                   return (
                     <li
                       key={item.id}
-                      className="rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
+                      className="rounded-3xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
                     >
                       <button
                         type="button"

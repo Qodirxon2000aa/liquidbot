@@ -1,7 +1,7 @@
 import { useEffect, useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X, Check } from 'lucide-react';
-import { Button, Tabs } from '../components/UI';
+import { Button, Tabs, PageHero, SectionLabel } from '../components/UI';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTezpremium } from '../context/TezpremiumContext';
 import { useTelegram } from '../hooks/useTelegram';
@@ -58,6 +58,7 @@ const PREMIUM_PLANS = [
   },
 ];
 const USER_CHECK_API = import.meta.env.VITE_USER_CHECK_API ?? 'https://tezpremium.uz/starsapi/user.php';
+const STAR_PRICE_UZS = 220;
 
 function UsernameRecipientField({
   label,
@@ -74,21 +75,19 @@ function UsernameRecipientField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          {label}
-        </p>
+        <SectionLabel>{label}</SectionLabel>
         <button
           type="button"
           onClick={onSelf}
           disabled={checkingUser}
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="liquid-chip liquid-chip-gold px-3 py-1.5 disabled:opacity-50"
         >
           O&apos;zimga
         </button>
       </div>
 
       {userInfo ? (
-        <div className="flex w-full items-center gap-2.5 rounded-xl bg-zinc-50 px-3 py-2.5 dark:bg-zinc-800">
+        <div className="v2-glass flex w-full items-center gap-2.5 px-3 py-2.5">
           {userInfo.photo ? (
             <img
               src={userInfo.photo}
@@ -102,13 +101,13 @@ function UsernameRecipientField({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+            <p className="v2-title truncate text-sm text-zinc-900 dark:text-white">
               {userInfo.name || userInfo.username}
             </p>
             <p className="truncate text-xs text-zinc-500">@{userInfo.username}</p>
           </div>
           {userInfo.has_premium && (
-            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-bold text-violet-600 dark:text-violet-400">
+            <span className="inline-flex shrink-0 items-center gap-0.5 rounded-3xl bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-bold text-violet-600 dark:text-violet-400">
               <ShieldCheck className="h-3 w-3" />
               Premium
             </span>
@@ -116,7 +115,7 @@ function UsernameRecipientField({
           <button
             type="button"
             onClick={onClear}
-            className="shrink-0 rounded-lg p-1 text-zinc-500 hover:bg-zinc-200/80 dark:hover:bg-zinc-700"
+            className="liquid-icon-btn !p-1"
             aria-label="Tozalash"
           >
             <X className="h-4 w-4" />
@@ -134,7 +133,7 @@ function UsernameRecipientField({
               }}
               placeholder="@username"
               disabled={checkingUser}
-              className="w-full rounded-xl bg-zinc-50 px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-blue-500 disabled:opacity-60 dark:bg-zinc-800 dark:text-white"
+              className="liquid-input text-sm disabled:opacity-60"
             />
             {checkingUser && (
               <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-zinc-400" />
@@ -144,7 +143,7 @@ function UsernameRecipientField({
             type="button"
             onClick={onConfirm}
             disabled={cleanLen < 4 || checkingUser}
-            className="inline-flex h-[46px] shrink-0 items-center gap-1 rounded-xl bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-zinc-300 dark:disabled:bg-zinc-700"
+            className="liquid-btn liquid-btn-gold inline-flex h-[46px] w-auto shrink-0 items-center gap-1 px-3 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check className="h-3.5 w-3.5" />
             Tayyor
@@ -176,7 +175,6 @@ export const HomePage = () => {
   });
   const [sending, setSending] = useState(false);
   const [loadingPrices, setLoadingPrices] = useState(true);
-  const [pricePerStar, setPricePerStar] = useState(0);
   const [premiumPrices, setPremiumPrices] = useState({
     3: 170000,
     6: 225000,
@@ -199,7 +197,6 @@ export const HomePage = () => {
       .then((r) => r.json())
       .then((d) => {
         if (!d?.ok || !d?.settings || cancelled) return;
-        if (d.settings.price) setPricePerStar(Number(d.settings.price) || 0);
         const price12 = Number(d.settings['12oylik']) || 295000;
         setPremiumPrices({
           3: Number(d.settings['3oylik']) || 170000,
@@ -245,7 +242,7 @@ export const HomePage = () => {
 
   const balance = Number(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
   const starsAmount = Number(starsSelected.amount || 0);
-  const starsOverall = starsAmount * pricePerStar;
+  const starsOverall = starsAmount * STAR_PRICE_UZS;
   const premPriceKey = premSelected.priceKey ?? premSelected.months;
   const premOverall = Number(premiumPrices[premPriceKey] || 0);
   const getPlanPrice = (pkg) => Number(premiumPrices[pkg.priceKey ?? pkg.months] || 0);
@@ -322,7 +319,7 @@ export const HomePage = () => {
         showToast(false, "50 - 10 000 oralig'ida bo'lishi kerak");
         return;
       }
-      if (!pricePerStar || loadingPrices) {
+      if (loadingPrices) {
         showToast(false, "Narxlar hali yuklanmadi");
         return;
       }
@@ -386,28 +383,19 @@ export const HomePage = () => {
       Number.isNaN(parseInt(starsCustomInput, 10)) ||
       parseInt(starsCustomInput, 10) < 1);
 
-  const starsBuyLabel =
-    starsSelected.type === 'preset' || !pricePerStar
-      ? `${t('home.buy')} · ${(starsAmount * pricePerStar).toLocaleString('uz-UZ')} UZS`
-      : `${t('home.buy')} · ${starsSelected.amount} ★`;
+  const starsBuyLabel = `${t('home.buy')} · ${starsOverall.toLocaleString('uz-UZ')} UZS`;
 
   const premBuyLabel = `${t('home.buy')} · ${premOverall.toLocaleString('uz-UZ')} UZS`;
 
-  const rowStar = (active) =>
-    active
-      ? 'border-blue-500 bg-blue-50 shadow-sm dark:bg-blue-950/40'
-      : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900/80 dark:hover:border-zinc-600';
-
-  const rowPrem = (active) =>
-    active
-      ? 'border-purple-500 bg-purple-50 shadow-sm dark:bg-purple-950/35'
-      : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900/80 dark:hover:border-zinc-600';
+  const rowStar = (active) => (active ? 'v2-row-active-stars' : 'v2-row-idle');
+  const rowPrem = (active) => (active ? 'v2-row-active-premium' : 'v2-row-idle');
 
   return (
     <div className="space-y-6">
       <Tabs
         tabs={tabLabels}
         activeTab={activeTab}
+        variant="product"
         onTabChange={(label) => {
           const i = tabLabels.indexOf(label);
           if (i >= 0) setTabIdx(i);
@@ -423,23 +411,24 @@ export const HomePage = () => {
             exit={{ opacity: 0, x: 20 }}
             className="flex flex-col gap-4"
           >
-            <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700">
+            <PageHero variant="stars">
               <div className="absolute inset-0 overflow-hidden">
-                {[...Array(20)].map((_, i) => (
+                {[...Array(16)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="absolute opacity-20"
+                    className="absolute opacity-30"
                     initial={{
                       x: Math.random() * 400,
                       y: Math.random() * 200,
                       scale: Math.random() * 0.5 + 0.5,
                     }}
                     animate={{
-                      y: [null, Math.random() * -20, Math.random() * 20],
-                      opacity: [0.1, 0.3, 0.1],
+                      y: [null, Math.random() * -24, Math.random() * 24],
+                      opacity: [0.15, 0.45, 0.15],
+                      rotate: [0, 180, 360],
                     }}
                     transition={{
-                      duration: Math.random() * 3 + 2,
+                      duration: Math.random() * 4 + 3,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }}
@@ -448,11 +437,17 @@ export const HomePage = () => {
                   </motion.div>
                 ))}
               </div>
-              <div className="relative space-y-1 text-center">
-                <TelegramStar className="mx-auto h-16 w-16 drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]" />
-                <h2 className="text-2xl font-bold text-white">Telegram Stars</h2>
+              <div className="relative space-y-2 text-center">
+                <motion.div
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <TelegramStar className="mx-auto h-16 w-16 drop-shadow-[0_0_20px_rgba(255,204,0,0.6)]" />
+                </motion.div>
+                <h2 className="v2-hero-title">Telegram Stars</h2>
+                <p className="v2-hero-sub text-amber-200/90">{t('home.starsSubtitle')}</p>
               </div>
-            </div>
+            </PageHero>
 
             <UsernameRecipientField
               label={t('home.username')}
@@ -465,20 +460,18 @@ export const HomePage = () => {
               checkingUser={checkingUser}
             />
 
-            <div className="relative overflow-hidden rounded-2xl border border-amber-200/70 bg-gradient-to-br from-amber-50/95 via-white to-orange-50/60 p-4 shadow-[0_8px_30px_-12px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/15 dark:border-amber-500/25 dark:from-amber-950/35 dark:via-zinc-900 dark:to-orange-950/25 dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] dark:ring-amber-500/10">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-amber-400/15 blur-2xl dark:bg-amber-500/10" aria-hidden />
-              <div className="pointer-events-none absolute -bottom-8 -left-8 h-20 w-20 rounded-full bg-orange-300/10 blur-xl dark:bg-orange-500/5" aria-hidden />
+            <div className="v2-glass relative overflow-hidden p-4">
 
               <div className="relative flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
                   <Sparkles className="h-5 w-5 text-white" strokeWidth={2.2} />
                 </div>
                 <div className="min-w-0 flex-1 space-y-2">
                   <div>
-                    <p className="text-sm font-bold text-zinc-900 dark:text-white">{t('home.customAmount')}</p>
-                    <p className="mt-0.5 text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">{t('home.customHint')}</p>
+                    <p className="v2-title text-sm text-zinc-900 dark:text-white">{t('home.customAmount')}</p>
+                    <p className="v2-caption mt-0.5">{t('home.customHint')}</p>
                   </div>
-                  <div className="flex items-center gap-2 rounded-xl border border-amber-200/80 bg-white/90 px-3 py-2 shadow-inner shadow-amber-500/5 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/25 dark:border-zinc-600 dark:bg-zinc-950/80 dark:focus-within:border-amber-500/50 dark:focus-within:ring-amber-500/20">
+                  <div className="liquid-input flex items-center gap-2 !py-2 focus-within:border-amber-400/50 focus-within:shadow-[var(--liquid-inset),0_0_0_3px_rgba(255,204,0,0.15)]">
                     <TelegramStar className="h-5 w-5 shrink-0 opacity-90" />
                     <input
                       type="number"
@@ -493,9 +486,9 @@ export const HomePage = () => {
                           setStarsSelected({ type: 'custom', amount: n });
                         }
                       }}
-                      className="min-w-0 flex-1 border-0 bg-transparent py-1 text-[15px] font-semibold tabular-nums text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+                      className="v2-price min-w-0 flex-1 border-0 bg-transparent py-1 text-[15px] outline-none placeholder:font-normal placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
                     />
-                    <span className="shrink-0 text-xs font-bold uppercase tracking-wide text-amber-700/80 dark:text-amber-400/90">
+                    <span className="v2-badge shrink-0 text-amber-700/90 dark:text-amber-400/90">
                       Stars
                     </span>
                   </div>
@@ -504,23 +497,21 @@ export const HomePage = () => {
             </div>
 
             <div className="flex flex-col gap-[4.7px]">
-              <p className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                {t('home.stars')}
-              </p>
+              <SectionLabel className="mb-2">{t('home.stars')}</SectionLabel>
               {STAR_PRIMARY.map((pkg) => (
                 <button
                   key={pkg.amount}
                   type="button"
                   onClick={() => selectStarPreset(pkg)}
-                  className={`flex w-full min-h-[44px] items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowStar(isStarPresetActive(pkg))}`}
+                  className={`flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowStar(isStarPresetActive(pkg))}`}
                 >
                   <TelegramStar className="h-6 w-6 shrink-0" />
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                    <span className="text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
+                    <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
                       {pkg.amount} Stars
                     </span>
-                    <span className="shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                      {(pkg.amount * pricePerStar).toLocaleString('uz-UZ')} UZS
+                    <span className="v2-price shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                      {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS
                     </span>
                   </div>
                 </button>
@@ -541,15 +532,15 @@ export const HomePage = () => {
                         key={pkg.amount}
                         type="button"
                         onClick={() => selectStarPreset(pkg)}
-                        className={`flex w-full min-h-[44px] items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowStar(isStarPresetActive(pkg))}`}
+                        className={`flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowStar(isStarPresetActive(pkg))}`}
                       >
                         <TelegramStar className="h-6 w-6 shrink-0" />
                         <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                          <span className="text-sm font-bold tabular-nums text-zinc-900 dark:text-white">
+                          <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
                             {pkg.amount} Stars
                           </span>
-                          <span className="shrink-0 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                            {(pkg.amount * pricePerStar).toLocaleString('uz-UZ')} UZS
+                          <span className="v2-price shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                            {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS
                           </span>
                         </div>
                       </button>
@@ -561,7 +552,7 @@ export const HomePage = () => {
               <button
                 type="button"
                 onClick={() => setStarsMoreOpen((o) => !o)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 py-2.5 text-sm font-semibold text-blue-600 transition-colors hover:bg-zinc-50 dark:border-zinc-600 dark:text-blue-400 dark:hover:bg-zinc-900/50"
+                className="liquid-btn liquid-btn-outline flex w-full items-center justify-center gap-2 !py-2.5 text-sm"
               >
                 {t('home.more')}
                 <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${starsMoreOpen ? 'rotate-180' : ''}`} />
@@ -570,7 +561,12 @@ export const HomePage = () => {
 
             <Button
               onClick={handleBuy}
-              disabled={starsCustomInvalid || sending || loadingPrices || !userInfo}
+              disabled={
+                starsCustomInvalid ||
+                sending ||
+                (starsSelected.type === 'preset' && loadingPrices) ||
+                !userInfo
+              }
               className="text-sm"
             >
               {sending ? 'Yuborilyabdi...' : starsBuyLabel}
@@ -584,15 +580,17 @@ export const HomePage = () => {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600 to-pink-700">
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute left-0 top-0 h-full w-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-              </div>
-              <div className="relative space-y-1 text-center">
-                <ShieldCheck className="mx-auto h-12 w-12 text-white drop-shadow-lg" />
-                <h2 className="text-2xl font-bold text-white">Telegram Premium</h2>
-              </div>
-            </div>
+            <PageHero variant="premium">
+              <motion.div
+                className="relative space-y-2 text-center"
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <ShieldCheck className="mx-auto h-14 w-14 text-violet-200 drop-shadow-[0_0_24px_rgba(167,139,250,0.6)]" />
+                <h2 className="v2-hero-title">Telegram Premium</h2>
+                <p className="v2-hero-sub text-violet-200/90">{t('home.premiumSubtitle')}</p>
+              </motion.div>
+            </PageHero>
 
             <UsernameRecipientField
               label={t('home.username')}
@@ -606,36 +604,34 @@ export const HomePage = () => {
             />
 
             <div className="space-y-2">
-              <p className="ml-1 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                {t('home.premium')}
-              </p>
+              <SectionLabel>{t('home.premium')}</SectionLabel>
               {PREMIUM_PLANS.map((pkg) => (
                 <button
                   key={pkg.id}
                   type="button"
                   onClick={() => selectPremPreset(pkg)}
-                  className={`relative flex w-full min-h-[44px] items-center gap-3 rounded-xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowPrem(isPremPresetActive(pkg))}`}
+                  className={`relative flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowPrem(isPremPresetActive(pkg))}`}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/40">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl bg-purple-100 dark:bg-purple-900/40">
                     <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                     <div className="min-w-0">
                       <span
-                        className={`text-sm font-bold text-zinc-900 dark:text-white ${
+                        className={`v2-title text-sm text-zinc-900 dark:text-white ${
                           pkg.label ? 'uppercase tracking-wide' : 'tabular-nums'
                         }`}
                       >
                         {pkg.label ?? `${pkg.months} ${t('home.months')}`}
                       </span>
-                      <span className="ml-2 inline-block rounded-md bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                      <span className="v2-badge ml-2 inline-block rounded-3xl bg-emerald-100 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
                         −{pkg.discount}
                       </span>
                     </div>
                     <div className="shrink-0 flex flex-col items-end justify-end gap-1 pt-1">
                       {pkg.note && (
                         <span
-                          className={`inline-block rounded-full px-2 py-[1px] text-[9px] font-bold uppercase tracking-wide text-white shadow-[0_5px_12px_-7px_rgba(0,0,0,0.55)] ring-1 ${
+                          className={`v2-badge inline-block rounded-full px-2 py-[1px] text-white shadow-[0_5px_12px_-7px_rgba(0,0,0,0.55)] ring-1 ${
                             pkg.delivery === 'account'
                               ? 'border-violet-300/50 bg-gradient-to-r from-violet-500 to-fuchsia-500 ring-white/20 dark:border-violet-400/40 dark:from-violet-600 dark:to-fuchsia-600'
                               : 'border-emerald-300/50 bg-gradient-to-r from-emerald-500 to-teal-500 ring-white/20 dark:border-emerald-400/40 dark:from-emerald-600 dark:to-teal-600'
@@ -644,7 +640,7 @@ export const HomePage = () => {
                           {pkg.note}
                         </span>
                       )}
-                      <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                      <span className="v2-price text-xs text-zinc-500 dark:text-zinc-400">
                         {getPlanPrice(pkg).toLocaleString('uz-UZ')} UZS
                       </span>
                     </div>
@@ -653,7 +649,7 @@ export const HomePage = () => {
               ))}
             </div>
 
-            <Button onClick={handleBuy} disabled={sending || loadingPrices || !userInfo} className="text-sm">
+            <Button onClick={handleBuy} disabled={sending || loadingPrices || !userInfo} variant="violet" className="text-sm">
               {sending ? 'Yuborilyabdi...' : premBuyLabel}
             </Button>
           </motion.div>
@@ -674,15 +670,15 @@ export const HomePage = () => {
               animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: 20, scale: 0.96, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-5 text-center shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+              className="liquid-modal w-full max-w-sm rounded-3xl p-5 text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
                 <CheckCircle2 className="h-8 w-8 text-emerald-500" />
               </div>
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{successModal.title}</h3>
+              <h3 className="v2-display text-lg text-zinc-900 dark:text-white">{successModal.title}</h3>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{successModal.message}</p>
-              <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-sm dark:border-zinc-700 dark:bg-zinc-800">
+              <div className="liquid-glass mt-3 rounded-3xl px-3 py-2 text-left text-sm">
                 <p className="text-zinc-700 dark:text-zinc-300">
                   <span className="font-semibold text-zinc-900 dark:text-white">Kimga:</span>{' '}
                   {successModal.recipient || '—'}
@@ -695,7 +691,7 @@ export const HomePage = () => {
               <button
                 type="button"
                 onClick={() => setSuccessModal((prev) => ({ ...prev, open: false }))}
-                className="mt-4 h-10 w-full rounded-xl bg-blue-500 text-sm font-semibold text-white hover:bg-blue-600"
+                className="liquid-btn liquid-btn-violet mt-4 h-10 w-full !py-2 text-sm"
               >
                 Yopish
               </button>
@@ -709,7 +705,7 @@ export const HomePage = () => {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-4 right-4 z-[100] flex justify-center"
           >
-            <div className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-white shadow-lg ${toast.ok ? 'bg-green-500' : 'bg-red-500'}`}>
+            <div className={`flex items-center gap-2 rounded-3xl px-6 py-3 text-white shadow-lg ${toast.ok ? 'bg-green-500' : 'bg-red-500'}`}>
               <CheckCircle2 className="h-5 w-5" />
               <span className="font-bold">{toast.text || t('home.success')}</span>
             </div>

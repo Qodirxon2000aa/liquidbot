@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Share2, Copy, Users, Trophy } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Card, Button } from '../components/UI';
 import { useTezpremium } from '../context/TezpremiumContext';
 
@@ -56,23 +57,28 @@ export const ReferralPage = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="text-center space-y-4 py-8">
-        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto">
-          <Share2 className="w-8 h-8 text-blue-500" />
-        </div>
+      <Card glass className="space-y-4 py-8 text-center">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', bounce: 0.4 }}
+          className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500/20 to-amber-500/20"
+        >
+          <Share2 className="h-8 w-8 text-violet-500" />
+        </motion.div>
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{t('referral.title')}</h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <h2 className="v2-display text-xl text-zinc-900 dark:text-white">{t('referral.title')}</h2>
+          <p className="v2-body text-sm text-zinc-500 dark:text-zinc-400">
             Sizning havolangizdan yangi do&apos;stingiz tashrif buyursa <b>100 so&apos;m bonus</b> olasiz va
             do&apos;stlaringizni har bir hisob to&apos;ldirishidan <b>2%</b> qismini olasiz.
           </p>
         </div>
         
-        <div className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-xl flex items-center justify-between gap-2 border border-zinc-100 dark:border-zinc-700">
+        <div className="v2-glass flex items-center justify-between gap-2 p-3">
           <span className="text-xs font-mono text-zinc-600 dark:text-zinc-300 truncate">
             {shareLink || '—'}
           </span>
-          <button onClick={copyToClipboard} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
+          <button onClick={copyToClipboard} className="liquid-icon-btn">
             <Copy className={`w-4 h-4 ${copied ? 'text-green-500' : 'text-zinc-500'}`} />
           </button>
         </div>
@@ -83,16 +89,16 @@ export const ReferralPage = () => {
       <div className="grid grid-cols-2 gap-4">
         <Card className="flex flex-col items-center gap-2 py-6">
           <Users className="w-6 h-6 text-blue-500" />
-          <span className="text-2xl font-bold dark:text-white">{invitedFriends}</span>
-          <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">{t('referral.invited')}</span>
+          <span className="v2-price text-2xl text-zinc-900 dark:text-white">{invitedFriends}</span>
+          <span className="v2-badge text-zinc-400">{t('referral.invited')}</span>
         </Card>
         <Card className="flex flex-col items-center gap-2 py-6">
           <Trophy className="w-6 h-6 text-yellow-500" />
-          <span className="text-2xl font-bold dark:text-white">
+          <span className="v2-price text-2xl text-zinc-900 dark:text-white">
             {earnedAmount.toLocaleString('uz-UZ')}
             <span className="ml-1 text-xs font-semibold text-zinc-500">so&apos;m</span>
           </span>
-          <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">{t('referral.earned')}</span>
+          <span className="v2-badge text-zinc-400">{t('referral.earned')}</span>
         </Card>
       </div>
 
@@ -100,7 +106,7 @@ export const ReferralPage = () => {
         <h3 className="text-sm font-bold text-zinc-900 dark:text-white ml-1">{t('referral.stats')}</h3>
         <div className="space-y-2">
           {friends.length === 0 ? (
-            <div className="rounded-xl border border-zinc-100 bg-white p-3 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="v2-glass p-3 text-center text-xs text-zinc-500">
               Taklif qilingan do&apos;stlar hozircha yo&apos;q
             </div>
           ) : (
@@ -115,7 +121,7 @@ export const ReferralPage = () => {
               return (
                 <div
                   key={`${uid || idx}-${displayName}`}
-                  className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-100 dark:border-zinc-800"
+                  className="liquid-row flex items-center justify-between p-3"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-zinc-500">

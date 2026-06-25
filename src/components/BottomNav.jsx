@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Home, Users, Calendar, ShoppingBag, User } from 'lucide-react';
+import { Home, Users, Calendar, ShoppingBag, User, CircleDot } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const BottomNav = ({ activeTab, onTabChange }) => {
@@ -8,43 +8,63 @@ export const BottomNav = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'referral', icon: Users, label: t('nav.referral') },
     { id: 'events', icon: Calendar, label: t('nav.events') },
-    { id: 'home', icon: Home, label: t('nav.home') },
+    { id: 'home', icon: Home, label: t('nav.home'), accent: true },
+    { id: 'baraban', icon: CircleDot, label: t('nav.baraban') },
     { id: 'market', icon: ShoppingBag, label: t('nav.market') },
     { id: 'profile', icon: User, label: t('nav.profile') },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 safe-bottom">
-      <div
-        className="max-w-md mx-auto px-2 h-16 flex items-center justify-around"
-        style={{ transform: 'translateY(-8px)' }}
-      >
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className="flex flex-col items-center justify-center flex-1 min-w-0 relative"
-            >
-              <div className={`p-1 rounded-xl transition-all ${isActive ? 'text-blue-500' : 'text-zinc-400'}`}>
-                <Icon className="w-6 h-6" />
-              </div>
-              <span className={`text-[10px] font-medium truncate w-full text-center ${isActive ? 'text-blue-500' : 'text-zinc-400'}`}>
-                {tab.label}
-              </span>
-              {isActive && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute -top-1 w-12 h-1 bg-blue-500 rounded-full"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-            </button>
-          );
-        })}
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="pointer-events-auto mx-auto max-w-md">
+        <div className="liquid-nav flex items-stretch justify-around">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            const isHome = tab.accent;
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onTabChange(tab.id)}
+                className="liquid-nav-item"
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="v2-nav-active"
+                    className={`liquid-nav-active-pill ${
+                      isHome ? 'liquid-nav-active-pill--gold' : 'liquid-nav-active-pill--default'
+                    }`}
+                    transition={{ type: 'spring', bounce: 0.22, duration: 0.45 }}
+                  />
+                )}
+                <div
+                  className={`liquid-nav-icon transition-colors ${
+                    isActive
+                      ? isHome
+                        ? 'text-amber-500'
+                        : 'text-violet-500 dark:text-violet-400'
+                      : 'text-zinc-400'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={isActive ? 2.25 : 2} />
+                </div>
+                <span
+                  className={`liquid-nav-label ${
+                    isActive
+                      ? isHome
+                        ? 'text-amber-600 dark:text-amber-400'
+                        : 'text-violet-600 dark:text-violet-400'
+                      : 'text-zinc-400'
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

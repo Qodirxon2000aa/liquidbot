@@ -453,7 +453,7 @@ function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="mx-auto mb-5 h-20 w-20 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">{thumbContent}</div>
+            <div className="mx-auto mb-5 h-20 w-20 overflow-hidden rounded-3xl bg-zinc-100 dark:bg-zinc-800">{thumbContent}</div>
             {children}
           </div>
         </div>
@@ -477,7 +477,7 @@ function UserInputSection({ username, setUsername, cleanUsername, userInfo, chec
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="username"
-          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-3 pl-7 pr-10 text-sm font-medium text-zinc-900 transition-all focus:border-blue-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:bg-zinc-900"
+          className="w-full rounded-3xl border border-zinc-200 bg-zinc-50 py-3 pl-7 pr-10 text-sm font-medium text-zinc-900 transition-all focus:border-blue-500 focus:bg-white focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:bg-zinc-900"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2">
           {checkLoading && <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />}
@@ -487,7 +487,7 @@ function UserInputSection({ username, setUsername, cleanUsername, userInfo, chec
       </div>
 
       {userInfo && !checkLoading && (
-        <div className="flex items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/10 px-3 py-2.5">
+        <div className="flex items-center gap-3 rounded-3xl border border-green-500/20 bg-green-500/10 px-3 py-2.5">
           {userInfo.photo ? (
             <img src={userInfo.photo} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" />
           ) : (
@@ -525,7 +525,7 @@ function CommentSection({
       <button
         type="button"
         onClick={() => setCommentOn((v) => !v)}
-        className={`mb-2 flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+        className={`mb-2 flex w-full items-center gap-3 rounded-3xl border px-4 py-3 text-left transition-all ${
           commentOn
             ? 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400'
             : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
@@ -558,7 +558,7 @@ function CommentSection({
               <button
                 type="button"
                 onClick={() => setShowAiInput(!showAiInput)}
-                className="flex items-center gap-1 rounded-lg bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-500/20 dark:text-blue-400"
+                className="flex items-center gap-1 rounded-3xl bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-500/20 dark:text-blue-400"
               >
                 <Wand2 className="h-3 w-3" />
                 AI BILAN YOZISH
@@ -566,20 +566,20 @@ function CommentSection({
             </div>
 
             {showAiInput && (
-              <div className="mb-3 space-y-2 rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
+              <div className="mb-3 space-y-2 rounded-3xl border border-blue-500/20 bg-blue-500/5 p-3">
                 <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400">Kimga va nima uchunligini ayting:</p>
                 <div className="flex gap-2">
                   <input
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                     placeholder="Masalan: Onamga tug'ilgan kun tabrigi"
-                    className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-white"
+                    className="flex-1 rounded-3xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-blue-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-white"
                   />
                   <button
                     type="button"
                     onClick={generateAIGreeting}
                     disabled={aiLoading || !aiPrompt}
-                    className="rounded-lg bg-blue-500 p-2 text-white disabled:opacity-50"
+                    className="rounded-3xl bg-blue-500 p-2 text-white disabled:opacity-50"
                   >
                     {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   </button>
@@ -593,7 +593,7 @@ function CommentSection({
               placeholder="Tabrik yoki xabar yozing..."
               maxLength={200}
               rows={3}
-              className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-400/50 focus:border-blue-500 focus:bg-zinc-50 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:bg-zinc-900"
+              className="w-full resize-none rounded-3xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900 placeholder:text-zinc-400/50 focus:border-blue-500 focus:bg-zinc-50 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:bg-zinc-900"
               style={{ WebkitAppearance: 'none', appearance: 'none' }}
             />
             <p className="mt-1 text-right text-[10px] text-zinc-400">{comment.length}/200</p>
@@ -609,7 +609,7 @@ function AnonimToggle({ anonim, setAnonim }) {
     <button
       type="button"
       onClick={() => setAnonim((v) => !v)}
-      className={`mb-4 flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+      className={`mb-4 flex w-full items-center gap-3 rounded-3xl border px-4 py-3 text-left transition-all ${
         anonim
           ? 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400'
           : 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400'
@@ -739,7 +739,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
         <AnonimToggle anonim={anonim} setAnonim={userSearch.setAnonim} />
 
         {!hasInitData && (
-          <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
+          <div className="mb-3 flex items-center gap-2 rounded-3xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <p className="text-xs text-amber-800 dark:text-amber-200">
               Gift yuborish faqat bot orqali ochilgan Mini Appda ishlaydi. Brauzerda ochilsa{' '}
@@ -749,7 +749,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
         )}
 
         {orderError && (
-          <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
+          <div className="mb-3 flex items-center gap-2 rounded-3xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
             <p className="text-xs text-red-500">{orderError}</p>
           </div>
@@ -760,7 +760,7 @@ function BuyOddiyModal({ gift, onClose, onSuccess }) {
             type="button"
             onClick={handleOrder}
             disabled={!canOrder}
-            className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all ${
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-3xl text-sm font-bold transition-all ${
               canOrder
                 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 active:scale-95'
                 : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500'
@@ -893,7 +893,7 @@ function BuyNftModal({ gift, onClose, onSuccess, nftServiceEnabled }) {
         <UserInputSection {...userSearch} />
 
         {!nftServiceEnabled && (
-          <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
+          <div className="mb-3 flex items-center gap-2 rounded-3xl border border-amber-500/25 bg-amber-500/10 px-3 py-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <p className="text-xs text-amber-800 dark:text-amber-200/90">
               Xizmat vaqtincha o&apos;chirilgan
@@ -902,7 +902,7 @@ function BuyNftModal({ gift, onClose, onSuccess, nftServiceEnabled }) {
         )}
 
         {orderError && (
-          <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
+          <div className="mb-3 flex items-center gap-2 rounded-3xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
             <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
             <p className="text-xs text-red-500">{orderError}</p>
           </div>
@@ -913,7 +913,7 @@ function BuyNftModal({ gift, onClose, onSuccess, nftServiceEnabled }) {
             type="button"
             onClick={handleOrder}
             disabled={!canOrder}
-            className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-bold transition-all ${
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-3xl text-sm font-bold transition-all ${
               canOrder
                 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 active:scale-95'
                 : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500'
@@ -1117,14 +1117,14 @@ export function GiftsMarketView({ onNavigateHome }) {
 
   return (
     <div className="min-h-0 space-y-4 pb-2">
-      <Card className="overflow-hidden border-none bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 p-0 text-white shadow-lg">
+      <Card className="overflow-hidden border-none bg-gradient-to-br from-rose-500/90 via-violet-600 to-indigo-700 p-0 text-white shadow-[var(--v2-glow-violet)]">
         <CardContent className="px-4 pb-5 pt-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="mb-1 text-xs text-white/70">Sizning balansingiz</p>
-              <h2 className="text-2xl font-bold leading-none">
+              <p className="mb-1 v2-badge text-white/70">Sizning balansingiz</p>
+              <h2 className="v2-price-lg text-white">
                 {userBalance.toLocaleString('uz-UZ')}
-                <span className="ml-1 text-base font-normal">UZS</span>
+                <span className="ml-1 text-base font-semibold opacity-75">UZS</span>
               </h2>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
@@ -1133,13 +1133,13 @@ export function GiftsMarketView({ onNavigateHome }) {
           </div>
           {((mainTab === 'nft' && !nftLoading && gifts.length > 0 && !canAffordAny) ||
             (mainTab === 'oddiy' && !oddiyLoading && oddiyGifts.length > 0 && !canAffordAnyOddiy)) && (
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
+            <div className="mt-3 flex items-center gap-2 rounded-3xl bg-white/10 px-3 py-2">
               <AlertCircle className="h-4 w-4 shrink-0 text-white/80" />
               <p className="text-xs text-white/80">Giftlar sotib olish uchun balansingizni to&apos;ldiring</p>
               <button
                 type="button"
                 onClick={() => onNavigateHome?.()}
-                className="ml-auto shrink-0 rounded-lg bg-white/20 px-2.5 py-1 text-xs font-semibold transition-all hover:bg-white/30"
+                className="ml-auto shrink-0 rounded-3xl bg-white/20 px-2.5 py-1 text-xs font-semibold transition-all hover:bg-white/30"
               >
                 To&apos;ldirish
               </button>
@@ -1157,10 +1157,10 @@ export function GiftsMarketView({ onNavigateHome }) {
             key={key}
             type="button"
             onClick={() => handleMainTab(key)}
-            className={`flex items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-semibold transition-all ${
+            className={`flex items-center justify-center gap-2 rounded-3xl border py-3 text-sm font-semibold transition-all ${
               mainTab === key
-                ? 'border-blue-500 bg-blue-500 text-white shadow-md'
-                : 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700'
+                ? 'liquid-btn liquid-btn-violet !w-auto border-0 py-3'
+                : 'v2-glass text-zinc-600 dark:text-zinc-400'
             }`}
           >
             {icon}
@@ -1177,10 +1177,10 @@ export function GiftsMarketView({ onNavigateHome }) {
                 key={f.key}
                 type="button"
                 onClick={() => handleFilterChange(f.key)}
-                className={`shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                className={`shrink-0 whitespace-nowrap rounded-3xl border px-3.5 py-2 text-sm font-medium transition-all ${
                   activeFilter === f.key
-                    ? 'border-blue-500 bg-blue-500 text-white'
-                    : 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                    ? 'liquid-filter-active'
+                    : 'liquid-filter'
                 }`}
               >
                 {f.label}
@@ -1189,7 +1189,7 @@ export function GiftsMarketView({ onNavigateHome }) {
           </div>
 
           {!NFT_SERVICE_ENABLED && (
-            <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
+            <div className="flex items-start gap-2 rounded-3xl border border-red-500/20 bg-red-500/10 px-3 py-2.5">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
               <p className="text-xs leading-snug text-red-600/90 dark:text-red-400/90">
                 NFT gift yuborish hozircha mumkin emas.{' '}
@@ -1203,7 +1203,7 @@ export function GiftsMarketView({ onNavigateHome }) {
             <Card className="p-0">
               <CardContent className="px-4 pb-4 pt-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pink-500/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl bg-pink-500/10">
                     <Gift className="h-4 w-4 text-pink-500" />
                   </div>
                   <div className="min-w-0">
@@ -1218,7 +1218,7 @@ export function GiftsMarketView({ onNavigateHome }) {
             <Card className="p-0">
               <CardContent className="px-4 pb-4 pt-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl bg-amber-500/10">
                     <Sparkles className="h-4 w-4 text-amber-500" />
                   </div>
                   <div className="min-w-0">
@@ -1243,7 +1243,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <button
                     type="button"
                     onClick={() => fetchNftGifts(activeFilter)}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white"
+                    className="flex h-6 w-6 items-center justify-center rounded-3xl text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-white"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${nftLoading ? 'animate-spin' : ''}`} />
                   </button>
@@ -1263,7 +1263,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <button
                     type="button"
                     onClick={() => fetchNftGifts(activeFilter)}
-                    className="flex items-center gap-1.5 rounded-xl bg-blue-500 px-4 py-2 text-xs font-medium text-white"
+                    className="flex items-center gap-1.5 rounded-3xl bg-blue-500 px-4 py-2 text-xs font-medium text-white"
                   >
                     <RefreshCw className="h-3 w-3" /> Qayta urinish
                   </button>
@@ -1311,7 +1311,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                 key={f.key}
                 type="button"
                 onClick={() => setOddiyFilter(f.key)}
-                className={`shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                className={`shrink-0 whitespace-nowrap rounded-3xl border px-3.5 py-2 text-sm font-medium transition-all ${
                   oddiyFilter === f.key
                     ? 'border-blue-500 bg-blue-500 text-white'
                     : 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
@@ -1328,10 +1328,10 @@ export function GiftsMarketView({ onNavigateHome }) {
                 key={f.key}
                 type="button"
                 onClick={() => setOddiyTypeFilter(f.key)}
-                className={`shrink-0 whitespace-nowrap rounded-xl border px-3.5 py-2 text-sm font-medium transition-all ${
+                className={`shrink-0 whitespace-nowrap rounded-3xl border px-3.5 py-2 text-sm font-medium transition-all ${
                   oddiyTypeFilter === f.key
-                    ? 'border-blue-500 bg-blue-500 text-white'
-                    : 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                    ? 'liquid-filter-active'
+                    : 'liquid-filter'
                 }`}
               >
                 {f.label}
@@ -1343,7 +1343,7 @@ export function GiftsMarketView({ onNavigateHome }) {
             <Card className="p-0">
               <CardContent className="px-4 pb-4 pt-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pink-500/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl bg-pink-500/10">
                     <span className="text-lg">🎁</span>
                   </div>
                   <div className="min-w-0">
@@ -1356,7 +1356,7 @@ export function GiftsMarketView({ onNavigateHome }) {
             <Card className="p-0">
               <CardContent className="px-4 pb-4 pt-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl bg-amber-500/10">
                     <Sparkles className="h-4 w-4 text-amber-500" />
                   </div>
                   <div className="min-w-0">
@@ -1381,7 +1381,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <button
                     type="button"
                     onClick={fetchOddiyGifts}
-                    className="flex h-6 w-6 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                    className="flex h-6 w-6 items-center justify-center rounded-3xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${oddiyLoading ? 'animate-spin' : ''}`} />
                   </button>
@@ -1401,7 +1401,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                   <button
                     type="button"
                     onClick={fetchOddiyGifts}
-                    className="flex items-center gap-1.5 rounded-xl bg-blue-500 px-4 py-2 text-xs font-medium text-white"
+                    className="flex items-center gap-1.5 rounded-3xl bg-blue-500 px-4 py-2 text-xs font-medium text-white"
                   >
                     <RefreshCw className="h-3 w-3" /> Qayta urinish
                   </button>
@@ -1421,13 +1421,13 @@ export function GiftsMarketView({ onNavigateHome }) {
                     return (
                       <div
                         key={gift.id}
-                        className={`overflow-hidden rounded-xl border transition-all ${
+                        className={`overflow-hidden rounded-3xl border transition-all ${
                           affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200 dark:border-zinc-700'
                         }`}
                       >
                         <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-50 dark:from-zinc-800 dark:to-zinc-900">
                           <span
-                            className={`pointer-events-none absolute right-2 top-2 z-30 max-w-[calc(100%-1rem)] truncate rounded-lg border px-2 py-0.5 text-[10px] font-semibold leading-tight backdrop-blur-md ${typeBadge.className}`}
+                            className={`pointer-events-none absolute right-2 top-2 z-30 max-w-[calc(100%-1rem)] truncate rounded-3xl border px-2 py-0.5 text-[10px] font-semibold leading-tight backdrop-blur-md ${typeBadge.className}`}
                           >
                             {typeBadge.label}
                           </span>
@@ -1446,7 +1446,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                             type="button"
                             onClick={() => affordable && setBuyGift(gift)}
                             disabled={!affordable}
-                            className={`mt-1 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-all ${
+                            className={`mt-1 flex h-8 w-full items-center justify-center gap-1.5 rounded-3xl text-xs font-semibold transition-all ${
                               affordable
                                 ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
                                 : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
@@ -1503,7 +1503,7 @@ function NftGiftCard({
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border transition-all ${
+      className={`overflow-hidden rounded-3xl border transition-all ${
         'border-zinc-200 dark:border-zinc-700'
       }`}
     >
@@ -1523,7 +1523,7 @@ function NftGiftCard({
         )}
         {!nftServiceEnabled && (
           <div className="absolute inset-0 z-[5] flex items-center justify-center bg-black/60 p-1">
-            <div className="flex items-center gap-1 rounded-lg bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
+            <div className="flex items-center gap-1 rounded-3xl bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
               <AlertCircle className="h-3 w-3 shrink-0 text-amber-600" />
               <span className="text-center text-[10px] font-medium leading-tight text-zinc-600 dark:text-zinc-400">
                 Xizmat o&apos;chirilgan
@@ -1547,7 +1547,7 @@ function NftGiftCard({
           <button
             type="button"
             onClick={() => onCopy(gift)}
-            className={`flex h-7 flex-1 items-center justify-center gap-1 rounded-lg border text-[11px] font-medium transition-all ${
+            className={`flex h-7 flex-1 items-center justify-center gap-1 rounded-3xl border text-[11px] font-medium transition-all ${
               copiedId === gift.id
                 ? 'border-green-500/30 bg-green-500/10 text-green-600'
                 : 'border-zinc-200 text-zinc-600 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400'
@@ -1568,7 +1568,7 @@ function NftGiftCard({
           <button
             type="button"
             onClick={() => gift.link && window.open(gift.link, '_blank')}
-            className="flex h-7 flex-1 items-center justify-center gap-1 rounded-lg border border-zinc-200 text-[11px] font-medium text-zinc-600 transition-all hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400"
+            className="flex h-7 flex-1 items-center justify-center gap-1 rounded-3xl border border-zinc-200 text-[11px] font-medium text-zinc-600 transition-all hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400"
           >
             <Eye className="h-3 w-3 shrink-0" />
             <span>View</span>
@@ -1578,7 +1578,7 @@ function NftGiftCard({
           type="button"
           onClick={onBuy}
           disabled={!canPurchase}
-          className={`flex h-8 w-full items-center justify-center gap-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`flex h-8 w-full items-center justify-center gap-1.5 rounded-3xl text-xs font-semibold transition-all ${
             canPurchase
               ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
               : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'

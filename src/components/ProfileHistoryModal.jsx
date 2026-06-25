@@ -209,7 +209,7 @@ export function ProfileHistoryModal({ open, onClose }) {
         aria-modal="true"
       >
         {toast && (
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-lg">
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-3xl bg-emerald-600 text-white text-xs font-bold shadow-lg">
             {toast}
           </div>
         )}
@@ -252,7 +252,7 @@ export function ProfileHistoryModal({ open, onClose }) {
           </div>
 
           <div className="px-4 pt-4 pb-2 shrink-0 flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400">
+            <div className="w-9 h-9 rounded-3xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400">
               <CreditCard className="w-5 h-5" />
             </div>
             <div>
@@ -287,7 +287,7 @@ export function ProfileHistoryModal({ open, onClose }) {
                   return (
                     <li
                       key={item.id}
-                      className="rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
+                      className="rounded-3xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
                     >
                       <button
                         type="button"
@@ -335,7 +335,7 @@ export function ProfileHistoryModal({ open, onClose }) {
                             )}
 
                             {pendingPayment && cardToShow && (
-                              <div className="rounded-xl border border-amber-300/50 dark:border-amber-600/40 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-2">
+                              <div className="rounded-3xl border border-amber-300/50 dark:border-amber-600/40 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-2">
                                 <p className="text-[11px] font-bold text-amber-800 dark:text-amber-200">
                                   {t('history.cardNumber')}
                                 </p>
@@ -349,7 +349,7 @@ export function ProfileHistoryModal({ open, onClose }) {
                                       e.stopPropagation();
                                       copyCard(cardToShow);
                                     }}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-[10px] font-bold"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-3xl bg-emerald-600 text-white text-[10px] font-bold"
                                   >
                                     <Copy className="w-3 h-3" />
                                     {t('money.copy')}

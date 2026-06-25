@@ -113,7 +113,7 @@ export const SettingsPage = () => {
         <Card className="divide-y divide-zinc-100 dark:divide-zinc-800 p-0 overflow-hidden">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500">
+              <div className="w-10 h-10 rounded-3xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500">
                 {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </div>
               <div>
@@ -136,7 +136,7 @@ export const SettingsPage = () => {
 
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500">
+              <div className="w-10 h-10 rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500">
                 <Moon className="w-5 h-5 fill-current" />
               </div>
               <div>
@@ -167,7 +167,7 @@ export const SettingsPage = () => {
 
         <Card className="p-4 space-y-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500">
+            <div className="w-10 h-10 rounded-3xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500">
               <Type className="w-5 h-5" />
             </div>
             <p className="text-sm font-bold dark:text-white">Adjust text size</p>
@@ -179,10 +179,10 @@ export const SettingsPage = () => {
                 type="button"
                 key={size}
                 onClick={() => changeTextSize(size)}
-                className={`py-3 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                className={`liquid-btn py-3 px-2 text-xs font-bold !w-auto flex items-center justify-center gap-1 ${
                   textSize === size
-                    ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'
+                    ? 'liquid-btn-gold'
+                    : 'liquid-btn-secondary'
                 }`}
               >
                 {t(`settings.${size}`)}
@@ -194,7 +194,7 @@ export const SettingsPage = () => {
       </div>
 
       <div className="p-4 text-center">
-        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.2em]">Version 1.0.4 (Beta)</p>
+        <p className="text-center v2-badge text-zinc-400">TezPremium v2.0</p>
       </div>
     </div>
   );

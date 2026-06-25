@@ -384,12 +384,12 @@ export function MoneyModal({ open, onClose }) {
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-zinc-900 shadow-xl border border-zinc-200 dark:border-zinc-800"
+        className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl liquid-modal shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10" style={{ background: 'var(--liquid-bg-elevated)' }}>
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <div className="w-9 h-9 rounded-3xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Wallet className="w-5 h-5" />
             </div>
             <h2 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wide">
@@ -399,7 +399,7 @@ export function MoneyModal({ open, onClose }) {
           <button
             type="button"
             onClick={handleClose}
-            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
+            className="liquid-icon-btn !rounded-full"
             aria-label={t('money.close')}
           >
             <X className="w-5 h-5" />
@@ -408,7 +408,7 @@ export function MoneyModal({ open, onClose }) {
 
         <div className="p-4 pb-8 space-y-4">
           {errorMsg && (
-            <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-3 py-2 rounded-xl">
+            <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-3 py-2 rounded-3xl">
               {errorMsg}
             </div>
           )}
@@ -419,7 +419,7 @@ export function MoneyModal({ open, onClose }) {
               <p className="text-sm">Tekshirilmoqda...</p>
             </div>
           ) : payStatus === 'off' ? (
-            <div className="mx-auto max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 text-center shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+            <div className="mx-auto max-w-sm liquid-modal rounded-3xl p-6 text-center">
               <p className="mb-2 text-3xl">⚠️</p>
               <h3 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-white">Ogohlantirish</h3>
               <p className="text-lg text-zinc-500 dark:text-zinc-400">
@@ -428,7 +428,7 @@ export function MoneyModal({ open, onClose }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="mt-5 h-12 w-full rounded-xl bg-blue-500 text-xl font-semibold text-white hover:bg-blue-600"
+                className="mt-5 h-12 w-full rounded-3xl bg-blue-500 text-xl font-semibold text-white hover:bg-blue-600"
               >
                 Tushunarli
               </button>
@@ -442,7 +442,7 @@ export function MoneyModal({ open, onClose }) {
                 <select
                   value={paymentType}
                   onChange={(e) => setPaymentType(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  className="liquid-input text-sm"
                 >
                   {paymentOptions.length === 0 ? (
                     <option value="" disabled>
@@ -484,7 +484,7 @@ export function MoneyModal({ open, onClose }) {
                       val ? parseInt(val, 10).toLocaleString('ru-RU') : ''
                     );
                   }}
-                  className="w-full px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  className="liquid-input"
                 />
                 <p className="text-[11px] text-zinc-500 mt-2">{t('money.limits')}</p>
               </div>
@@ -512,7 +512,7 @@ export function MoneyModal({ open, onClose }) {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-100 dark:border-zinc-700">
+              <div className="liquid-glass flex flex-col items-stretch justify-between gap-2 p-4 sm:flex-row sm:items-center">
                 <div className="text-left">
                   <p className="text-[10px] font-bold uppercase text-zinc-500">
                     {t('money.amountDisplay')}
@@ -524,7 +524,7 @@ export function MoneyModal({ open, onClose }) {
                 <button
                   type="button"
                   onClick={() => copyToClipboard(rawAmount, 'money.amountDisplay')}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-blue-500 text-white hover:bg-blue-600"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-3xl text-xs font-bold bg-blue-500 text-white hover:bg-blue-600"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   {t('money.copy')}
@@ -532,7 +532,7 @@ export function MoneyModal({ open, onClose }) {
               </div>
 
               {cardInfo && (
-                <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-100 dark:border-zinc-700 text-left space-y-3">
+                <div className="liquid-glass space-y-3 p-4 text-left">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-[10px] font-bold uppercase text-zinc-500">
@@ -547,7 +547,7 @@ export function MoneyModal({ open, onClose }) {
                       onClick={() =>
                         copyToClipboard(cardInfo.number, 'money.cardNumber')
                       }
-                      className="shrink-0 inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100"
+                      className="shrink-0 inline-flex items-center gap-1 px-2 py-1.5 rounded-3xl text-[10px] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100"
                     >
                       <Copy className="w-3 h-3" />
                       {t('money.copy')}
@@ -582,7 +582,7 @@ export function MoneyModal({ open, onClose }) {
           }`}
         >
           <div
-            className={`max-w-xs w-full rounded-2xl p-6 text-center shadow-xl ${
+            className={`max-w-xs w-full rounded-3xl p-6 text-center shadow-xl ${
               resultType === 'success'
                 ? 'bg-emerald-600 text-white'
                 : 'bg-red-600 text-white'
@@ -601,7 +601,7 @@ export function MoneyModal({ open, onClose }) {
       )}
 
       {toast && !showResult && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-xl bg-zinc-900 text-white text-xs font-medium shadow-lg max-w-[90vw] text-center">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-3xl bg-zinc-900 text-white text-xs font-medium shadow-lg max-w-[90vw] text-center">
           {toast}
         </div>
       )}
@@ -610,7 +610,7 @@ export function MoneyModal({ open, onClose }) {
 
       {prettyAlert.open && (
         <div className="fixed inset-0 z-[225] flex items-center justify-center p-6 bg-black/50">
-          <div className="max-w-sm w-full rounded-2xl bg-white dark:bg-zinc-900 p-6 text-center border border-zinc-200 dark:border-zinc-700 shadow-xl">
+          <div className="liquid-modal max-w-sm w-full rounded-3xl p-6 text-center">
             <p className="text-2xl mb-2">⚠️</p>
             <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-2">
               Ogohlantirish
@@ -621,7 +621,7 @@ export function MoneyModal({ open, onClose }) {
             <button
               type="button"
               onClick={() => setPrettyAlert({ open: false, message: '' })}
-              className="mt-4 h-10 w-full rounded-xl bg-blue-500 text-sm font-semibold text-white hover:bg-blue-600"
+              className="mt-4 h-10 w-full rounded-3xl bg-blue-500 text-sm font-semibold text-white hover:bg-blue-600"
             >
               Tushunarli
             </button>

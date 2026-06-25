@@ -101,13 +101,13 @@ export const EventsPage = () => {
 
   return (
     <div className="space-y-4 pb-2">
-      <Card className="cursor-pointer p-0" onClick={() => eventData && setShowModal(true)}>
+      <Card className="cursor-pointer overflow-hidden p-0" onClick={() => eventData && setShowModal(true)}>
         <CardContent className="space-y-3 px-4 pb-4 pt-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
+            <div className="flex h-9 w-9 items-center justify-center rounded-3xl bg-amber-500/10">
               <Gift className="h-5 w-5 text-amber-500" />
             </div>
-            <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
+            <h2 className="v2-title text-base text-zinc-900 dark:text-white">
               Umumiy savdo maqsadi
             </h2>
           </div>
@@ -119,7 +119,7 @@ export const EventsPage = () => {
               <div>
                 <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-500 to-violet-500"
+                    className="h-full rounded-full bg-gradient-to-r from-amber-400 via-violet-500 to-rose-400 transition-all duration-700"
                     style={{ width: `${percent}%` }}
                   />
                 </div>
@@ -138,13 +138,13 @@ export const EventsPage = () => {
       <Card className="p-0">
         <CardContent className="space-y-3 px-4 pb-4 pt-4">
           <div>
-            <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
+            <h2 className="v2-title text-base text-zinc-900 dark:text-white">
               Savdo statistikasi
             </h2>
             <p className="text-xs text-zinc-500">Kunlik, haftalik va oylik reyting</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
+          <div className="liquid-tab-track grid grid-cols-3 gap-1.5 !p-1">
             {[
               { key: 'today', label: 'Bugun' },
               { key: 'week', label: 'Bu hafta' },
@@ -154,9 +154,9 @@ export const EventsPage = () => {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-3xl px-2 py-1.5 text-xs font-semibold transition ${
                   activeTab === tab.key
-                    ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
+                    ? 'liquid-tab-pill text-zinc-900 dark:text-white'
                     : 'text-zinc-500'
                 }`}
               >
@@ -172,7 +172,7 @@ export const EventsPage = () => {
               leaderboardData[activeTab].map((item) => (
                 <div
                   key={`${activeTab}-${item.rank}-${item.username}`}
-                  className="flex items-center gap-2 rounded-xl border border-zinc-200 px-3 py-2 dark:border-zinc-700"
+                  className="liquid-row flex items-center gap-2 px-3 py-2"
                 >
                   <span className="w-8 text-center text-sm font-semibold">
                     {item.trophy || `${item.rank}.`}
@@ -196,7 +196,7 @@ export const EventsPage = () => {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="w-full max-w-md rounded-t-3xl bg-white p-5 dark:bg-zinc-900 sm:rounded-2xl"
+            className="liquid-modal w-full max-w-md rounded-t-3xl p-5 sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
@@ -206,7 +206,7 @@ export const EventsPage = () => {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="liquid-icon-btn !p-1.5"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -228,7 +228,7 @@ export const EventsPage = () => {
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="mt-4 flex h-10 w-full items-center justify-center rounded-xl bg-blue-500 text-sm font-semibold text-white"
+              className="liquid-btn liquid-btn-violet mt-4 h-10 w-full !py-2 text-sm"
             >
               Tushundim
             </button>
@@ -237,7 +237,7 @@ export const EventsPage = () => {
       )}
 
       {!eventData && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5">
+        <div className="flex items-center gap-2 rounded-3xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5">
           <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           <p className="text-xs text-amber-800 dark:text-amber-200">
             Event ma&apos;lumoti topilmadi yoki server javob bermadi.
