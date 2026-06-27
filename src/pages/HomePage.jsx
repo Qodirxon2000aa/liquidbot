@@ -1,7 +1,8 @@
 import { useEffect, useState, useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X, Check } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, ChevronDown, Sparkles, Loader2, X, Check, Crown } from 'lucide-react';
 import { Button, Tabs, PageHero, SectionLabel } from '../components/UI';
+import { BodyPortal } from '../components/BodyPortal';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTezpremium } from '../context/TezpremiumContext';
 import { useTelegram } from '../hooks/useTelegram';
@@ -383,11 +384,7 @@ export const HomePage = () => {
       Number.isNaN(parseInt(starsCustomInput, 10)) ||
       parseInt(starsCustomInput, 10) < 1);
 
-  const starsBuyLabel = `${t('home.buy')} · ${starsOverall.toLocaleString('uz-UZ')} UZS`;
 
-  const premBuyLabel = `${t('home.buy')} · ${premOverall.toLocaleString('uz-UZ')} UZS`;
-
-  const rowStar = (active) => (active ? 'v2-row-active-stars' : 'v2-row-idle');
   const rowPrem = (active) => (active ? 'v2-row-active-premium' : 'v2-row-idle');
 
   return (
@@ -411,20 +408,20 @@ export const HomePage = () => {
             exit={{ opacity: 0, x: 20 }}
             className="flex flex-col gap-4"
           >
-            <PageHero variant="stars">
+            <PageHero variant="stars" className="!h-56">
               <div className="absolute inset-0 overflow-hidden">
-                {[...Array(16)].map((_, i) => (
+                {[...Array(20)].map((_, i) => (
                   <motion.div
                     key={i}
                     className="absolute opacity-30"
                     initial={{
                       x: Math.random() * 400,
-                      y: Math.random() * 200,
-                      scale: Math.random() * 0.5 + 0.5,
+                      y: Math.random() * 224,
+                      scale: Math.random() * 0.5 + 0.4,
                     }}
                     animate={{
                       y: [null, Math.random() * -24, Math.random() * 24],
-                      opacity: [0.15, 0.45, 0.15],
+                      opacity: [0.12, 0.4, 0.12],
                       rotate: [0, 180, 360],
                     }}
                     transition={{
@@ -433,18 +430,53 @@ export const HomePage = () => {
                       ease: 'easeInOut',
                     }}
                   >
-                    <TelegramStar className="h-4 w-4" />
+                    <TelegramStar className="h-3.5 w-3.5" />
                   </motion.div>
                 ))}
               </div>
-              <div className="relative space-y-2 text-center">
-                <motion.div
-                  animate={{ scale: [1, 1.06, 1] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <TelegramStar className="mx-auto h-16 w-16 drop-shadow-[0_0_20px_rgba(255,204,0,0.6)]" />
-                </motion.div>
-                <h2 className="v2-hero-title">Telegram Stars</h2>
+
+              <span className="absolute right-3.5 top-3.5 z-20 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-amber-100/90 backdrop-blur-md">
+                <Sparkles className="h-3 w-3" />
+                Tezkor
+              </span>
+
+              <div className="relative flex flex-col items-center gap-2 text-center">
+                <div className="relative flex h-24 w-24 items-center justify-center">
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background:
+                        'radial-gradient(circle, rgba(255,204,0,0.35) 0%, transparent 70%)',
+                    }}
+                    animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.9, 0.5] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  <motion.div
+                    className="absolute inset-0"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
+                  >
+                    {[0, 120, 240].map((deg) => (
+                      <div
+                        key={deg}
+                        className="absolute left-1/2 top-1/2 h-2 w-2"
+                        style={{
+                          transform: `rotate(${deg}deg) translate(2.9rem) translate(-50%, -50%)`,
+                        }}
+                      >
+                        <TelegramStar className="h-2.5 w-2.5 drop-shadow-[0_0_6px_rgba(255,204,0,0.8)]" />
+                      </div>
+                    ))}
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1, 1.08, 1], rotate: [0, -4, 4, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    className="relative z-10"
+                  >
+                    <TelegramStar className="h-14 w-14 drop-shadow-[0_0_24px_rgba(255,204,0,0.7)]" />
+                  </motion.div>
+                </div>
+                <h2 className="v2-hero-title v2-text-shimmer">Telegram Stars</h2>
                 <p className="v2-hero-sub text-amber-200/90">{t('home.starsSubtitle')}</p>
               </div>
             </PageHero>
@@ -460,19 +492,38 @@ export const HomePage = () => {
               checkingUser={checkingUser}
             />
 
-            <div className="v2-glass relative overflow-hidden p-4">
-
-              <div className="relative flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
-                  <Sparkles className="h-5 w-5 text-white" strokeWidth={2.2} />
+            <motion.div
+              className="v2-amount-card"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="relative flex items-center gap-2">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/30">
+                  <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.4} />
                 </div>
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div>
-                    <p className="v2-title text-sm text-zinc-900 dark:text-white">{t('home.customAmount')}</p>
-                    <p className="v2-caption mt-0.5">{t('home.customHint')}</p>
-                  </div>
-                  <div className="liquid-input flex items-center gap-2 !py-2 focus-within:border-amber-400/50 focus-within:shadow-[var(--liquid-inset),0_0_0_3px_rgba(255,204,0,0.15)]">
-                    <TelegramStar className="h-5 w-5 shrink-0 opacity-90" />
+                <div className="min-w-0 flex-1">
+                  <p className="v2-title text-sm text-white">{t('home.customAmount')}</p>
+                  <p className="v2-caption !text-amber-100/70">{t('home.customHint')}</p>
+                </div>
+              </div>
+
+              <div className="relative mt-4 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cur = parseInt(starsCustomInput, 10) || starsLastPreset.amount;
+                    onStarsCustomChange(String(Math.max(1, cur - 50)));
+                  }}
+                  className="v2-amount-stepper"
+                  aria-label="Kamaytirish"
+                >
+                  <span className="text-xl leading-none">−</span>
+                </button>
+
+                <div className="flex min-w-0 flex-1 flex-col items-center">
+                  <div className="flex items-center gap-2">
+                    <TelegramStar className="h-7 w-7 drop-shadow-[0_0_12px_rgba(255,204,0,0.6)]" />
                     <input
                       type="number"
                       inputMode="numeric"
@@ -486,36 +537,64 @@ export const HomePage = () => {
                           setStarsSelected({ type: 'custom', amount: n });
                         }
                       }}
-                      className="v2-price min-w-0 flex-1 border-0 bg-transparent py-1 text-[15px] outline-none placeholder:font-normal placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+                      className="v2-amount-display w-32 border-0 bg-transparent text-center outline-none placeholder:text-white/30"
                     />
-                    <span className="v2-badge shrink-0 text-amber-700/90 dark:text-amber-400/90">
-                      Stars
-                    </span>
+                  </div>
+                  <span className="v2-badge mt-1 text-amber-200/80">Stars</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cur = parseInt(starsCustomInput, 10) || starsLastPreset.amount;
+                    onStarsCustomChange(String(cur + 50));
+                  }}
+                  className="v2-amount-stepper"
+                  aria-label="Ko'paytirish"
+                >
+                  <span className="text-xl leading-none">+</span>
+                </button>
+              </div>
+
+              {starsAmount > 0 && (
+                <div className="relative mt-3 flex justify-center">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-black/20 px-3 py-1">
+                    <p className="v2-price text-sm text-amber-200">
+                      {starsOverall.toLocaleString('uz-UZ')} UZS
+                    </p>
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </motion.div>
 
-            <div className="flex flex-col gap-[4.7px]">
-              <SectionLabel className="mb-2">{t('home.stars')}</SectionLabel>
-              {STAR_PRIMARY.map((pkg) => (
-                <button
-                  key={pkg.amount}
-                  type="button"
-                  onClick={() => selectStarPreset(pkg)}
-                  className={`flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowStar(isStarPresetActive(pkg))}`}
-                >
-                  <TelegramStar className="h-6 w-6 shrink-0" />
-                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                    <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
-                      {pkg.amount} Stars
-                    </span>
-                    <span className="v2-price shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
-                      {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS
-                    </span>
-                  </div>
-                </button>
-              ))}
+            <div className="flex flex-col gap-3">
+              <SectionLabel className="mb-0">{t('home.stars')}</SectionLabel>
+              <div className="grid grid-cols-3 gap-2.5">
+                {STAR_PRIMARY.map((pkg) => {
+                  const active = isStarPresetActive(pkg);
+                  return (
+                    <button
+                      key={pkg.amount}
+                      type="button"
+                      onClick={() => selectStarPreset(pkg)}
+                      className={`v2-pkg-card ${active ? 'v2-pkg-card--active-stars' : ''}`}
+                    >
+                      {active && (
+                        <span className="v2-pkg-check bg-amber-500">
+                          <Check className="h-3 w-3" />
+                        </span>
+                      )}
+                      <TelegramStar className="h-7 w-7 shrink-0" />
+                      <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
+                        {pkg.amount}
+                      </span>
+                      <span className="v2-price text-[11px] text-zinc-500 dark:text-zinc-400">
+                        {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
               <AnimatePresence initial={false}>
                 {starsMoreOpen && (
@@ -525,26 +604,34 @@ export const HomePage = () => {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="flex flex-col gap-[4.7px] overflow-hidden"
+                    className="overflow-hidden"
                   >
-                    {STAR_EXTRA.map((pkg) => (
-                      <button
-                        key={pkg.amount}
-                        type="button"
-                        onClick={() => selectStarPreset(pkg)}
-                        className={`flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowStar(isStarPresetActive(pkg))}`}
-                      >
-                        <TelegramStar className="h-6 w-6 shrink-0" />
-                        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                          <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
-                            {pkg.amount} Stars
-                          </span>
-                          <span className="v2-price shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
-                            {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS
-                          </span>
-                        </div>
-                      </button>
-                    ))}
+                    <div className="grid grid-cols-3 gap-2.5">
+                      {STAR_EXTRA.map((pkg) => {
+                        const active = isStarPresetActive(pkg);
+                        return (
+                          <button
+                            key={pkg.amount}
+                            type="button"
+                            onClick={() => selectStarPreset(pkg)}
+                            className={`v2-pkg-card ${active ? 'v2-pkg-card--active-stars' : ''}`}
+                          >
+                            {active && (
+                              <span className="v2-pkg-check bg-amber-500">
+                                <Check className="h-3 w-3" />
+                              </span>
+                            )}
+                            <TelegramStar className="h-7 w-7 shrink-0" />
+                            <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
+                              {pkg.amount}
+                            </span>
+                            <span className="v2-price text-[11px] text-zinc-500 dark:text-zinc-400">
+                              {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -559,18 +646,26 @@ export const HomePage = () => {
               </button>
             </div>
 
-            <Button
-              onClick={handleBuy}
-              disabled={
-                starsCustomInvalid ||
-                sending ||
-                (starsSelected.type === 'preset' && loadingPrices) ||
-                !userInfo
-              }
-              className="text-sm"
-            >
-              {sending ? 'Yuborilyabdi...' : starsBuyLabel}
-            </Button>
+            <div className="liquid-dock">
+              <div className="min-w-0 flex-1">
+                <p className="v2-caption !text-[10px]">{t('home.stars')}</p>
+                <p className="v2-price text-sm text-zinc-900 dark:text-white">
+                  {starsOverall.toLocaleString('uz-UZ')} UZS
+                </p>
+              </div>
+              <Button
+                onClick={handleBuy}
+                disabled={
+                  starsCustomInvalid ||
+                  sending ||
+                  (starsSelected.type === 'preset' && loadingPrices) ||
+                  !userInfo
+                }
+                className="!w-auto px-5 text-sm"
+              >
+                {sending ? 'Yuborilyabdi...' : t('home.buy')}
+              </Button>
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -580,16 +675,81 @@ export const HomePage = () => {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            <PageHero variant="premium">
-              <motion.div
-                className="relative space-y-2 text-center"
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <ShieldCheck className="mx-auto h-14 w-14 text-violet-200 drop-shadow-[0_0_24px_rgba(167,139,250,0.6)]" />
-                <h2 className="v2-hero-title">Telegram Premium</h2>
+            <PageHero variant="premium" className="!h-56">
+              <div className="absolute inset-0 overflow-hidden">
+                {[...Array(14)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute opacity-25 text-violet-200"
+                    initial={{
+                      x: Math.random() * 400,
+                      y: Math.random() * 224,
+                      scale: Math.random() * 0.5 + 0.4,
+                    }}
+                    animate={{
+                      y: [null, Math.random() * -20, Math.random() * 20],
+                      opacity: [0.1, 0.35, 0.1],
+                    }}
+                    transition={{
+                      duration: Math.random() * 4 + 3,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                  </motion.div>
+                ))}
+              </div>
+
+              <span className="absolute right-3.5 top-3.5 z-20 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-violet-100/90 backdrop-blur-md">
+                <Crown className="h-3 w-3" />
+                VIP
+              </span>
+
+              <div className="relative flex flex-col items-center gap-2 text-center">
+                <div className="relative flex h-24 w-24 items-center justify-center">
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background:
+                        'radial-gradient(circle, rgba(167,139,250,0.4) 0%, transparent 70%)',
+                    }}
+                    animate={{ scale: [1, 1.25, 1], opacity: [0.5, 0.9, 0.5] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-dashed border-violet-300/40"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                  />
+                  <motion.div
+                    className="absolute inset-0"
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                  >
+                    {[0, 90, 180, 270].map((deg) => (
+                      <div
+                        key={deg}
+                        className="absolute left-1/2 top-1/2 h-2 w-2"
+                        style={{
+                          transform: `rotate(${deg}deg) translate(2.9rem) translate(-50%, -50%)`,
+                        }}
+                      >
+                        <Sparkles className="h-3 w-3 text-violet-200 drop-shadow-[0_0_6px_rgba(167,139,250,0.8)]" />
+                      </div>
+                    ))}
+                  </motion.div>
+                  <motion.div
+                    animate={{ scale: [1, 1.08, 1], y: [0, -3, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                    className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-400/30 to-fuchsia-500/20 ring-1 ring-violet-200/40"
+                  >
+                    <ShieldCheck className="h-9 w-9 text-violet-100 drop-shadow-[0_0_20px_rgba(167,139,250,0.7)]" />
+                  </motion.div>
+                </div>
+                <h2 className="v2-hero-title v2-text-shimmer-violet">Telegram Premium</h2>
                 <p className="v2-hero-sub text-violet-200/90">{t('home.premiumSubtitle')}</p>
-              </motion.div>
+              </div>
             </PageHero>
 
             <UsernameRecipientField
@@ -603,59 +763,79 @@ export const HomePage = () => {
               checkingUser={checkingUser}
             />
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <SectionLabel>{t('home.premium')}</SectionLabel>
-              {PREMIUM_PLANS.map((pkg) => (
-                <button
-                  key={pkg.id}
-                  type="button"
-                  onClick={() => selectPremPreset(pkg)}
-                  className={`relative flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${rowPrem(isPremPresetActive(pkg))}`}
-                >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl bg-purple-100 dark:bg-purple-900/40">
-                    <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                    <div className="min-w-0">
+              {PREMIUM_PLANS.map((pkg) => {
+                const active = isPremPresetActive(pkg);
+                return (
+                  <button
+                    key={pkg.id}
+                    type="button"
+                    onClick={() => selectPremPreset(pkg)}
+                    className={`relative flex w-full min-h-[64px] items-center gap-3 rounded-3xl border px-4 py-3 text-left transition-all active:scale-[0.99] ${rowPrem(active)}`}
+                  >
+                    {pkg.note && (
                       <span
-                        className={`v2-title text-sm text-zinc-900 dark:text-white ${
-                          pkg.label ? 'uppercase tracking-wide' : 'tabular-nums'
+                        className={`v2-pkg-ribbon ${
+                          pkg.delivery === 'account'
+                            ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500'
+                            : 'bg-gradient-to-r from-emerald-500 to-teal-500'
                         }`}
                       >
-                        {pkg.label ?? `${pkg.months} ${t('home.months')}`}
+                        {pkg.note}
                       </span>
-                      <span className="v2-badge ml-2 inline-block rounded-3xl bg-emerald-100 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                        −{pkg.discount}
+                    )}
+                    {active && (
+                      <span className="v2-pkg-check bg-violet-500">
+                        <Check className="h-3 w-3" />
                       </span>
+                    )}
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl bg-purple-100 dark:bg-purple-900/40">
+                      <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <div className="shrink-0 flex flex-col items-end justify-end gap-1 pt-1">
-                      {pkg.note && (
+                    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                      <div className="min-w-0">
                         <span
-                          className={`v2-badge inline-block rounded-full px-2 py-[1px] text-white shadow-[0_5px_12px_-7px_rgba(0,0,0,0.55)] ring-1 ${
-                            pkg.delivery === 'account'
-                              ? 'border-violet-300/50 bg-gradient-to-r from-violet-500 to-fuchsia-500 ring-white/20 dark:border-violet-400/40 dark:from-violet-600 dark:to-fuchsia-600'
-                              : 'border-emerald-300/50 bg-gradient-to-r from-emerald-500 to-teal-500 ring-white/20 dark:border-emerald-400/40 dark:from-emerald-600 dark:to-teal-600'
+                          className={`v2-title block text-sm text-zinc-900 dark:text-white ${
+                            pkg.label ? 'uppercase tracking-wide' : 'tabular-nums'
                           }`}
                         >
-                          {pkg.note}
+                          {pkg.label ?? `${pkg.months} ${t('home.months')}`}
                         </span>
-                      )}
-                      <span className="v2-price text-xs text-zinc-500 dark:text-zinc-400">
+                        <span className="v2-badge mt-1 inline-block rounded-3xl bg-emerald-100 px-1.5 py-0.5 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+                          −{pkg.discount}
+                        </span>
+                      </div>
+                      <span className="v2-price shrink-0 text-sm text-zinc-700 dark:text-zinc-300">
                         {getPlanPrice(pkg).toLocaleString('uz-UZ')} UZS
                       </span>
                     </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
 
-            <Button onClick={handleBuy} disabled={sending || loadingPrices || !userInfo} variant="violet" className="text-sm">
-              {sending ? 'Yuborilyabdi...' : premBuyLabel}
-            </Button>
+            <div className="liquid-dock">
+              <div className="min-w-0 flex-1">
+                <p className="v2-caption !text-[10px]">{t('home.premium')}</p>
+                <p className="v2-price text-sm text-zinc-900 dark:text-white">
+                  {premOverall.toLocaleString('uz-UZ')} UZS
+                </p>
+              </div>
+              <Button
+                onClick={handleBuy}
+                disabled={sending || loadingPrices || !userInfo}
+                variant="violet"
+                className="!w-auto px-5 text-sm"
+              >
+                {sending ? 'Yuborilyabdi...' : t('home.buy')}
+              </Button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      <BodyPortal>
       <AnimatePresence>
         {successModal.open && (
           <motion.div
@@ -712,6 +892,7 @@ export const HomePage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </BodyPortal>
     </div>
   );
 };

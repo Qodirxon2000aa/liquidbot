@@ -4,6 +4,7 @@ import './i18n/config';
 
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
+import { WeeklyPrizeBanner } from './components/WeeklyPrizeBanner';
 
 import { ReferralPage } from './pages/ReferralPage';
 import { EventsPage } from './pages/EventsPage';
@@ -58,6 +59,11 @@ export default function App() {
   const startParamAppliedRef = useRef(false);
 
   const headerBalance = formatHeaderCompactBalance(apiUser?.balanceUzs ?? apiUser?.balance ?? 0);
+  const [prizeBannerHeight, setPrizeBannerHeight] = useState(0);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--prize-banner-height', `${prizeBannerHeight}px`);
+  }, [prizeBannerHeight]);
 
   useEffect(() => {
     applyTelegramChrome(webApp);
@@ -97,7 +103,7 @@ export default function App() {
       case 'market':
         return <MarketPage onNavigateHome={() => setActiveTab('home')} />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage onOpenSettings={() => setActiveTab('settings')} />;
       case 'settings':
         return <SettingsPage />;
       case 'payment':
@@ -118,17 +124,23 @@ export default function App() {
       {showSplash ? <AppSplash onDone={() => setShowSplash(false)} /> : null}
 
       <div className="v2-mesh" aria-hidden>
+        <div className="v2-mesh__grid" />
         <div className="v2-mesh__blob v2-mesh__blob--gold" />
         <div className="v2-mesh__blob v2-mesh__blob--violet" />
         <div className="v2-mesh__blob v2-mesh__blob--rose" />
       </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        <WeeklyPrizeBanner
+          onHeightChange={setPrizeBannerHeight}
+          onNavigate={() => setActiveTab('events')}
+        />
         <Header
           title={getPageTitle()}
           balanceDisplay={`${headerBalance} UZS`}
           onTopupClick={() => setMoneyOpen(true)}
-          onSettingsClick={() => setActiveTab('settings')}
+          onProfileClick={() => setActiveTab('profile')}
+          profileActive={activeTab === 'profile' || activeTab === 'settings'}
         />
 
         <main className="content v2-main-with-header">
@@ -149,14 +161,10 @@ export default function App() {
         <MoneyModal open={moneyOpen} onClose={() => setMoneyOpen(false)} />
 
         <BottomNav
-          activeTab={
-            activeTab === 'settings'
-              ? 'profile'
-              : activeTab === 'payment'
-                ? 'home'
-                : activeTab
-          }
+          activeTab={activeTab === 'payment' ? 'home' : activeTab}
           onTabChange={setActiveTab}
+          user={user}
+          onProfileClick={() => setActiveTab('profile')}
         />
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Globe, Settings as SettingsIcon, Wallet, Plus } from 'lucide-react';
+import { Globe, User, Wallet, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const Header = ({ title, balanceDisplay = '0', onTopupClick, onSettingsClick }) => {
+export const Header = ({ title, balanceDisplay = '0', onTopupClick, onProfileClick, profileActive = false }) => {
   const { i18n, t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -19,20 +19,20 @@ export const Header = ({ title, balanceDisplay = '0', onTopupClick, onSettingsCl
   };
 
   return (
-    <header className="v2-header-shell safe-top">
-      <div className="mx-auto max-w-md px-4 pb-2">
+    <header className="v2-header-shell prize-safe-top">
+      <div className="mx-auto max-w-md px-4 pb-1">
         <div className="v2-header-bar">
           <button
             type="button"
             onClick={onTopupClick}
-            className="liquid-chip liquid-chip-emerald group gap-2 px-2.5 py-1.5 active:scale-95"
+            className="liquid-chip liquid-chip-emerald group gap-1.5 px-2 py-1 active:scale-95"
           >
-            <Wallet className="h-4 w-4 text-emerald-500" />
+            <Wallet className="h-3.5 w-3.5 text-emerald-500" />
             <span className="max-w-[88px] truncate v2-price text-[11px] text-zinc-800 dark:text-emerald-100">
               {balanceDisplay}
             </span>
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 transition-transform group-hover:scale-105">
-              <Plus className="h-3 w-3" />
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 transition-transform group-hover:scale-105">
+              <Plus className="h-2.5 w-2.5" />
             </span>
           </button>
 
@@ -49,9 +49,9 @@ export const Header = ({ title, balanceDisplay = '0', onTopupClick, onSettingsCl
             <button
               type="button"
               onClick={() => setOpen(!open)}
-              className="liquid-icon-btn gap-1 !px-2.5"
+              className="liquid-icon-btn gap-1 !px-2"
             >
-              <Globe className="h-4 w-4" />
+              <Globe className="h-3.5 w-3.5" />
               <span className="v2-nav-label text-zinc-500">{i18n.language.split('-')[0]}</span>
             </button>
 
@@ -61,7 +61,7 @@ export const Header = ({ title, balanceDisplay = '0', onTopupClick, onSettingsCl
                   initial={{ opacity: 0, y: -8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                  className="liquid-modal absolute right-0 top-12 z-50 w-36 overflow-hidden rounded-3xl"
+                  className="liquid-modal absolute right-0 top-9 z-50 w-36 overflow-hidden rounded-3xl"
                 >
                   {languages.map((lang) => (
                     <button
@@ -83,11 +83,11 @@ export const Header = ({ title, balanceDisplay = '0', onTopupClick, onSettingsCl
 
             <button
               type="button"
-              onClick={onSettingsClick}
-              className="liquid-icon-btn"
-              aria-label={t('settings.title')}
+              onClick={onProfileClick}
+              className={`liquid-icon-btn ${profileActive ? 'text-violet-500 dark:text-violet-400' : ''}`}
+              aria-label={t('nav.profile')}
             >
-              <SettingsIcon className="h-5 w-5" />
+              <User className="h-4 w-4" />
             </button>
           </div>
         </div>

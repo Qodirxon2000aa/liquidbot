@@ -106,19 +106,19 @@ export const SettingsPage = () => {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-zinc-900 dark:text-white ml-1 uppercase tracking-wider opacity-60">
+        <h3 className="v2-section-label">
           {t('settings.appearance')}
         </h3>
 
-        <Card className="divide-y divide-zinc-100 dark:divide-zinc-800 p-0 overflow-hidden">
+        <Card className="divide-y divide-white/10 p-0 overflow-hidden">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-3xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500">
+              <div className="liquid-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl text-blue-500">
                 {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </div>
               <div>
-                <p className="text-sm font-bold dark:text-white">{t('settings.darkMode')}</p>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                <p className="v2-title text-sm text-zinc-900 dark:text-white">{t('settings.darkMode')}</p>
+                <p className="v2-caption text-[10px]">
                   Switch between light and dark themes
                 </p>
               </div>
@@ -126,22 +126,22 @@ export const SettingsPage = () => {
             <button
               type="button"
               onClick={toggleDark}
-              className={`w-12 h-6 rounded-full transition-colors relative ${isDark ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-700'}`}
+              className={`liquid-glass relative h-6 w-12 rounded-full transition-colors ${isDark ? 'bg-blue-500' : ''}`}
             >
               <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isDark ? 'left-7' : 'left-1'}`}
+                className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${isDark ? 'left-7' : 'left-1'}`}
               />
             </button>
           </div>
 
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-3xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500">
+              <div className="liquid-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl text-violet-500">
                 <Moon className="w-5 h-5 fill-current" />
               </div>
               <div>
-                <p className="text-sm font-bold dark:text-white">{t('settings.nightMode')}</p>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                <p className="v2-title text-sm text-zinc-900 dark:text-white">{t('settings.nightMode')}</p>
+                <p className="v2-caption text-[10px]">
                   Extra dark theme for night usage
                 </p>
               </div>
@@ -150,10 +150,10 @@ export const SettingsPage = () => {
               type="button"
               onClick={toggleNight}
               disabled={!isDark}
-              className={`w-12 h-6 rounded-full transition-colors relative ${isNight ? 'bg-indigo-500' : 'bg-zinc-200 dark:bg-zinc-700'} ${!isDark ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`liquid-glass relative h-6 w-12 rounded-full transition-colors ${isNight ? 'bg-violet-500' : ''} ${!isDark ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isNight ? 'left-7' : 'left-1'}`}
+                className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${isNight ? 'left-7' : 'left-1'}`}
               />
             </button>
           </div>
@@ -161,16 +161,16 @@ export const SettingsPage = () => {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-bold text-zinc-900 dark:text-white ml-1 uppercase tracking-wider opacity-60">
+        <h3 className="v2-section-label">
           {t('settings.textSize')}
         </h3>
 
         <Card className="p-4 space-y-4">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-3xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500">
+            <div className="liquid-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl text-zinc-500 dark:text-zinc-400">
               <Type className="w-5 h-5" />
             </div>
-            <p className="text-sm font-bold dark:text-white">Adjust text size</p>
+            <p className="v2-title text-sm text-zinc-900 dark:text-white">Adjust text size</p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">

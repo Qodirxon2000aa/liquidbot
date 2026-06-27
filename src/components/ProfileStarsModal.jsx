@@ -143,10 +143,13 @@ export function ProfileStarsModal({ open, onClose }) {
         aria-modal="true"
       >
         <div
-          className="w-full max-w-md max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden"
+          className="w-full max-w-md max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl liquid-modal overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div
+            className="sticky top-0 z-10 shrink-0 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10"
+            style={{ background: 'var(--liquid-bg-elevated)' }}
+          >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-blue-500 shrink-0 bg-zinc-200 dark:bg-zinc-700">
                 {profilePhotoUrl ? (
@@ -172,7 +175,7 @@ export function ProfileStarsModal({ open, onClose }) {
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
+              className="liquid-icon-btn !rounded-full"
               aria-label={t('money.close')}
             >
               <X className="w-5 h-5" />
@@ -180,7 +183,7 @@ export function ProfileStarsModal({ open, onClose }) {
           </div>
 
           <div className="px-4 pt-4 pb-2 shrink-0 flex items-center gap-2">
-            <div className="w-9 h-9 rounded-3xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+            <div className="liquid-glass flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl text-amber-500 dark:text-amber-400">
               <StarGlyph className="w-5 h-5" />
             </div>
             <div>
@@ -210,12 +213,12 @@ export function ProfileStarsModal({ open, onClose }) {
                   return (
                     <li
                       key={item.id}
-                      className="rounded-3xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-800/40 overflow-hidden"
+                      className="liquid-row overflow-hidden"
                     >
                       <button
                         type="button"
                         onClick={() => toggleRow(item.id)}
-                        className="w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-3 text-left transition-colors hover:bg-white/10"
                       >
                         <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300 shrink-0 max-w-[32%] truncate">
                           {t('profile.starsPurchase')}
@@ -234,7 +237,7 @@ export function ProfileStarsModal({ open, onClose }) {
                       </button>
 
                       {expanded && (
-                        <div className="px-3 pb-3 pt-0 border-t border-zinc-200/60 dark:border-zinc-700/60 space-y-3">
+                        <div className="px-3 pb-3 pt-0 border-t border-white/10 space-y-3">
                           <div className="text-xs text-zinc-600 dark:text-zinc-400 space-y-2 pt-2">
                             <p>
                               <span className="font-bold text-zinc-800 dark:text-zinc-200">

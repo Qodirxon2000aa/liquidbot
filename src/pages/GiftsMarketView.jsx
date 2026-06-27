@@ -1311,10 +1311,8 @@ export function GiftsMarketView({ onNavigateHome }) {
                 key={f.key}
                 type="button"
                 onClick={() => setOddiyFilter(f.key)}
-                className={`shrink-0 whitespace-nowrap rounded-3xl border px-3.5 py-2 text-sm font-medium transition-all ${
-                  oddiyFilter === f.key
-                    ? 'border-blue-500 bg-blue-500 text-white'
-                    : 'border-zinc-200 bg-zinc-100 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400'
+                className={`shrink-0 whitespace-nowrap px-3.5 py-2 text-sm font-medium transition-all ${
+                  oddiyFilter === f.key ? 'liquid-filter-active' : 'liquid-filter'
                 }`}
               >
                 {f.label}
@@ -1419,13 +1417,8 @@ export function GiftsMarketView({ onNavigateHome }) {
                     const affordable = canBuy(gift.price);
                     const typeBadge = oddiyGiftTypeBadge(gift.type);
                     return (
-                      <div
-                        key={gift.id}
-                        className={`overflow-hidden rounded-3xl border transition-all ${
-                          affordable ? 'border-zinc-200 dark:border-zinc-700' : 'border-zinc-200 dark:border-zinc-700'
-                        }`}
-                      >
-                        <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-100 to-zinc-50 dark:from-zinc-800 dark:to-zinc-900">
+                      <div key={gift.id} className="v2-glass overflow-hidden">
+                        <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden">
                           <span
                             className={`pointer-events-none absolute right-2 top-2 z-30 max-w-[calc(100%-1rem)] truncate rounded-3xl border px-2 py-0.5 text-[10px] font-semibold leading-tight backdrop-blur-md ${typeBadge.className}`}
                           >
@@ -1433,7 +1426,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                           </span>
                           <GiftAnimation name={gift.name} />
                         </div>
-                        <div className="h-px bg-zinc-200/80 dark:bg-zinc-800" />
+                        <div className="border-t border-white/20 dark:border-white/10" />
                         <div className="space-y-1.5 p-2.5">
                           <p className="truncate text-xs font-semibold capitalize leading-tight text-zinc-900 dark:text-white">
                             {String(gift.name).replace(/_/g, ' ')}
@@ -1446,10 +1439,8 @@ export function GiftsMarketView({ onNavigateHome }) {
                             type="button"
                             onClick={() => affordable && setBuyGift(gift)}
                             disabled={!affordable}
-                            className={`mt-1 flex h-8 w-full items-center justify-center gap-1.5 rounded-3xl text-xs font-semibold transition-all ${
-                              affordable
-                                ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
-                                : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
+                            className={`liquid-btn mt-1 flex h-8 w-full items-center justify-center gap-1.5 !py-0 text-xs ${
+                              affordable ? 'liquid-btn-violet' : 'liquid-btn-outline opacity-60'
                             }`}
                           >
                             {affordable ? (
@@ -1502,12 +1493,8 @@ function NftGiftCard({
   const [imgErr, setImgErr] = useState(false);
 
   return (
-    <div
-      className={`overflow-hidden rounded-3xl border transition-all ${
-        'border-zinc-200 dark:border-zinc-700'
-      }`}
-    >
-      <div className="relative aspect-square w-full bg-zinc-100 dark:bg-zinc-800">
+    <div className="v2-glass overflow-hidden">
+      <div className="relative aspect-square w-full">
         {!imgErr && gift.photo ? (
           <img
             src={gift.photo}
@@ -1522,8 +1509,8 @@ function NftGiftCard({
           </div>
         )}
         {!nftServiceEnabled && (
-          <div className="absolute inset-0 z-[5] flex items-center justify-center bg-black/60 p-1">
-            <div className="flex items-center gap-1 rounded-3xl bg-white/90 px-2 py-1 dark:bg-zinc-900/90">
+          <div className="absolute inset-0 z-[5] flex items-center justify-center bg-black/40 p-1 backdrop-blur-sm">
+            <div className="liquid-glass flex items-center gap-1 rounded-3xl px-2 py-1">
               <AlertCircle className="h-3 w-3 shrink-0 text-amber-600" />
               <span className="text-center text-[10px] font-medium leading-tight text-zinc-600 dark:text-zinc-400">
                 Xizmat o&apos;chirilgan
@@ -1532,7 +1519,7 @@ function NftGiftCard({
           </div>
         )}
       </div>
-      <div className="h-px bg-zinc-200/80 dark:bg-zinc-800" />
+      <div className="border-t border-white/20 dark:border-white/10" />
       <div className="space-y-1.5 p-2.5">
         <p className="truncate text-xs font-semibold leading-tight text-zinc-900 dark:text-white">{formatNftName(gift.nft_id)}</p>
         <p className="truncate text-[10px] text-zinc-500">
@@ -1547,10 +1534,8 @@ function NftGiftCard({
           <button
             type="button"
             onClick={() => onCopy(gift)}
-            className={`flex h-7 flex-1 items-center justify-center gap-1 rounded-3xl border text-[11px] font-medium transition-all ${
-              copiedId === gift.id
-                ? 'border-green-500/30 bg-green-500/10 text-green-600'
-                : 'border-zinc-200 text-zinc-600 hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400'
+            className={`liquid-icon-btn flex h-7 flex-1 !w-auto items-center justify-center gap-1 !rounded-3xl text-[11px] font-medium ${
+              copiedId === gift.id ? 'text-green-600' : ''
             }`}
           >
             {copiedId === gift.id ? (
@@ -1568,7 +1553,7 @@ function NftGiftCard({
           <button
             type="button"
             onClick={() => gift.link && window.open(gift.link, '_blank')}
-            className="flex h-7 flex-1 items-center justify-center gap-1 rounded-3xl border border-zinc-200 text-[11px] font-medium text-zinc-600 transition-all hover:border-zinc-300 dark:border-zinc-700 dark:text-zinc-400"
+            className="liquid-icon-btn flex h-7 flex-1 !w-auto items-center justify-center gap-1 !rounded-3xl text-[11px] font-medium"
           >
             <Eye className="h-3 w-3 shrink-0" />
             <span>View</span>
@@ -1578,10 +1563,8 @@ function NftGiftCard({
           type="button"
           onClick={onBuy}
           disabled={!canPurchase}
-          className={`flex h-8 w-full items-center justify-center gap-1.5 rounded-3xl text-xs font-semibold transition-all ${
-            canPurchase
-              ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-95'
-              : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-zinc-800'
+          className={`liquid-btn flex h-8 w-full items-center justify-center gap-1.5 !py-0 text-xs ${
+            canPurchase ? 'liquid-btn-violet' : 'liquid-btn-outline opacity-60'
           }`}
         >
           {!nftServiceEnabled ? (

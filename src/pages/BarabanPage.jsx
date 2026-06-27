@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Button } from '../components/UI';
 import { BarabanWinCelebration } from '../components/BarabanWinCelebration';
@@ -89,16 +88,6 @@ export const BarabanPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="v2-hero-stars relative overflow-hidden rounded-3xl px-4 py-6 text-center text-white">
-        <div className="relative space-y-1">
-          <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-            <Sparkles className="mx-auto h-8 w-8 text-amber-300" />
-          </motion.div>
-          <h2 className="v2-hero-title text-xl">{t('baraban.title')}</h2>
-          <p className="v2-hero-sub text-white/85">{t('baraban.subtitle')}</p>
-        </div>
-      </div>
-
       <div className="relative mx-auto flex max-w-[320px] flex-col items-center">
         <div className="absolute -top-1 z-20 flex flex-col items-center">
           <div className="h-0 w-0 border-x-[12px] border-x-transparent border-t-[20px] border-t-rose-500 drop-shadow-md" />

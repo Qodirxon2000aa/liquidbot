@@ -14,25 +14,28 @@ export const PaymentPage = ({ onOpenStars }) => {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center px-2">
+      <p className="v2-body text-center px-2 text-zinc-500 dark:text-zinc-400">
         {t('payment.subtitle')}
       </p>
 
-      <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 border-none text-white p-6">
+      <Card
+        glass
+        className="overflow-hidden border-none bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 p-6 text-white shadow-[var(--v2-glow-emerald)]"
+      >
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1">
-            <p className="text-emerald-100 text-xs font-bold uppercase tracking-wider">
+            <p className="v2-badge text-white/80">
               {t('profile.balance')}
             </p>
-            <p className="text-3xl font-bold">
-              {balanceDisplay} {t('profile.balanceCurrency')}
+            <p className="v2-price-lg text-white">
+              {balanceDisplay} <span className="text-base font-semibold opacity-80">{t('profile.balanceCurrency')}</span>
             </p>
           </div>
-          <Wallet className="w-8 h-8 text-emerald-200 opacity-50" />
+          <Wallet className="w-8 h-8 text-blue-200 opacity-50" />
         </div>
         <Button
           variant="secondary"
-          className="w-full bg-white/20 hover:bg-white/30 border-none text-white backdrop-blur-sm"
+          className="liquid-btn liquid-btn-secondary !w-auto bg-white/25 text-white hover:bg-white/35 border-white/30"
         >
           {t('profile.topup')}
         </Button>
@@ -41,6 +44,7 @@ export const PaymentPage = ({ onOpenStars }) => {
       <Button
         type="button"
         onClick={onOpenStars}
+        variant="violet"
         className="w-full flex items-center justify-center gap-2"
       >
         <Sparkles className="w-4 h-4" />

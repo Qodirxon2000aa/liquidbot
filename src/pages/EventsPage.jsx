@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Gift, Loader2, X } from 'lucide-react';
+import { AlertCircle, Gift, Loader2, Target, X } from 'lucide-react';
+import { motion } from 'motion/react';
 import { Card, CardContent } from '../components/UI';
 import { useTelegram } from '../hooks/useTelegram';
 
 const DEV_USER_ID = '7521806735';
+
+const RANK_RING = {
+  1: 'from-amber-300 to-yellow-500 text-amber-900',
+  2: 'from-zinc-300 to-zinc-400 text-zinc-800',
+  3: 'from-orange-300 to-amber-600 text-orange-950',
+};
 
 export const EventsPage = () => {
   const { user } = useTelegram();
@@ -100,40 +107,46 @@ export const EventsPage = () => {
   }
 
   return (
-    <div className="space-y-4 pb-2">
-      <Card className="cursor-pointer overflow-hidden p-0" onClick={() => eventData && setShowModal(true)}>
-        <CardContent className="space-y-3 px-4 pb-4 pt-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-3xl bg-amber-500/10">
-              <Gift className="h-5 w-5 text-amber-500" />
-            </div>
-            <h2 className="v2-title text-base text-zinc-900 dark:text-white">
-              Umumiy savdo maqsadi
-            </h2>
+    <div className="space-y-5 pb-2">
+      <PageHeroEvents />
+
+      <motion.div
+        className="v2-amount-card !cursor-pointer !px-5 !py-5"
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        onClick={() => eventData && setShowModal(true)}
+      >
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400/30 to-violet-500/20 ring-1 ring-white/20">
+            <Gift className="h-5.5 w-5.5 text-amber-200" />
           </div>
-          {eventData ? (
-            <>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                NFT olish uchun {target.toLocaleString('uz-UZ')} so&apos;m
-              </p>
-              <div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-amber-400 via-violet-500 to-rose-400 transition-all duration-700"
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
-                <div className="mt-1 flex items-center justify-between text-xs text-zinc-500">
-                  <span>{paid.toLocaleString('uz-UZ')} so&apos;m</span>
-                  <span>{target.toLocaleString('uz-UZ')} so&apos;m</span>
-                </div>
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-zinc-500">Ma&apos;lumot topilmadi</p>
-          )}
-        </CardContent>
-      </Card>
+          <div className="min-w-0 flex-1">
+            <p className="v2-title text-sm text-white">Umumiy savdo maqsadi</p>
+            <p className="v2-caption !text-amber-100/70">
+              {eventData ? `NFT olish uchun ${target.toLocaleString('uz-UZ')} so'm` : 'Ma\'lumot topilmadi'}
+            </p>
+          </div>
+          <span className="v2-amount-display !text-2xl shrink-0">{Math.round(percent)}%</span>
+        </div>
+
+        {eventData && (
+          <div className="relative mt-4">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/25">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400 shadow-[0_0_12px_rgba(255,180,0,0.6)]"
+                initial={{ width: 0 }}
+                animate={{ width: `${percent}%` }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </div>
+            <div className="mt-1.5 flex items-center justify-between text-[11px] text-amber-100/80">
+              <span>{paid.toLocaleString('uz-UZ')} so&apos;m</span>
+              <span>{target.toLocaleString('uz-UZ')} so&apos;m</span>
+            </div>
+          </div>
+        )}
+      </motion.div>
 
       <Card className="p-0">
         <CardContent className="space-y-3 px-4 pb-4 pt-4">
@@ -169,22 +182,29 @@ export const EventsPage = () => {
             {leaderboardData[activeTab].length === 0 ? (
               <p className="py-5 text-center text-sm text-zinc-500">Ma&apos;lumot yo&apos;q</p>
             ) : (
-              leaderboardData[activeTab].map((item) => (
-                <div
-                  key={`${activeTab}-${item.rank}-${item.username}`}
-                  className="liquid-row flex items-center gap-2 px-3 py-2"
-                >
-                  <span className="w-8 text-center text-sm font-semibold">
-                    {item.trophy || `${item.rank}.`}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-900 dark:text-white">
-                    {item.username}
-                  </span>
-                  <span className="text-xs font-semibold text-zinc-500">
-                    {item.amount.toLocaleString('uz-UZ')} so&apos;m
-                  </span>
-                </div>
-              ))
+              leaderboardData[activeTab].map((item) => {
+                const ring = RANK_RING[item.rank];
+                return (
+                  <div
+                    key={`${activeTab}-${item.rank}-${item.username}`}
+                    className="liquid-row flex items-center gap-3 px-3 py-2.5"
+                  >
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                        ring ? `bg-gradient-to-br ${ring}` : 'bg-zinc-200/60 text-zinc-500 dark:bg-zinc-700/60 dark:text-zinc-300'
+                      }`}
+                    >
+                      {item.trophy || item.rank}
+                    </div>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-zinc-900 dark:text-white">
+                      {item.username}
+                    </span>
+                    <span className="v2-price text-xs text-zinc-500">
+                      {item.amount.toLocaleString('uz-UZ')} so&apos;m
+                    </span>
+                  </div>
+                );
+              })
             )}
           </div>
         </CardContent>
@@ -247,3 +267,45 @@ export const EventsPage = () => {
     </div>
   );
 };
+
+function PageHeroEvents() {
+  return (
+    <div className="v2-hero-premium relative flex h-32 items-center justify-center overflow-hidden rounded-[2.25rem] border border-white/20">
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute opacity-25 text-violet-200"
+            initial={{
+              x: Math.random() * 400,
+              y: Math.random() * 128,
+              scale: Math.random() * 0.5 + 0.4,
+            }}
+            animate={{
+              y: [null, Math.random() * -16, Math.random() * 16],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: Math.random() * 4 + 3,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            <Target className="h-3 w-3" />
+          </motion.div>
+        ))}
+      </div>
+      <div className="relative flex flex-col items-center gap-1 text-center">
+        <motion.div
+          animate={{ rotate: [0, 8, -8, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-400/30 to-fuchsia-500/20 ring-1 ring-violet-200/40"
+        >
+          <Target className="h-6 w-6 text-violet-100 drop-shadow-[0_0_16px_rgba(167,139,250,0.7)]" />
+        </motion.div>
+        <h2 className="v2-hero-title v2-text-shimmer-violet !text-xl">Tadbirlar</h2>
+        <p className="v2-hero-sub text-violet-200/90">Maqsadlar va haftalik reyting</p>
+      </div>
+    </div>
+  );
+}

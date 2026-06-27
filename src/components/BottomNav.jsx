@@ -1,23 +1,22 @@
 import { useTranslation } from 'react-i18next';
-import { Home, Users, Calendar, ShoppingBag, User, CircleDot } from 'lucide-react';
+import { Home, Users, Calendar, ShoppingBag, CircleDot } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export const BottomNav = ({ activeTab, onTabChange }) => {
+export const BottomNav = ({ activeTab, onTabChange, user, onProfileClick }) => {
   const { t } = useTranslation();
 
   const tabs = [
+    { id: 'home', icon: Home, label: t('nav.home'), accent: true },
+    { id: 'market', icon: ShoppingBag, label: t('nav.market') },
+    { id: 'baraban', icon: CircleDot, label: t('nav.baraban') },
     { id: 'referral', icon: Users, label: t('nav.referral') },
     { id: 'events', icon: Calendar, label: t('nav.events') },
-    { id: 'home', icon: Home, label: t('nav.home'), accent: true },
-    { id: 'baraban', icon: CircleDot, label: t('nav.baraban') },
-    { id: 'market', icon: ShoppingBag, label: t('nav.market') },
-    { id: 'profile', icon: User, label: t('nav.profile') },
   ];
 
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="pointer-events-auto mx-auto max-w-md">
-        <div className="liquid-nav flex items-stretch justify-around">
+      <div className="pointer-events-auto mx-auto flex max-w-md items-center gap-2">
+        <div className="liquid-nav flex min-w-0 flex-1 items-stretch justify-around">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -65,6 +64,26 @@ export const BottomNav = ({ activeTab, onTabChange }) => {
             );
           })}
         </div>
+
+        <button
+          type="button"
+          onClick={onProfileClick}
+          className="liquid-nav-avatar-btn shrink-0"
+          aria-label={t('nav.profile')}
+        >
+          {user?.photo_url ? (
+            <img
+              src={user.photo_url}
+              alt=""
+              className="h-full w-full rounded-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span className="liquid-nav-avatar-fallback">
+              {(user?.first_name?.[0] || '?').toUpperCase()}
+            </span>
+          )}
+        </button>
       </div>
     </nav>
   );

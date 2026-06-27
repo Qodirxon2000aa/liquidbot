@@ -404,8 +404,8 @@ const resources = {
         perMonth: 'oyiga o‘rtacha',
         months: 'oy',
         more: 'Ko‘proq',
-        customAmount: 'O‘zingiz yozing',
-        customHint: 'Istalgan miqdor (narx to‘lovda)',
+        customAmount: 'Miqdorni kiriting',
+        customHint: 'Istalgan miqdorda Stars buyurtma qiling',
         premiumCustomMonths: 'Oylar (o‘zingiz yozing)',
         premiumCustomHint: 'Oy sonini kiriting — narx to‘lovda'
       },
