@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Home, Users, Calendar, ShoppingBag, CircleDot } from 'lucide-react';
+import { Home, Users, ShoppingBag, CircleDot } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const BottomNav = ({ activeTab, onTabChange, user, onProfileClick }) => {
@@ -10,7 +10,6 @@ export const BottomNav = ({ activeTab, onTabChange, user, onProfileClick }) => {
     { id: 'market', icon: ShoppingBag, label: t('nav.market') },
     { id: 'baraban', icon: CircleDot, label: t('nav.baraban') },
     { id: 'referral', icon: Users, label: t('nav.referral') },
-    { id: 'events', icon: Calendar, label: t('nav.events') },
   ];
 
   return (
