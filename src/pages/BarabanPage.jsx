@@ -111,9 +111,8 @@ export const BarabanPage = () => {
           <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-black/70 to-transparent" />
 
           <div className="pointer-events-none absolute left-1/2 top-0 z-30 -translate-x-1/2">
-            <div className="h-0 w-0 border-x-[7px] border-x-transparent border-t-[11px] border-t-amber-400 drop-shadow" />
+            <div className="h-0 w-0 border-x-[8px] border-x-transparent border-t-[13px] border-t-amber-400 drop-shadow-[0_2px_6px_rgba(255,180,0,0.6)]" />
           </div>
-          <div className="pointer-events-none absolute left-1/2 top-0 z-20 h-full w-24 -translate-x-1/2 rounded-2xl ring-2 ring-amber-400/70 shadow-[0_0_20px_rgba(255,180,0,0.35)]" />
 
           <motion.div
             ref={trackRef}
