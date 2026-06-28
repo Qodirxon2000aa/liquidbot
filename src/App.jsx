@@ -131,16 +131,16 @@ export default function App() {
       </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-        <WeeklyPrizeBanner
-          onHeightChange={setPrizeBannerHeight}
-          onNavigate={() => setActiveTab('events')}
-        />
         <Header
           title={getPageTitle()}
           balanceDisplay={`${headerBalance} UZS`}
           onTopupClick={() => setMoneyOpen(true)}
           onProfileClick={() => setActiveTab('profile')}
           profileActive={activeTab === 'profile' || activeTab === 'settings'}
+        />
+        <WeeklyPrizeBanner
+          onHeightChange={setPrizeBannerHeight}
+          onNavigate={() => setActiveTab('events')}
         />
 
         <main className="content v2-main-with-header">

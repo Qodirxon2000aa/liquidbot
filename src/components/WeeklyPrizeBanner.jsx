@@ -45,7 +45,7 @@ export const WeeklyPrizeBanner = ({ onNavigate, onHeightChange }) => {
   if (dismissed) return null;
 
   return (
-    <div ref={wrapRef} className="fixed inset-x-0 top-0 z-[60] prize-safe-top">
+    <div ref={wrapRef} className="fixed inset-x-0 z-[60] prize-below-header">
       <div className="liquid-prize-banner relative flex w-full items-center gap-1.5 overflow-hidden px-4 py-1.5">
         <button
           type="button"

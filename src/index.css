@@ -139,7 +139,7 @@
 
   .v2-header-shell {
     @apply fixed inset-x-0 z-50;
-    top: var(--prize-banner-height, 0px);
+    top: 0;
     background: var(--liquid-bg);
     backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
     -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
@@ -154,6 +154,11 @@
 
   .prize-safe-top {
     padding-top: var(--tg-safe-top, 0px);
+  }
+
+  .prize-below-header {
+    top: calc(var(--tg-safe-top, 0px) + 3.25rem + 0.375rem);
+    transition: top 0.25s ease;
   }
 
   .v2-main-with-header {
