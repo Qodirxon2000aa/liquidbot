@@ -21,7 +21,7 @@ const CARD_WIDTH = 96; // matches w-24 card class
 const ITEM_GAP = 12; // matches gap-3
 const ITEM_WIDTH = CARD_WIDTH + ITEM_GAP; // distance between successive item starts
 const REEL_LENGTH = 48;
-const WINNER_SLOT = 40; // index in reel where the winning card always lands
+const WINNER_SLOT = 6; // index in reel where the winning card always lands (near the start so the reel travels left-to-right)
 const SPIN_MS = 4200;
 
 function randomPrize() {
@@ -58,7 +58,12 @@ export const BarabanPage = () => {
     const winnerCenterLocal = WINNER_SLOT * ITEM_WIDTH + CARD_WIDTH / 2;
     const targetX = Math.round(viewportWidth / 2 - winnerCenterLocal);
 
-    x.set(-ITEM_WIDTH * (2 + Math.random() * 2));
+    // Start the track far along the reel (showing the tail end) and animate
+    // toward the winner near the start — this makes cards visually flow
+    // left-to-right as the track slides rightward into place.
+    const startIndex = REEL_LENGTH - (3 + Math.floor(Math.random() * 2));
+    const startCenterLocal = startIndex * ITEM_WIDTH + CARD_WIDTH / 2;
+    x.set(Math.round(viewportWidth / 2 - startCenterLocal));
 
     animate(x, targetX, {
       duration: SPIN_MS / 1000,
