@@ -3,8 +3,8 @@ const TEXT_KEYS = ['app-text-small', 'app-text-medium', 'app-text-large'];
 export function initThemeFromStorage() {
   try {
     const dark = localStorage.getItem('app-dark');
-    if (dark === '1') document.documentElement.classList.add('dark');
-    else if (dark === '0') document.documentElement.classList.remove('dark');
+    if (dark === '0') document.documentElement.classList.remove('dark');
+    else document.documentElement.classList.add('dark');
 
     const night = localStorage.getItem('app-night');
     document.body.classList.toggle('night-mode', night === '1');

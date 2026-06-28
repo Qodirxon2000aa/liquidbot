@@ -408,7 +408,7 @@ export const HomePage = () => {
             exit={{ opacity: 0, x: 20 }}
             className="flex flex-col gap-4"
           >
-            <PageHero variant="stars" className="!h-56">
+            <PageHero variant="stars" className="!h-48">
               <div className="absolute inset-0 overflow-hidden">
                 {[...Array(20)].map((_, i) => (
                   <motion.div
@@ -492,38 +492,19 @@ export const HomePage = () => {
               checkingUser={checkingUser}
             />
 
-            <motion.div
-              className="v2-amount-card"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="relative flex items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/30">
-                  <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.4} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="v2-title text-sm text-white">{t('home.customAmount')}</p>
-                  <p className="v2-caption !text-amber-100/70">{t('home.customHint')}</p>
-                </div>
-              </div>
+            <div className="v2-glass relative overflow-hidden p-4">
 
-              <div className="relative mt-4 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const cur = parseInt(starsCustomInput, 10) || starsLastPreset.amount;
-                    onStarsCustomChange(String(Math.max(1, cur - 50)));
-                  }}
-                  className="v2-amount-stepper"
-                  aria-label="Kamaytirish"
-                >
-                  <span className="text-xl leading-none">−</span>
-                </button>
-
-                <div className="flex min-w-0 flex-1 flex-col items-center">
-                  <div className="flex items-center gap-2">
-                    <TelegramStar className="h-7 w-7 drop-shadow-[0_0_12px_rgba(255,204,0,0.6)]" />
+              <div className="relative flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
+                  <Sparkles className="h-5 w-5 text-white" strokeWidth={2.2} />
+                </div>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div>
+                    <p className="v2-title text-sm text-zinc-900 dark:text-white">{t('home.customAmount')}</p>
+                    <p className="v2-caption mt-0.5">{t('home.customHint')}</p>
+                  </div>
+                  <div className="liquid-input flex items-center gap-2 !py-2 focus-within:border-amber-400/50 focus-within:shadow-[var(--liquid-inset),0_0_0_3px_rgba(255,204,0,0.15)]">
+                    <TelegramStar className="h-5 w-5 shrink-0 opacity-90" />
                     <input
                       type="number"
                       inputMode="numeric"
@@ -537,64 +518,38 @@ export const HomePage = () => {
                           setStarsSelected({ type: 'custom', amount: n });
                         }
                       }}
-                      className="v2-amount-display w-32 border-0 bg-transparent text-center outline-none placeholder:text-white/30"
+                      className="v2-price min-w-0 flex-1 border-0 bg-transparent py-1 text-[15px] outline-none placeholder:font-normal placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
                     />
+                    <span className="v2-badge shrink-0 text-amber-700/90 dark:text-amber-400/90">
+                      Stars
+                    </span>
                   </div>
-                  <span className="v2-badge mt-1 text-amber-200/80">Stars</span>
                 </div>
+              </div>
+            </div>
 
+            <div className="flex flex-col gap-[4.7px]">
+              <SectionLabel className="mb-2">{t('home.stars')}</SectionLabel>
+              {STAR_PRIMARY.map((pkg) => (
                 <button
+                  key={pkg.amount}
                   type="button"
-                  onClick={() => {
-                    const cur = parseInt(starsCustomInput, 10) || starsLastPreset.amount;
-                    onStarsCustomChange(String(cur + 50));
-                  }}
-                  className="v2-amount-stepper"
-                  aria-label="Ko'paytirish"
+                  onClick={() => selectStarPreset(pkg)}
+                  className={`flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${
+                    isStarPresetActive(pkg) ? 'v2-row-active-stars' : 'v2-row-idle'
+                  }`}
                 >
-                  <span className="text-xl leading-none">+</span>
-                </button>
-              </div>
-
-              {starsAmount > 0 && (
-                <div className="relative mt-3 flex justify-center">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-black/20 px-3 py-1">
-                    <p className="v2-price text-sm text-amber-200">
-                      {starsOverall.toLocaleString('uz-UZ')} UZS
-                    </p>
+                  <TelegramStar className="h-6 w-6 shrink-0" />
+                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                    <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
+                      {pkg.amount} Stars
+                    </span>
+                    <span className="v2-price shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                      {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS
+                    </span>
                   </div>
-                </div>
-              )}
-            </motion.div>
-
-            <div className="flex flex-col gap-3">
-              <SectionLabel className="mb-0">{t('home.stars')}</SectionLabel>
-              <div className="grid grid-cols-3 gap-2.5">
-                {STAR_PRIMARY.map((pkg) => {
-                  const active = isStarPresetActive(pkg);
-                  return (
-                    <button
-                      key={pkg.amount}
-                      type="button"
-                      onClick={() => selectStarPreset(pkg)}
-                      className={`v2-pkg-card ${active ? 'v2-pkg-card--active-stars' : ''}`}
-                    >
-                      {active && (
-                        <span className="v2-pkg-check bg-amber-500">
-                          <Check className="h-3 w-3" />
-                        </span>
-                      )}
-                      <TelegramStar className="h-7 w-7 shrink-0" />
-                      <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
-                        {pkg.amount}
-                      </span>
-                      <span className="v2-price text-[11px] text-zinc-500 dark:text-zinc-400">
-                        {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                </button>
+              ))}
 
               <AnimatePresence initial={false}>
                 {starsMoreOpen && (
@@ -604,34 +559,28 @@ export const HomePage = () => {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                    className="flex flex-col gap-[4.7px] overflow-hidden"
                   >
-                    <div className="grid grid-cols-3 gap-2.5">
-                      {STAR_EXTRA.map((pkg) => {
-                        const active = isStarPresetActive(pkg);
-                        return (
-                          <button
-                            key={pkg.amount}
-                            type="button"
-                            onClick={() => selectStarPreset(pkg)}
-                            className={`v2-pkg-card ${active ? 'v2-pkg-card--active-stars' : ''}`}
-                          >
-                            {active && (
-                              <span className="v2-pkg-check bg-amber-500">
-                                <Check className="h-3 w-3" />
-                              </span>
-                            )}
-                            <TelegramStar className="h-7 w-7 shrink-0" />
-                            <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
-                              {pkg.amount}
-                            </span>
-                            <span className="v2-price text-[11px] text-zinc-500 dark:text-zinc-400">
-                              {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {STAR_EXTRA.map((pkg) => (
+                      <button
+                        key={pkg.amount}
+                        type="button"
+                        onClick={() => selectStarPreset(pkg)}
+                        className={`flex w-full min-h-[44px] items-center gap-3 rounded-3xl border px-4 py-2.5 text-left transition-all active:scale-[0.99] ${
+                          isStarPresetActive(pkg) ? 'v2-row-active-stars' : 'v2-row-idle'
+                        }`}
+                      >
+                        <TelegramStar className="h-6 w-6 shrink-0" />
+                        <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                          <span className="v2-title text-sm tabular-nums text-zinc-900 dark:text-white">
+                            {pkg.amount} Stars
+                          </span>
+                          <span className="v2-price shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                            {(pkg.amount * STAR_PRICE_UZS).toLocaleString('uz-UZ')} UZS
+                          </span>
+                        </div>
+                      </button>
+                    ))}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -675,7 +624,7 @@ export const HomePage = () => {
             exit={{ opacity: 0, x: -20 }}
             className="space-y-6"
           >
-            <PageHero variant="premium" className="!h-56">
+            <PageHero variant="premium" className="!h-48">
               <div className="absolute inset-0 overflow-hidden">
                 {[...Array(14)].map((_, i) => (
                   <motion.div
