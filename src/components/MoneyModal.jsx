@@ -378,7 +378,7 @@ export function MoneyModal({ open, onClose }) {
   return (
     <BodyPortal>
     <div
-      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 dark:bg-black/70"
+      className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/20 backdrop-blur-md dark:bg-black/35"
       role="dialog"
       aria-modal="true"
       onClick={handleClose}
@@ -387,7 +387,7 @@ export function MoneyModal({ open, onClose }) {
         className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl liquid-modal shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10" style={{ background: 'var(--liquid-bg-elevated)' }}>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10" style={{ background: 'rgba(255,255,255,0.12)' }}>
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-3xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <Wallet className="w-5 h-5" />

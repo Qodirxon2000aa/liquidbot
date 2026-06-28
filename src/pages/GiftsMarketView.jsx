@@ -432,11 +432,11 @@ function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
         <button
           type="button"
           aria-label="Close"
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/20 backdrop-blur-md dark:bg-black/35"
           onClick={onClose}
         />
         <div
-          className="relative z-10 max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white pb-12 shadow-2xl dark:bg-zinc-950"
+          className="liquid-modal relative z-10 max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl pb-12"
           style={{ maxHeight: '92vh' }}
         >
           <div className="p-5 pb-8">
@@ -448,12 +448,12 @@ function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 transition-colors hover:text-zinc-900 dark:bg-zinc-800 dark:hover:text-white"
+                className="liquid-icon-btn !rounded-full"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="mx-auto mb-5 h-20 w-20 overflow-hidden rounded-3xl bg-zinc-100 dark:bg-zinc-800">{thumbContent}</div>
+            <div className="liquid-glass mx-auto mb-5 h-20 w-20 overflow-hidden">{thumbContent}</div>
             {children}
           </div>
         </div>

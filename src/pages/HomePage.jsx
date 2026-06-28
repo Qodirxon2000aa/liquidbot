@@ -791,7 +791,7 @@ export const HomePage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 px-4"
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/20 backdrop-blur-md dark:bg-black/35 px-4"
             onClick={() => setSuccessModal((prev) => ({ ...prev, open: false }))}
           >
             <motion.div

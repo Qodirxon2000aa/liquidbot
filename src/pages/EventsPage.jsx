@@ -212,7 +212,7 @@ export const EventsPage = () => {
 
       {showModal && eventData && (
         <div
-          className="fixed inset-0 z-[999] flex items-end justify-center bg-black/50 sm:items-center"
+          className="fixed inset-0 z-[999] flex items-end justify-center bg-black/20 backdrop-blur-md dark:bg-black/35 sm:items-center"
           onClick={() => setShowModal(false)}
         >
           <div

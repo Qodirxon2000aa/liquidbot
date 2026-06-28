@@ -107,7 +107,7 @@ export function ProfileGiftModal({ open, onClose }) {
   return (
     <BodyPortal>
       <div
-        className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/70 p-0 sm:p-4"
+        className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/20 backdrop-blur-md dark:bg-black/35 p-0 sm:p-4"
         onClick={handleClose}
         role="dialog"
         aria-modal="true"
@@ -118,7 +118,7 @@ export function ProfileGiftModal({ open, onClose }) {
         >
           <div
             className="sticky top-0 z-10 shrink-0 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10"
-            style={{ background: 'var(--liquid-bg-elevated)' }}
+            style={{ background: 'rgba(255,255,255,0.12)' }}
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-blue-500 shrink-0 bg-zinc-200 dark:bg-zinc-700">

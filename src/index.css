@@ -776,12 +776,41 @@
 
 
 .liquid-modal {
+  position: relative;
+  overflow: hidden;
   border-radius: var(--liquid-radius-xl);
-  background: var(--liquid-bg-elevated);
-  backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
-  -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
-  border: 1px solid var(--liquid-border);
-  box-shadow: var(--liquid-shadow), var(--liquid-inset);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(26px) saturate(220%);
+  -webkit-backdrop-filter: blur(26px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.liquid-modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.06) 35%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  mix-blend-mode: overlay;
+}
+
+.dark .liquid-modal {
+  background: rgba(30, 30, 38, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 16px 56px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .liquid-row {
