@@ -16,6 +16,16 @@ const GIFT_ANIM_LOADERS = {
   champagne: () => import('../assets/champagne.json'),
   bouquet: () => import('../assets/bouquet.json'),
   cake: () => import('../assets/cake.json'),
+  heart: () => import('../assets/heart.json'),
+  love_teddy: () => import('../assets/love_teddy.json'),
+  love_heart: () => import('../assets/love_heart.json'),
+  tree: () => import('../assets/tree.json'),
+  new_bear: () => import('../assets/new_bear.json'),
+  march_bear: () => import('../assets/march_bear.json'),
+  april_bear: () => import('../assets/bear3.json'),
+  money_pot: () => import('../assets/money_pot.json'),
+  egg_bear: () => import('../assets/egg_bear.json'),
+  builder_bear: () => import('../assets/bear4.json'),
 };
 
 const GLOW = {
@@ -29,6 +39,17 @@ const GLOW = {
   champagne: '#fcd34d',
   bouquet: '#4ade80',
   cake: '#fda4af',
+  heart: '#fb7185',
+  love_teddy: '#fb7185',
+  love_heart: '#f472b6',
+  tree: '#4ade80',
+  new_bear: '#f97316',
+  march_bear: '#f97316',
+  april_bear: '#f97316',
+  money_pot: '#facc15',
+  egg_bear: '#f97316',
+  builder_bear: '#f97316',
+  vice_cream: '#fda4af',
 };
 
 function prepareLottie(mod) {

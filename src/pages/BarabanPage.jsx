@@ -4,18 +4,64 @@ import { motion, useMotionValue, animate } from 'motion/react';
 import { Button } from '../components/UI';
 import { BarabanWinCelebration } from '../components/BarabanWinCelebration';
 
-const WHEEL_PRIZES = [
-  { id: 'gift_box', emoji: '🎁', name: "Sovg'a qutisi" },
-  { id: 'rose', emoji: '🌹', name: 'Atirgul' },
-  { id: 'teddy_bear', emoji: '🐻', name: 'Ayiqcha' },
-  { id: 'diamond', emoji: '💎', name: 'Olmos' },
-  { id: 'rocket', emoji: '🚀', name: 'Raketa' },
-  { id: 'trophy', emoji: '🏆', name: 'Kubok' },
-  { id: 'ring', emoji: '💍', name: 'Uzuk' },
-  { id: 'champagne', emoji: '🍾', name: 'Shampan' },
-  { id: 'bouquet', emoji: '💐', name: 'Gul dasta' },
-  { id: 'cake', emoji: '🎂', name: 'Tort' },
+const CHANCE_API_URL = 'https://tezpremium.uz/uzbstar/lucky_chance.php';
+
+const GIFT_META = {
+  heart: { emoji: '❤️', name: 'Yurak' },
+  teddy_bear: { emoji: '🐻', name: 'Ayiqcha' },
+  gift_box: { emoji: '🎁', name: "Sovg'a qutisi" },
+  rose: { emoji: '🌹', name: 'Atirgul' },
+  cake: { emoji: '🎂', name: 'Tort' },
+  bouquet: { emoji: '💐', name: 'Gul dasta' },
+  rocket: { emoji: '🚀', name: 'Raketa' },
+  trophy: { emoji: '🏆', name: 'Kubok' },
+  ring: { emoji: '💍', name: 'Uzuk' },
+  diamond: { emoji: '💎', name: 'Olmos' },
+  champagne: { emoji: '🍾', name: 'Shampan' },
+  love_teddy: { emoji: '🧸', name: 'Sevimli ayiqcha' },
+  love_heart: { emoji: '💝', name: 'Sevgi yuragi' },
+  tree: { emoji: '🌳', name: 'Daraxt' },
+  new_bear: { emoji: '🐻', name: 'Yangi ayiqcha' },
+  march_bear: { emoji: '🐻', name: 'Mart ayiqchasi' },
+  april_bear: { emoji: '🐻', name: 'Aprel ayiqchasi' },
+  money_pot: { emoji: '💰', name: "Pul ko'zachasi" },
+  egg_bear: { emoji: '🐻', name: 'Tuxum ayiqcha' },
+  builder_bear: { emoji: '🐻', name: 'Quruvchi ayiqcha' },
+  vice_cream: { emoji: '🍦', name: 'Muzqaymoq' },
+};
+
+// Fallback table — mirrors the live odds from lucky_chance.php so the wheel
+// already feels right before the fetch resolves (and if it ever fails).
+const DEFAULT_CHANCES = [
+  { id: 'heart', chance: 29.14 },
+  { id: 'teddy_bear', chance: 29.14 },
+  { id: 'gift_box', chance: 8.74 },
+  { id: 'rose', chance: 8.74 },
+  { id: 'cake', chance: 2.91 },
+  { id: 'bouquet', chance: 3.5 },
+  { id: 'rocket', chance: 1.17 },
+  { id: 'trophy', chance: 0.58 },
+  { id: 'ring', chance: 0.58 },
+  { id: 'diamond', chance: 0.58 },
+  { id: 'champagne', chance: 2.33 },
+  { id: 'love_teddy', chance: 1.75 },
+  { id: 'love_heart', chance: 1.98 },
+  { id: 'tree', chance: 1.28 },
+  { id: 'new_bear', chance: 1.4 },
+  { id: 'march_bear', chance: 1.52 },
+  { id: 'april_bear', chance: 1.17 },
+  { id: 'money_pot', chance: 1.05 },
+  { id: 'egg_bear', chance: 1.17 },
+  { id: 'builder_bear', chance: 1.17 },
+  { id: 'vice_cream', chance: 0.12 },
 ];
+
+function toPrizeList(chances) {
+  return chances.map((c) => {
+    const meta = GIFT_META[c.id] || { emoji: '🎁', name: c.id };
+    return { id: c.id, emoji: meta.emoji, name: meta.name, chance: c.chance };
+  });
+}
 
 const CARD_WIDTH = 96; // matches w-24 card class
 const ITEM_GAP = 12; // matches gap-3
@@ -24,26 +70,29 @@ const REEL_LENGTH = 48;
 const WINNER_SLOT = 6; // index in reel where the winning card always lands (near the start so the reel travels left-to-right)
 const SPIN_MS = 4200;
 
-function randomPrize() {
-  return WHEEL_PRIZES[Math.floor(Math.random() * WHEEL_PRIZES.length)];
+function pickWeighted(prizes) {
+  const total = prizes.reduce((sum, p) => sum + (p.chance > 0 ? p.chance : 0), 0);
+  if (!total) return prizes[Math.floor(Math.random() * prizes.length)];
+  let r = Math.random() * total;
+  for (const p of prizes) {
+    r -= p.chance > 0 ? p.chance : 0;
+    if (r <= 0) return p;
+  }
+  return prizes[prizes.length - 1];
 }
 
-function buildReel(winningPrize) {
+function buildReel(prizes, winningPrize) {
   return Array.from({ length: REEL_LENGTH }, (_, i) =>
-    i === WINNER_SLOT ? winningPrize : randomPrize()
+    i === WINNER_SLOT ? winningPrize : pickWeighted(prizes)
   ).map((prize, i) => ({ ...prize, key: `${i}-${prize.id}-${Math.random()}` }));
 }
 
-// Idle ticker: the prize list repeated a few times so the loop point is seamless.
-const IDLE_ITEMS = Array.from({ length: 4 }, () => WHEEL_PRIZES)
-  .flat()
-  .map((prize, i) => ({ ...prize, key: `idle-${i}-${prize.id}` }));
-const IDLE_LOOP_DISTANCE = WHEEL_PRIZES.length * ITEM_WIDTH;
 const IDLE_SPEED_PX_PER_SEC = 16;
 
 export const BarabanPage = () => {
   const { t } = useTranslation();
-  const [reel, setReel] = useState(() => buildReel(randomPrize()));
+  const [prizes, setPrizes] = useState(() => toPrizeList(DEFAULT_CHANCES));
+  const [reel, setReel] = useState(() => buildReel(toPrizeList(DEFAULT_CHANCES), pickWeighted(toPrizeList(DEFAULT_CHANCES))));
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
   const spinLockRef = useRef(false);
@@ -52,16 +101,46 @@ export const BarabanPage = () => {
   const x = useMotionValue(0);
 
   useEffect(() => {
+    let cancelled = false;
+    fetch(CHANCE_API_URL)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled || !data?.ok || !Array.isArray(data.gifts)) return;
+        const next = data.gifts
+          .filter((g) => g && g.name && Number.isFinite(Number(g.chance)))
+          .map((g) => ({ id: g.name, chance: Number(g.chance) }));
+        if (next.length > 0) setPrizes(toPrizeList(next));
+      })
+      .catch(() => {
+        /* keep the default fallback table */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const idleItems = useRef([]);
+  const idleLoopDistance = useRef(0);
+  if (idleItems.current.length === 0 || idleItems.current.__forPrizes !== prizes) {
+    const list = Array.from({ length: 4 }, () => prizes)
+      .flat()
+      .map((prize, i) => ({ ...prize, key: `idle-${i}-${prize.id}` }));
+    list.__forPrizes = prizes;
+    idleItems.current = list;
+    idleLoopDistance.current = prizes.length * ITEM_WIDTH;
+  }
+
+  useEffect(() => {
     if (spinning) return;
     x.set(0);
-    const controls = animate(x, [0, -IDLE_LOOP_DISTANCE], {
-      duration: IDLE_LOOP_DISTANCE / IDLE_SPEED_PX_PER_SEC,
+    const controls = animate(x, [0, -idleLoopDistance.current], {
+      duration: idleLoopDistance.current / IDLE_SPEED_PX_PER_SEC,
       ease: 'linear',
       repeat: Infinity,
       repeatType: 'loop',
     });
     return () => controls.stop();
-  }, [spinning, x]);
+  }, [spinning, x, prizes]);
 
   const spin = useCallback(() => {
     if (spinLockRef.current) return;
@@ -69,8 +148,8 @@ export const BarabanPage = () => {
     setSpinning(true);
     setWinner(null);
 
-    const prize = randomPrize();
-    const nextReel = buildReel(prize);
+    const prize = pickWeighted(prizes);
+    const nextReel = buildReel(prizes, prize);
     setReel(nextReel);
 
     const viewportWidth = viewportRef.current?.clientWidth || 320;
@@ -93,7 +172,7 @@ export const BarabanPage = () => {
         spinLockRef.current = false;
       },
     });
-  }, [x]);
+  }, [x, prizes]);
 
   return (
     <div className="space-y-5">
@@ -119,7 +198,7 @@ export const BarabanPage = () => {
             className="flex h-full items-center gap-3 py-2 will-change-transform"
             style={{ x }}
           >
-            {(spinning ? reel : IDLE_ITEMS).map((prize) => (
+            {(spinning ? reel : idleItems.current).map((prize) => (
               <div
                 key={prize.key}
                 className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
@@ -138,9 +217,12 @@ export const BarabanPage = () => {
         {spinning ? t('baraban.spinning') : t('baraban.spin')}
       </Button>
 
-      <div className="grid grid-cols-5 gap-2">
-        {WHEEL_PRIZES.map((prize) => (
-          <div key={prize.id} className="v2-glass flex flex-col items-center gap-1 px-1 py-2">
+      <div className="grid grid-cols-3 gap-2">
+        {prizes.map((prize) => (
+          <div key={prize.id} className="v2-glass relative flex flex-col items-center gap-1 px-1 py-2.5">
+            <span className="v2-badge absolute right-1.5 top-1.5 rounded-full bg-black/30 px-1.5 py-0.5 text-[8px] text-amber-300">
+              {prize.chance < 1 ? prize.chance.toFixed(2) : prize.chance.toFixed(2)}%
+            </span>
             <span className="text-xl">{prize.emoji}</span>
             <span className="v2-caption w-full truncate text-center text-[9px]">{prize.name}</span>
           </div>
