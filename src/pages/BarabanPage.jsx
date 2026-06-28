@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'motion/react';
+import { motion, useMotionValue, animate } from 'motion/react';
 import { Button } from '../components/UI';
 import { BarabanWinCelebration } from '../components/BarabanWinCelebration';
 
@@ -17,49 +17,32 @@ const WHEEL_PRIZES = [
   { id: 'cake', emoji: '🎂', name: 'Tort' },
 ];
 
-const SEGMENT_COUNT = WHEEL_PRIZES.length;
-const SEGMENT_ANGLE = 360 / SEGMENT_COUNT;
-const SPIN_MS = 4800;
+const CARD_WIDTH = 96; // matches w-24 card class
+const ITEM_GAP = 12; // matches gap-3
+const ITEM_WIDTH = CARD_WIDTH + ITEM_GAP; // distance between successive item starts
+const REEL_LENGTH = 48;
+const WINNER_SLOT = 40; // index in reel where the winning card always lands
+const SPIN_MS = 4200;
 
-const WHEEL_COLORS = [
-  '#ffcc00',
-  '#8b5cf6',
-  '#fb7185',
-  '#f59e0b',
-  '#10b981',
-  '#6366f1',
-  '#ec4899',
-  '#06b6d4',
-  '#a855f7',
-  '#f97316',
-];
+function randomPrize() {
+  return WHEEL_PRIZES[Math.floor(Math.random() * WHEEL_PRIZES.length)];
+}
 
-function buildConicGradient() {
-  const stops = WHEEL_COLORS.map((color, i) => {
-    const start = i * SEGMENT_ANGLE;
-    const end = (i + 1) * SEGMENT_ANGLE;
-    return `${color} ${start}deg ${end}deg`;
-  });
-  return `conic-gradient(from -90deg, ${stops.join(', ')})`;
+function buildReel(winningPrize) {
+  return Array.from({ length: REEL_LENGTH }, (_, i) =>
+    i === WINNER_SLOT ? winningPrize : randomPrize()
+  ).map((prize, i) => ({ ...prize, key: `${i}-${prize.id}-${Math.random()}` }));
 }
 
 export const BarabanPage = () => {
   const { t } = useTranslation();
-  const [rotation, setRotation] = useState(0);
+  const [reel, setReel] = useState(() => buildReel(randomPrize()));
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState(null);
   const spinLockRef = useRef(false);
-  const pendingPrizeRef = useRef(null);
-  const wheelGradient = useMemo(() => buildConicGradient(), []);
-
-  const finishSpin = useCallback(() => {
-    if (!pendingPrizeRef.current) return;
-    const prize = pendingPrizeRef.current;
-    pendingPrizeRef.current = null;
-    setSpinning(false);
-    setWinner(prize);
-    spinLockRef.current = false;
-  }, []);
+  const trackRef = useRef(null);
+  const viewportRef = useRef(null);
+  const x = useMotionValue(0);
 
   const spin = useCallback(() => {
     if (spinLockRef.current) return;
@@ -67,80 +50,64 @@ export const BarabanPage = () => {
     setSpinning(true);
     setWinner(null);
 
-    const winIndex = Math.floor(Math.random() * SEGMENT_COUNT);
-    const extraSpins = 5 + Math.floor(Math.random() * 3);
-    const prizeAngle = winIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
-    const current = rotation % 360;
-    let delta = extraSpins * 360 + (360 - prizeAngle) - current;
-    if (delta < extraSpins * 360) delta += 360;
+    const prize = randomPrize();
+    const nextReel = buildReel(prize);
+    setReel(nextReel);
 
-    pendingPrizeRef.current = WHEEL_PRIZES[winIndex];
-    setRotation((prev) => prev + delta);
+    const viewportWidth = viewportRef.current?.clientWidth || 320;
+    const winnerCenterLocal = WINNER_SLOT * ITEM_WIDTH + CARD_WIDTH / 2;
+    const targetX = Math.round(viewportWidth / 2 - winnerCenterLocal);
 
-    window.setTimeout(finishSpin, SPIN_MS + 80);
-  }, [rotation, finishSpin]);
+    x.set(-ITEM_WIDTH * (2 + Math.random() * 2));
 
-  const onWheelTransitionEnd = (e) => {
-    if (e.propertyName === 'transform' && spinning && pendingPrizeRef.current) {
-      finishSpin();
-    }
-  };
+    animate(x, targetX, {
+      duration: SPIN_MS / 1000,
+      ease: [0.13, 0.7, 0.1, 1],
+      onComplete: () => {
+        setSpinning(false);
+        setWinner(prize);
+        spinLockRef.current = false;
+      },
+    });
+  }, [x]);
 
   return (
-    <div className="space-y-6">
-      <div className="relative mx-auto flex max-w-[320px] flex-col items-center">
-        <div className="absolute -top-1 z-20 flex flex-col items-center">
-          <div className="h-0 w-0 border-x-[12px] border-x-transparent border-t-[20px] border-t-rose-500 drop-shadow-md" />
+    <div className="space-y-5">
+      <div className="v2-glass relative overflow-hidden p-4">
+        <div className="mb-3 space-y-0.5">
+          <h2 className="v2-title text-base text-zinc-900 dark:text-white">{t('baraban.title')}</h2>
+          <p className="v2-caption text-amber-500/90 dark:text-amber-400/90">{t('baraban.subtitle')}</p>
         </div>
 
-        <div className="relative rounded-full p-3 shadow-[0_12px_40px_-12px_rgba(249,115,22,0.55)] ring-4 ring-amber-200/80 dark:ring-amber-500/30">
-          <div
-            className="relative h-[min(72vw,280px)] w-[min(72vw,280px)] rounded-full"
-            onTransitionEnd={onWheelTransitionEnd}
-            style={{
-              transform: `rotate(${rotation}deg)`,
-              transition: spinning
-                ? `transform ${SPIN_MS}ms cubic-bezier(0.12, 0.75, 0.12, 1)`
-                : 'none',
-              background: wheelGradient,
-            }}
-          >
-            <div className="absolute inset-[10%] rounded-full border-4 border-white/30 bg-white/10 shadow-inner" />
+        <div
+          ref={viewportRef}
+          className="relative h-32 overflow-hidden rounded-2xl bg-gradient-to-b from-black/40 via-black/20 to-black/40"
+        >
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12 bg-gradient-to-r from-black/70 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-black/70 to-transparent" />
 
-            {WHEEL_PRIZES.map((prize, index) => {
-              const angle = index * SEGMENT_ANGLE + SEGMENT_ANGLE / 2 - 90;
-              const rad = (angle * Math.PI) / 180;
-              const radius = 38;
-              const x = 50 + radius * Math.cos(rad);
-              const y = 50 + radius * Math.sin(rad);
-
-              return (
-                <div
-                  key={prize.id}
-                  className="absolute flex flex-col items-center"
-                  style={{
-                    left: `${x}%`,
-                    top: `${y}%`,
-                    transform: `translate(-50%, -50%) rotate(${angle + 90}deg)`,
-                  }}
-                >
-                  <span className="text-2xl leading-none drop-shadow-sm">{prize.emoji}</span>
-                  <span className="v2-badge mt-0.5 max-w-[52px] truncate text-center text-white drop-shadow">
-                    {prize.name}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="pointer-events-none absolute left-1/2 top-0 z-30 -translate-x-1/2">
+            <div className="h-0 w-0 border-x-[7px] border-x-transparent border-t-[11px] border-t-amber-400 drop-shadow" />
           </div>
+          <div className="pointer-events-none absolute left-1/2 top-0 z-20 h-full w-24 -translate-x-1/2 rounded-2xl ring-2 ring-amber-400/70 shadow-[0_0_20px_rgba(255,180,0,0.35)]" />
 
-          <button
-            type="button"
-            onClick={spin}
-            disabled={spinning}
-            className="absolute left-1/2 top-1/2 z-10 flex h-[22%] w-[22%] min-h-[52px] min-w-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-amber-100 bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-extrabold uppercase tracking-wide text-white shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:scale-100 disabled:opacity-70 dark:border-amber-200/40"
+          <motion.div
+            ref={trackRef}
+            className="flex h-full items-center gap-3 py-2 will-change-transform"
+            style={{ x }}
           >
-            {spinning ? '…' : 'GO'}
-          </button>
+            {reel.map((prize) => (
+              <div
+                key={prize.key}
+                className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
+              >
+                <span className="text-3xl leading-none drop-shadow-sm">{prize.emoji}</span>
+                <span className="v2-badge max-w-[80px] truncate text-center text-[9px] text-amber-100/80">
+                  {prize.name}
+                </span>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </div>
 
