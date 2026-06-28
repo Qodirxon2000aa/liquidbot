@@ -98,7 +98,7 @@ export function prepareLottieAnimationData(data) {
   }
 }
 
-export function GiftAnimation({ name, autoplayInView = true, loop = false }) {
+export function GiftAnimation({ name, autoplayInView = true, loop = false, play = true }) {
   const nameKey = normalizeGiftNameKey(name);
   const rawAnim = useMemo(
     () => GIFT_ANIMATIONS[nameKey] ?? GIFT_ANIMATIONS[String(name ?? '').trim()] ?? null,
@@ -119,7 +119,7 @@ export function GiftAnimation({ name, autoplayInView = true, loop = false }) {
   }, [nameKey, animData]);
 
   useEffect(() => {
-    if (!autoplayInView) {
+    if (!play || !autoplayInView) {
       setVisible(true);
       return undefined;
     }
@@ -136,14 +136,21 @@ export function GiftAnimation({ name, autoplayInView = true, loop = false }) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [autoplayInView]);
+  }, [autoplayInView, play]);
 
   useEffect(() => {
-    if (visible && !played && lottieRef.current && animData) {
+    if (!lottieRef.current || !animData) return;
+    if (!play) {
+      // Render the gift statically (first frame only) — used anywhere the
+      // animation shouldn't run until a real event (e.g. a win) triggers it.
+      lottieRef.current.goToAndStop(0, true);
+      return;
+    }
+    if (visible && !played) {
       lottieRef.current.goToAndPlay(0, true);
       setPlayed(true);
     }
-  }, [visible, played, animData]);
+  }, [visible, played, animData, play]);
 
   return (
     <div ref={wrapRef} className="flex h-full w-full items-center justify-center">

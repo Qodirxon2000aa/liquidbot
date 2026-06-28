@@ -202,11 +202,9 @@ export const BarabanPage = () => {
             {(spinning ? reel : idleItems.current).map((prize) => (
               <div
                 key={prize.key}
-                className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
+                className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
               >
-                <div className="h-12 w-12 shrink-0">
-                  <GiftAnimation name={prize.id} />
-                </div>
+                <span className="text-3xl leading-none drop-shadow-sm">{prize.emoji}</span>
                 <span className="v2-badge max-w-[80px] truncate text-center text-[9px] text-amber-100/80">
                   {prize.name}
                 </span>
@@ -227,7 +225,7 @@ export const BarabanPage = () => {
               {prize.chance.toFixed(2)}%
             </span>
             <div className="h-10 w-10 shrink-0">
-              <GiftAnimation name={prize.id} />
+              <GiftAnimation name={prize.id} play={false} />
             </div>
             <span className="v2-caption w-full truncate text-center text-[9px]">{prize.name}</span>
           </div>
