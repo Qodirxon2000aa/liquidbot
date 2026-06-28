@@ -61,22 +61,24 @@ export const Header = ({ title, balanceDisplay = '0', onTopupClick, onProfileCli
                   initial={{ opacity: 0, y: -8, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                  className="liquid-modal absolute right-0 top-9 z-50 w-36 overflow-hidden rounded-3xl"
+                  className="absolute right-0 top-9 z-[70] w-36"
                 >
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      type="button"
-                      onClick={() => changeLang(lang.code)}
-                      className={`v2-body w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/20 dark:hover:bg-white/10 ${
-                        i18n.language.startsWith(lang.code)
-                          ? 'font-bold text-amber-600 dark:text-amber-400'
-                          : 'text-zinc-700 dark:text-zinc-300'
-                      }`}
-                    >
-                      {lang.label}
-                    </button>
-                  ))}
+                  <div className="liquid-modal overflow-hidden rounded-3xl">
+                    {languages.map((lang) => (
+                      <button
+                        key={lang.code}
+                        type="button"
+                        onClick={() => changeLang(lang.code)}
+                        className={`v2-body w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-white/20 dark:hover:bg-white/10 ${
+                          i18n.language.startsWith(lang.code)
+                            ? 'font-bold text-amber-600 dark:text-amber-400'
+                            : 'text-zinc-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

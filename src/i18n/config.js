@@ -526,7 +526,14 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
+    fallbackLng: 'uz',
+    detection: {
+      // Only respect a language the user explicitly picked before (cached in
+      // localStorage); otherwise always start on Uzbek instead of guessing
+      // from the browser/device locale.
+      order: ['localStorage'],
+      caches: ['localStorage']
+    },
     interpolation: {
       escapeValue: false
     }
