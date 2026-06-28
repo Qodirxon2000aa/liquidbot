@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'motion/react';
 import { Wallet, X, Copy } from 'lucide-react';
 import { BodyPortal } from './BodyPortal';
 import { Button } from './UI';
@@ -373,19 +374,27 @@ export function MoneyModal({ open, onClose }) {
       });
   };
 
-  if (!open) return null;
-
   return (
     <BodyPortal>
-    <div
+    <AnimatePresence>
+    {open && (
+    <motion.div
       className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/20 backdrop-blur-md dark:bg-black/35"
       role="dialog"
       aria-modal="true"
       onClick={handleClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
     >
-      <div
+      <motion.div
         className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl liquid-modal shadow-xl"
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 24, scale: 0.97 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10" style={{ background: 'rgba(255,255,255,0.12)' }}>
           <div className="flex items-center gap-2">
@@ -573,14 +582,25 @@ export function MoneyModal({ open, onClose }) {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
+      <AnimatePresence>
       {showResult && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center p-6 backdrop-blur-sm bg-black/40">
-          <div
+        <motion.div
+          className="fixed inset-0 z-[210] flex items-center justify-center p-6 backdrop-blur-sm bg-black/40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
             className={`liquid-modal max-w-xs w-full rounded-3xl p-6 text-center ${
               resultType === 'success' ? 'border-emerald-400/40' : 'border-red-400/40'
             }`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
           >
             <div
               className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
@@ -596,21 +616,43 @@ export function MoneyModal({ open, onClose }) {
                 ? t('money.success')
                 : t('money.failed')}
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
+      <AnimatePresence>
       {toast && !showResult && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-3xl bg-zinc-900 text-white text-xs font-medium shadow-lg max-w-[90vw] text-center">
+        <motion.div
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[220] px-4 py-2 rounded-3xl bg-zinc-900 text-white text-xs font-medium shadow-lg max-w-[90vw] text-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.2 }}
+        >
           {toast}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {showPaymentDisabled && null}
 
+      <AnimatePresence>
       {prettyAlert.open && (
-        <div className="fixed inset-0 z-[225] flex items-center justify-center p-6 bg-black/50">
-          <div className="liquid-modal max-w-sm w-full rounded-3xl p-6 text-center">
+        <motion.div
+          className="fixed inset-0 z-[225] flex items-center justify-center p-6 bg-black/50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className="liquid-modal max-w-sm w-full rounded-3xl p-6 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
             <p className="text-2xl mb-2">⚠️</p>
             <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-2">
               Ogohlantirish
@@ -625,10 +667,13 @@ export function MoneyModal({ open, onClose }) {
             >
               Tushunarli
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+    </motion.div>
+    )}
+    </AnimatePresence>
     </BodyPortal>
   );
 }

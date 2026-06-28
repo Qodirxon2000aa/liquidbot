@@ -428,16 +428,26 @@ function useAIComment() {
 function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
   return (
     <BodyPortal>
-      <div className="fixed inset-0 z-[1000] flex items-end justify-center">
+      <motion.div
+        className="fixed inset-0 z-[1000] flex items-end justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      >
         <button
           type="button"
           aria-label="Close"
           className="absolute inset-0 bg-black/20 backdrop-blur-md dark:bg-black/35"
           onClick={onClose}
         />
-        <div
+        <motion.div
           className="liquid-modal relative z-10 max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-3xl pb-12"
           style={{ maxHeight: '92vh' }}
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 24, scale: 0.97 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="p-5 pb-8">
             <div className="mb-4 flex items-center justify-between">
@@ -456,8 +466,8 @@ function ModalShell({ title, subtitle, thumbContent, onClose, children }) {
             <div className="liquid-glass mx-auto mb-5 h-20 w-20 overflow-hidden">{thumbContent}</div>
             {children}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </BodyPortal>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Gift, Loader2, Target, X } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent } from '../components/UI';
 import { useTelegram } from '../hooks/useTelegram';
 
@@ -210,14 +210,23 @@ export const EventsPage = () => {
         </CardContent>
       </Card>
 
+      <AnimatePresence>
       {showModal && eventData && (
-        <div
+        <motion.div
           className="fixed inset-0 z-[999] flex items-end justify-center bg-black/20 backdrop-blur-md dark:bg-black/35 sm:items-center"
           onClick={() => setShowModal(false)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          <div
+          <motion.div
             className="liquid-modal w-full max-w-md rounded-t-3xl p-5 sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 24, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.97 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-base font-semibold text-zinc-900 dark:text-white">
@@ -252,9 +261,10 @@ export const EventsPage = () => {
             >
               Tushundim
             </button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {!eventData && (
         <div className="flex items-center gap-2 rounded-3xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5">

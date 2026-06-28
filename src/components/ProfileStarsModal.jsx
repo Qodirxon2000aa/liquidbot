@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { BodyPortal } from './BodyPortal';
 import { useTelegram } from '../hooks/useTelegram';
 import { useTezpremium } from '../context/TezpremiumContext';
@@ -132,19 +133,27 @@ export function ProfileStarsModal({ open, onClose }) {
     return 'bg-zinc-500 text-white';
   };
 
-  if (!open) return null;
-
   return (
     <BodyPortal>
-      <div
+    <AnimatePresence>
+    {open && (
+      <motion.div
         className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/20 backdrop-blur-md dark:bg-black/35 p-0 sm:p-4"
         onClick={handleClose}
         role="dialog"
         aria-modal="true"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
       >
-        <div
+        <motion.div
           className="w-full max-w-md max-h-[92dvh] flex flex-col rounded-t-3xl sm:rounded-3xl liquid-modal overflow-hidden"
           onClick={(e) => e.stopPropagation()}
+          initial={{ opacity: 0, y: 24, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 24, scale: 0.97 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
         >
           <div
             className="sticky top-0 z-10 shrink-0 flex items-center justify-between border-b border-white/20 px-4 py-3 backdrop-blur-xl dark:border-white/10"
@@ -267,8 +276,10 @@ export function ProfileStarsModal({ open, onClose }) {
               </ul>
             )}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
+    )}
+    </AnimatePresence>
     </BodyPortal>
   );
 }
