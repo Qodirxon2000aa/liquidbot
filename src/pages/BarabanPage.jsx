@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, useMotionValue, animate } from 'motion/react';
 import { Button } from '../components/UI';
 import { BarabanWinCelebration } from '../components/BarabanWinCelebration';
+import { GiftAnimation } from '../utils/giftAnimations';
 
 const CHANCE_API_URL = 'https://tezpremium.uz/uzbstar/lucky_chance.php';
 
@@ -201,9 +202,11 @@ export const BarabanPage = () => {
             {(spinning ? reel : idleItems.current).map((prize) => (
               <div
                 key={prize.key}
-                className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
+                className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
               >
-                <span className="text-3xl leading-none drop-shadow-sm">{prize.emoji}</span>
+                <div className="h-12 w-12 shrink-0">
+                  <GiftAnimation name={prize.id} />
+                </div>
                 <span className="v2-badge max-w-[80px] truncate text-center text-[9px] text-amber-100/80">
                   {prize.name}
                 </span>
@@ -221,9 +224,11 @@ export const BarabanPage = () => {
         {prizes.map((prize) => (
           <div key={prize.id} className="v2-glass relative flex flex-col items-center gap-1 px-1 py-2.5">
             <span className="v2-badge absolute right-1.5 top-1.5 rounded-full bg-black/30 px-1.5 py-0.5 text-[8px] text-amber-300">
-              {prize.chance < 1 ? prize.chance.toFixed(2) : prize.chance.toFixed(2)}%
+              {prize.chance.toFixed(2)}%
             </span>
-            <span className="text-xl">{prize.emoji}</span>
+            <div className="h-10 w-10 shrink-0">
+              <GiftAnimation name={prize.id} />
+            </div>
             <span className="v2-caption w-full truncate text-center text-[9px]">{prize.name}</span>
           </div>
         ))}
