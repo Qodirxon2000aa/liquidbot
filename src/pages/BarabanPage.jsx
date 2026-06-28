@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useMotionValue, animate } from 'motion/react';
 import { Button } from '../components/UI';
@@ -34,6 +34,13 @@ function buildReel(winningPrize) {
   ).map((prize, i) => ({ ...prize, key: `${i}-${prize.id}-${Math.random()}` }));
 }
 
+// Idle ticker: the prize list repeated a few times so the loop point is seamless.
+const IDLE_ITEMS = Array.from({ length: 4 }, () => WHEEL_PRIZES)
+  .flat()
+  .map((prize, i) => ({ ...prize, key: `idle-${i}-${prize.id}` }));
+const IDLE_LOOP_DISTANCE = WHEEL_PRIZES.length * ITEM_WIDTH;
+const IDLE_SPEED_PX_PER_SEC = 16;
+
 export const BarabanPage = () => {
   const { t } = useTranslation();
   const [reel, setReel] = useState(() => buildReel(randomPrize()));
@@ -43,6 +50,18 @@ export const BarabanPage = () => {
   const trackRef = useRef(null);
   const viewportRef = useRef(null);
   const x = useMotionValue(0);
+
+  useEffect(() => {
+    if (spinning) return;
+    x.set(0);
+    const controls = animate(x, [0, -IDLE_LOOP_DISTANCE], {
+      duration: IDLE_LOOP_DISTANCE / IDLE_SPEED_PX_PER_SEC,
+      ease: 'linear',
+      repeat: Infinity,
+      repeatType: 'loop',
+    });
+    return () => controls.stop();
+  }, [spinning, x]);
 
   const spin = useCallback(() => {
     if (spinLockRef.current) return;
@@ -101,7 +120,7 @@ export const BarabanPage = () => {
             className="flex h-full items-center gap-3 py-2 will-change-transform"
             style={{ x }}
           >
-            {reel.map((prize) => (
+            {(spinning ? reel : IDLE_ITEMS).map((prize) => (
               <div
                 key={prize.key}
                 className="flex h-[88%] w-24 shrink-0 flex-col items-center justify-center gap-1.5 rounded-2xl border border-amber-300/25 bg-gradient-to-b from-amber-500/10 to-zinc-900/40 shadow-inner"
