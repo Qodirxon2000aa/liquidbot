@@ -338,8 +338,8 @@ export function ProfileHistoryModal({ open, onClose }) {
                             )}
 
                             {pendingPayment && cardToShow && (
-                              <div className="rounded-3xl border border-amber-300/50 dark:border-amber-600/40 bg-amber-50 dark:bg-amber-950/30 p-3 space-y-2">
-                                <p className="text-[11px] font-bold text-amber-800 dark:text-amber-200">
+                              <div className="liquid-glass space-y-2 border-amber-400/30 p-3">
+                                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
                                   {t('history.cardNumber')}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2">
@@ -352,7 +352,7 @@ export function ProfileHistoryModal({ open, onClose }) {
                                       e.stopPropagation();
                                       copyCard(cardToShow);
                                     }}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-3xl bg-emerald-600 text-white text-[10px] font-bold"
+                                    className="liquid-btn liquid-btn-violet inline-flex !w-auto items-center gap-1 !py-1.5 px-2.5 text-[10px]"
                                   >
                                     <Copy className="w-3 h-3" />
                                     {t('money.copy')}
@@ -367,7 +367,7 @@ export function ProfileHistoryModal({ open, onClose }) {
                                     </span>
                                   </p>
                                 )}
-                                <p className="text-[10px] text-amber-800/80 dark:text-amber-200/80">
+                                <p className="text-[10px] text-amber-700/80 dark:text-amber-300/80">
                                   {t('history.pendingHint')}
                                 </p>
                               </div>

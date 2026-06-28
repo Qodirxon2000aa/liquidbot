@@ -408,7 +408,7 @@ export function MoneyModal({ open, onClose }) {
 
         <div className="p-4 pb-8 space-y-4">
           {errorMsg && (
-            <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-3 py-2 rounded-3xl">
+            <div className="liquid-glass border-red-400/30 px-3 py-2 text-sm text-red-600 dark:text-red-400">
               {errorMsg}
             </div>
           )}
@@ -428,7 +428,7 @@ export function MoneyModal({ open, onClose }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="mt-5 h-12 w-full rounded-3xl bg-blue-500 text-xl font-semibold text-white hover:bg-blue-600"
+                className="liquid-btn liquid-btn-violet mt-5 h-12 w-full text-xl"
               >
                 Tushunarli
               </button>
@@ -524,7 +524,7 @@ export function MoneyModal({ open, onClose }) {
                 <button
                   type="button"
                   onClick={() => copyToClipboard(rawAmount, 'money.amountDisplay')}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-3xl text-xs font-bold bg-blue-500 text-white hover:bg-blue-600"
+                  className="liquid-btn liquid-btn-violet inline-flex !w-auto items-center justify-center gap-1.5 !py-2 px-3 text-xs"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   {t('money.copy')}
@@ -547,7 +547,7 @@ export function MoneyModal({ open, onClose }) {
                       onClick={() =>
                         copyToClipboard(cardInfo.number, 'money.cardNumber')
                       }
-                      className="shrink-0 inline-flex items-center gap-1 px-2 py-1.5 rounded-3xl text-[10px] font-bold bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-100"
+                      className="liquid-icon-btn shrink-0 inline-flex !w-auto items-center gap-1 !px-2 !py-1.5 text-[10px] font-bold"
                     >
                       <Copy className="w-3 h-3" />
                       {t('money.copy')}
@@ -576,22 +576,22 @@ export function MoneyModal({ open, onClose }) {
       </div>
 
       {showResult && (
-        <div
-          className={`fixed inset-0 z-[210] flex items-center justify-center p-6 bg-black/40 ${
-            resultType === 'success' ? '' : ''
-          }`}
-        >
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-6 backdrop-blur-sm bg-black/40">
           <div
-            className={`max-w-xs w-full rounded-3xl p-6 text-center shadow-xl ${
-              resultType === 'success'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-red-600 text-white'
+            className={`liquid-modal max-w-xs w-full rounded-3xl p-6 text-center ${
+              resultType === 'success' ? 'border-emerald-400/40' : 'border-red-400/40'
             }`}
           >
-            <div className="text-3xl mb-2">
+            <div
+              className={`mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full text-2xl ${
+                resultType === 'success'
+                  ? 'bg-emerald-500/15 text-emerald-500'
+                  : 'bg-red-500/15 text-red-500'
+              }`}
+            >
               {resultType === 'success' ? '✓' : '✖'}
             </div>
-            <p className="text-sm font-bold">
+            <p className="text-sm font-bold text-zinc-900 dark:text-white">
               {resultType === 'success'
                 ? t('money.success')
                 : t('money.failed')}
@@ -621,7 +621,7 @@ export function MoneyModal({ open, onClose }) {
             <button
               type="button"
               onClick={() => setPrettyAlert({ open: false, message: '' })}
-              className="mt-4 h-10 w-full rounded-3xl bg-blue-500 text-sm font-semibold text-white hover:bg-blue-600"
+              className="liquid-btn liquid-btn-violet mt-4 h-10 w-full text-sm"
             >
               Tushunarli
             </button>
