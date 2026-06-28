@@ -101,7 +101,12 @@ export default function App() {
       case 'baraban':
         return <BarabanPage />;
       case 'market':
-        return <MarketPage onNavigateHome={() => setActiveTab('home')} />;
+        return (
+          <MarketPage
+            onNavigateHome={() => setActiveTab('home')}
+            onOpenTopup={() => setMoneyOpen(true)}
+          />
+        );
       case 'profile':
         return <ProfilePage onOpenSettings={() => setActiveTab('settings')} />;
       case 'settings':

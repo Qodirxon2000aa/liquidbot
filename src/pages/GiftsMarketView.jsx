@@ -959,7 +959,7 @@ function formatNftName(nftId) {
   return nftId.split('-')[0].replace(/([A-Z])/g, ' $1').trim();
 }
 
-export function GiftsMarketView({ onNavigateHome }) {
+export function GiftsMarketView({ onNavigateHome, onOpenTopup }) {
   const { apiUser, refreshUser } = useTezpremium();
   const [mainTab, setMainTab] = useState('nft');
   const [oddiyFilter, setOddiyFilter] = useState('cheap');
@@ -1289,7 +1289,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                 <div className="grid grid-cols-2 gap-2.5">
                   {gifts.map((gift) => {
                     const affordable = canBuy(gift.price);
-                    const canPurchase = affordable && NFT_SERVICE_ENABLED;
+                    const canPurchase = NFT_SERVICE_ENABLED;
                     return (
                       <NftGiftCard
                         key={gift.id}
@@ -1300,6 +1300,7 @@ export function GiftsMarketView({ onNavigateHome }) {
                         copiedId={copiedId}
                         onCopy={handleCopy}
                         onBuy={() => canPurchase && setBuyNftGift(gift)}
+                        onOpenTopup={onOpenTopup}
                       />
                     );
                   })}
@@ -1447,24 +1448,22 @@ export function GiftsMarketView({ onNavigateHome }) {
                           </p>
                           <button
                             type="button"
-                            onClick={() => affordable && setBuyGift(gift)}
-                            disabled={!affordable}
-                            className={`liquid-btn mt-1 flex h-8 w-full items-center justify-center gap-1.5 !py-0 text-xs ${
-                              affordable ? 'liquid-btn-violet' : 'liquid-btn-outline opacity-60'
-                            }`}
+                            onClick={() => setBuyGift(gift)}
+                            className="liquid-btn liquid-btn-violet mt-1 flex h-8 w-full items-center justify-center gap-1.5 !py-0 text-xs"
                           >
-                            {affordable ? (
-                              <>
-                                <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
-                                Sotib olish
-                              </>
-                            ) : (
-                              <>
-                                <Wallet className="h-3.5 w-3.5 shrink-0" />
-                                Balans yetmaydi
-                              </>
-                            )}
+                            <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
+                            Sotib olish
                           </button>
+                          {!affordable && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenTopup?.()}
+                              className="liquid-btn liquid-btn-outline flex h-8 w-full items-center justify-center gap-1.5 !py-0 text-xs"
+                            >
+                              <Wallet className="h-3.5 w-3.5 shrink-0" />
+                              Hisobni to&apos;ldirish
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
@@ -1499,6 +1498,7 @@ function NftGiftCard({
   copiedId,
   onCopy,
   onBuy,
+  onOpenTopup,
 }) {
   const [imgErr, setImgErr] = useState(false);
 
@@ -1582,18 +1582,23 @@ function NftGiftCard({
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               O&apos;chirilgan
             </>
-          ) : affordable ? (
+          ) : (
             <>
               <ShoppingCart className="h-3.5 w-3.5 shrink-0" />
               Yuborish
             </>
-          ) : (
-            <>
-              <Wallet className="h-3.5 w-3.5 shrink-0" />
-              Balans yetmaydi
-            </>
           )}
         </button>
+        {nftServiceEnabled && !affordable && (
+          <button
+            type="button"
+            onClick={() => onOpenTopup?.()}
+            className="liquid-btn liquid-btn-outline mt-1.5 flex h-8 w-full items-center justify-center gap-1.5 !py-0 text-xs"
+          >
+            <Wallet className="h-3.5 w-3.5 shrink-0" />
+            Hisobni to&apos;ldirish
+          </button>
+        )}
       </div>
     </div>
   );
